@@ -1,0 +1,133 @@
+/* Global */
+body {
+    margin: 0;
+    background-color: #101827;
+    color: #F8FAFC;
+    font-family: Inter, sans-serif;
+}
+
+/* Ensure headings and titles are crisp white against dark backgrounds */
+h1, h2, h3, h4, h5, h6, .mantine-Title-root {
+    color: #F8FAFC !important;
+}
+
+/* Header */
+header {
+    color: #F8FAFC !important;
+}
+
+/* Sidebar navigation */
+.mantine-NavLink-root {
+    color: #CBD5E1;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.mantine-NavLink-root:hover {
+    background-color: #263449;
+    color: #FFFFFF;
+}
+
+.mantine-NavLink-root[data-active="true"] {
+    background-color: rgba(132, 204, 22, 0.14);
+    color: #A3E635;
+    font-weight: 600;
+}
+
+/* Welcome panel and Alerts */
+.mantine-Alert-root {
+    background-color: #172438;
+    border: 1px solid #334155;
+    border-left: 3px solid #84CC16;
+    color: #F8FAFC;
+}
+
+.mantine-Alert-title {
+    color: #A3E635;
+}
+
+.mantine-Alert-message {
+    color: #CBD5E1;
+}
+
+/* Mantine Select dark inputs and popover options */
+.mantine-Select-input {
+    background-color: #151F30 !important;
+    border: 1px solid #263449 !important;
+    color: #F8FAFC !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-family: Inter, sans-serif !important;
+}
+
+.mantine-Select-input:focus,
+.mantine-Select-input:focus-within {
+    border-color: #84CC16 !important;
+}
+
+.mantine-Select-dropdown {
+    background-color: #172438 !important;
+    border: 1px solid #263449 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mantine-Select-option {
+    color: #F8FAFC !important;
+    font-size: 13px !important;
+    border-radius: 4px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.mantine-Select-option:hover {
+    background-color: #263449 !important;
+    color: #FFFFFF !important;
+}
+
+.mantine-Select-option[data-checked="true"] {
+    background-color: rgba(132, 204, 22, 0.15) !important;
+    color: #84CC16 !important;
+    font-weight: 600 !important;
+}
+
+
+/* Mantine Select dark inputs and popover options */
+.mantine-Select-input {
+    background-color: #151F30 !important;
+    border: 1px solid #263449 !important;
+    color: #F8FAFC !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-family: Inter, sans-serif !important;
+}
+
+.mantine-Select-input:focus,
+.mantine-Select-input:focus-within {
+    border-color: #84CC16 !important;
+}
+
+.mantine-Select-dropdown {
+    background-color: #172438 !important;
+    border: 1px solid #263449 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mantine-Select-option {
+    color: #F8FAFC !important;
+    font-size: 13px !important;
+    border-radius: 4px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.mantine-Select-option:hover {
+    background-color: #263449 !important;
+    color: #FFFFFF !important;
+}
+
+.mantine-Select-option[data-checked="true"] {
+    background-color: rgba(132, 204, 22, 0.15) !important;
+    color: #84CC16 !important;
+    font-weight: 600 !important;
+}

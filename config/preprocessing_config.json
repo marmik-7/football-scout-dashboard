@@ -1,0 +1,6 @@
+{
+    "min_minutes": 600,
+    "remove_goalkeepers": true,
+    "merge_transfers": true,
+    "primary_position_only": true
+}

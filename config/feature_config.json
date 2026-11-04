@@ -1,0 +1,138 @@
+{
+    "metadata_columns": [
+        "Player",
+        "Nation",
+        "Pos",
+        "Squad",
+        "Comp",
+        "Age",
+        "Born",
+        "Min"
+    ],
+    "duplicate_columns": [
+        "Ast_stats_passing",
+        "xAG_stats_passing",
+        "PrgP_stats_passing",
+        "PrgC_stats_possession",
+        "Int_stats_misc",
+        "TklW_stats_misc",
+        "CrdY_stats_misc",
+        "CrdR_stats_misc"
+    ],
+    "derived_columns": [
+        "G+A",
+        "G-PK",
+        "G+A-PK",
+        "xG+xAG",
+        "npxG+xAG",
+        "G-xG",
+        "np:G-xG"
+    ],
+    "temporary_columns": [
+        "MP",
+        "Starts",
+        "Min",
+        "90s"
+    ],
+    "discipline_columns": [
+        "CrdY",
+        "CrdR",
+        "2CrdY",
+        "Fls"
+    ],
+    "position_groups": {
+        "DF": [
+            "DF",
+            "DF,MF",
+            "MF,DF",
+            "DF,FW",
+            "FW,DF"
+        ],
+        "MF": [
+            "MF",
+            "MF,FW",
+            "FW,MF"
+        ],
+        "FW": [
+            "FW"
+        ]
+    },
+    "attribute_map": {
+        "Finishing": {
+            "description": "Goal scoring and shot quality",
+            "features": [
+                "Gls",
+                "xG",
+                "Sh",
+                "SoT",
+                "G/Sh"
+            ],
+            "aggregation": "mean"
+        },
+        "Creativity": {
+            "description": "Chance creation and attacking playmaking",
+            "features": [
+                "Ast",
+                "xA",
+                "KP",
+                "SCA",
+                "GCA",
+                "TB"
+            ],
+            "aggregation": "mean"
+        },
+        "Passing": {
+            "description": "Progressive and accurate passing ability",
+            "features": [
+                "Cmp%",
+                "PrgP",
+                "PrgDist",
+                "PPA",
+                "TB",
+                "Sw"
+            ],
+            "aggregation": "mean"
+        },
+        "Progression": {
+            "description": "Advancing the ball through carries and passes",
+            "features": [
+                "PrgC",
+                "PrgP",
+                "Carries",
+                "CPA",
+                "Succ"
+            ],
+            "aggregation": "mean"
+        },
+        "Defending": {
+            "description": "Ball-winning and defensive actions",
+            "features": [
+                "Tkl",
+                "TklW",
+                "Int",
+                "Blocks_stats_defense",
+                "Clr",
+                "Recov"
+            ],
+            "aggregation": "mean"
+        },
+        "BallSecurity": {
+            "description": "Ability to retain possession and avoid turnovers",
+            "features": [
+                "Cmp%",
+                "Mis",
+                "Dis",
+                "Rec"
+            ],
+            "aggregation": "mean"
+        },
+        "Aerial": {
+            "description": "Effectiveness in aerial duels",
+            "features": [
+                "Won",
+                "Won%"
+            ],
+            "aggregation": "mean"
+        }
+    }
+}
