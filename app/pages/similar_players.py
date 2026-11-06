@@ -44,21 +44,21 @@ def layout(player=None, **kwargs):
     return dmc.Container(
         [
             create_page_header(
-                title="Similar Players",
-                subtitle="Player recruitment & replacement modeling. Discover the closest statistical matches using position-standardized cosine similarity.",
-                badge_text="COSINE SIMILARITY ENGINE",
+                title="Statistical Twins",
+                subtitle="Recruitment target discovery and succession modeling. Pinpoint closest statistical matches using 7D cosine similarity.",
+                badge_text="SIMILARITY ENGINE",
             ),
 
             # FILTER AND CONFIG PANEL
             create_section_card(
                 dmc.Box([
-                    # Row 1: Target Player & Positional / Geographic Filters
+                    # Row 1: Reference Player & Positional / Geographic Filters
                     dmc.Grid(
                         [
                             dmc.GridCol(
                                 dmc.Select(
                                     id="similar-ref-player",
-                                    label="Target / Benchmark Player",
+                                    label="Reference Benchmark Player",
                                     placeholder="Choose reference player...",
                                     data=[{"label": name, "value": name} for name in all_player_names],
                                     value=initial_player,
@@ -70,9 +70,9 @@ def layout(player=None, **kwargs):
                             dmc.GridCol(
                                 dmc.Select(
                                     id="similar-pos-filter",
-                                    label="Candidate Position Scope",
+                                    label="Position Scope",
                                     data=[
-                                        {"label": "Same Position (Recommended)", "value": "SAME"},
+                                        {"label": "Same Position Group", "value": "SAME"},
                                         {"label": "All Positions (Cross-Position)", "value": "ALL"},
                                         {"label": "Defenders Only (DF)", "value": "DF"},
                                         {"label": "Midfielders Only (MF)", "value": "MF"},
@@ -110,12 +110,12 @@ def layout(player=None, **kwargs):
                             dmc.GridCol(
                                 dmc.Select(
                                     id="similar-age-filter",
-                                    label="Max Age (Succession)",
+                                    label="Succession Cap",
                                     data=[
                                         {"label": "Any Age", "value": "ALL"},
                                         {"label": "U-21 Only (≤21)", "value": "21"},
                                         {"label": "U-23 Only (≤23)", "value": "23"},
-                                        {"label": "Under 26 (≤26)", "value": "26"},
+                                        {"label": "Peak / Young (≤26)", "value": "26"},
                                     ],
                                     value="ALL",
                                     allowDeselect=False,
@@ -123,10 +123,10 @@ def layout(player=None, **kwargs):
                                 span={"base": 12, "sm": 6, "md": 2},
                             ),
                         ],
-                        gap="md",
+                        gap="sm",
                     ),
 
-                    dmc.Space(h=12),
+                    dmc.Space(h=10),
 
                     # Row 2: Candidate Club & Depth
                     dmc.Grid(
@@ -142,37 +142,37 @@ def layout(player=None, **kwargs):
                                     searchable=True,
                                     allowDeselect=False,
                                 ),
-                                span={"base": 12, "sm": 8, "md": 8},
+                                span={"base": 12, "sm": 8, "md": 9},
                             ),
                             dmc.GridCol(
                                 dmc.Select(
                                     id="similar-top-n",
-                                    label="Results Count",
+                                    label="Results Depth",
                                     data=[
-                                        {"label": "Top 5", "value": 5},
-                                        {"label": "Top 10", "value": 10},
-                                        {"label": "Top 15", "value": 15},
-                                        {"label": "Top 20", "value": 20},
+                                        {"label": "Top 5 Candidates", "value": 5},
+                                        {"label": "Top 10 Candidates", "value": 10},
+                                        {"label": "Top 15 Candidates", "value": 15},
+                                        {"label": "Top 20 Candidates", "value": 20},
                                     ],
                                     value=10,
                                     allowDeselect=False,
                                 ),
-                                span={"base": 12, "sm": 4, "md": 4},
+                                span={"base": 12, "sm": 4, "md": 3},
                             ),
                         ],
-                        gap="md",
+                        gap="sm",
                     ),
                 ]),
                 title="Similarity Query Parameters",
-                subtitle="Select the benchmark player and configure candidate search constraints across leagues and roles",
+                subtitle="Configure the target reference benchmark and candidate filtering criteria",
             ),
 
-            dmc.Space(h=20),
+            dmc.Space(h=16),
 
             # REFERENCE PLAYER SUMMARY & BEST MATCH HIGHLIGHT
             html.Div(id="similar-banner-container"),
 
-            dmc.Space(h=20),
+            dmc.Space(h=16),
 
             # COMPARISON RADAR: REFERENCE VS #1 MATCH
             dmc.Grid(
@@ -192,22 +192,22 @@ def layout(player=None, **kwargs):
                     dmc.GridCol(
                         create_section_card(
                             html.Div(id="similar-methodology-container"),
-                            title="Analytical Methodology & Match Quality",
+                            title="Similarity Intelligence & Scouting Methodology",
                             subtitle="Algorithmic details and tactical interpretation of cosine similarity",
                         ),
                         span={"base": 12, "lg": 6},
                     ),
                 ],
-                gap="lg",
+                gap="md",
             ),
 
-            dmc.Space(h=25),
+            dmc.Space(h=16),
 
             # SIMILAR PLAYERS LEADERBOARD TABLE
             create_section_card(
                 html.Div(id="similar-table-container", style={"overflowX": "auto"}),
                 title="Top Statistical Twins",
-                subtitle="Ranked list of matching candidates with similarity indices and core percentiles",
+                subtitle="Ranked candidate cohort with similarity indices, positional percentiles, and direct dossier navigation",
             ),
         ],
         fluid=True,
@@ -249,61 +249,69 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
     )
 
     # 1. Reference & Top Match Banner
-    ref_pos_color = "blue" if ref_player["Pos"] == "DF" else "lime" if ref_player["Pos"] == "MF" else "orange"
+    ref_pos_color = "blue" if ref_player["Pos"] == "DF" else "emerald" if ref_player["Pos"] == "MF" else "orange"
 
     if not sim_results.empty:
         best_match = sim_results.iloc[0]
-        match_pos_color = "blue" if best_match["Pos"] == "DF" else "lime" if best_match["Pos"] == "MF" else "orange"
+        match_pos_color = "blue" if best_match["Pos"] == "DF" else "emerald" if best_match["Pos"] == "MF" else "orange"
         best_sim_pct = best_match["Similarity_Pct"]
 
         banner = dmc.Grid(
             [
                 dmc.GridCol(
-                    dmc.Card(
+                    dmc.Box(
                         [
-                            dmc.Text("REFERENCE PLAYER", size="xs", fw=700, c="dimmed"),
-                            dmc.Title(ref_player["Player"], order=3, c="white", mt=4),
+                            dmc.Text("REFERENCE BENCHMARK", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.8px"}),
+                            dmc.Title(ref_player["Player"], order=3, c="white", mt=2, style={"fontSize": "18px"}),
                             dmc.Group(
                                 [
                                     dmc.Badge(ref_player["Pos"], color=ref_pos_color, variant="filled", size="xs"),
-                                    dmc.Text(f"{ref_player['Squad']} • {ref_player.get('Nation_Display', ref_player['Nation_Clean'])}", size="xs", c="dimmed"),
-                                    dmc.Text(f"Min: {ref_player['Min']:,}m", size="xs", c="dimmed"),
+                                    dmc.Badge(ref_player.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
+                                    dmc.Text(f"{ref_player['Squad']} • {ref_player.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
+                                    dmc.Text(f"Min: {ref_player['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
                                 ],
                                 gap="xs",
                                 mt=6,
                             ),
-                            dmc.Text(f"Tactical Style: {ref_player.get('PlayingStyle_Name', 'Specialist')}", size="xs", c="lime", mt=6),
+                            dmc.Text(f"Tactical Style: {ref_player.get('PlayingStyle_Name', 'Specialist')}", size="xs", style={"color": ACCENT}, mt=4),
                         ],
-                        withBorder=True,
-                        radius="md",
-                        p="md",
-                        style={"backgroundColor": PANEL, "borderColor": BORDER, "borderLeft": "3px solid #84CC16"},
+                        style={
+                            "backgroundColor": "#0D131F",
+                            "border": f"1px solid {BORDER}",
+                            "borderLeft": f"3px solid {ACCENT}",
+                            "borderRadius": "4px",
+                            "padding": "12px 16px",
+                        },
                     ),
                     span={"base": 12, "md": 6},
                 ),
                 dmc.GridCol(
-                    dmc.Card(
+                    dmc.Box(
                         [
                             dmc.Group([
-                                dmc.Text("#1 CLOSEST MATCH", size="xs", fw=700, c="dimmed"),
-                                dmc.Badge(f"{best_sim_pct:.1f}% SIMILARITY", color="lime", variant="filled", size="sm"),
+                                dmc.Text("#1 CLOSEST STATISTICAL TWIN", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.8px"}),
+                                dmc.Badge(f"{best_sim_pct:.1f}% SIMILARITY", color="emerald", variant="filled", size="sm"),
                             ], justify="space-between"),
-                            dmc.Title(best_match["Player"], order=3, c="white", mt=4),
+                            dmc.Title(best_match["Player"], order=3, c="white", mt=2, style={"fontSize": "18px"}),
                             dmc.Group(
                                 [
                                     dmc.Badge(best_match["Pos"], color=match_pos_color, variant="filled", size="xs"),
-                                    dmc.Text(f"{best_match['Squad']} • {best_match.get('Nation_Display', best_match['Nation_Clean'])}", size="xs", c="dimmed"),
-                                    dmc.Text(f"Min: {best_match['Min']:,}m", size="xs", c="dimmed"),
+                                    dmc.Badge(best_match.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
+                                    dmc.Text(f"{best_match['Squad']} • {best_match.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
+                                    dmc.Text(f"Min: {best_match['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
                                 ],
                                 gap="xs",
                                 mt=6,
                             ),
-                            dmc.Text(f"Tactical Style: {best_match.get('PlayingStyle_Name', 'Specialist')}", size="xs", c="cyan", mt=6),
+                            dmc.Text(f"Tactical Style: {best_match.get('PlayingStyle_Name', 'Specialist')}", size="xs", c="cyan", mt=4),
                         ],
-                        withBorder=True,
-                        radius="md",
-                        p="md",
-                        style={"backgroundColor": PANEL, "borderColor": BORDER, "borderLeft": "3px solid #38BDF8"},
+                        style={
+                            "backgroundColor": "#0D131F",
+                            "border": f"1px solid {BORDER}",
+                            "borderLeft": "3px solid #38BDF8",
+                            "borderRadius": "4px",
+                            "padding": "12px 16px",
+                        },
                     ),
                     span={"base": 12, "md": 6},
                 ),
@@ -316,35 +324,45 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
             title="Empty Results",
             color="yellow",
             variant="light",
+            radius="sm",
         )
 
     # 2. Radar Chart (Reference vs Top Match)
     if not sim_results.empty:
         compare_players = [ref_player, sim_results.iloc[0]]
-        radar_fig = build_radar_chart(players=compare_players, height=380)
+        radar_fig = build_radar_chart(players=compare_players, height=370)
     else:
-        radar_fig = build_radar_chart(players=[ref_player], height=380)
+        radar_fig = build_radar_chart(players=[ref_player], height=370)
 
     # 3. Methodology & Context
     methodology = html.Div([
         dmc.Text(
-            "SCOUT's similarity algorithm computes cosine distance across the 7 engineered percentile dimensions: "
-            "Finishing, Creativity, Passing, Progression, Defending, Ball Security, and Aerial duel dominance.",
-            size="sm",
-            c="white",
+            "SCOUT's similarity algorithm computes multi-dimensional cosine distance across 7 position-standardized percentile dimensions: "
+            "Finishing, Creativity, Passing, Progression, Defending (pAdj), Ball Security, and Aerial Dominance.",
+            size="xs",
+            c="#CBD5E1",
             style={"lineHeight": 1.6},
         ),
-        dmc.Divider(my="sm"),
-        dmc.Text("KEY SCOUTING APPLICATIONS", size="xs", fw=700, c="lime", mb=6),
-        html.Ul([
-            html.Li(dmc.Text("Replacement Recruitment: Identify tactical successors who replicate outgoing key contributors.", size="xs", c="dimmed")),
-            html.Li(dmc.Text("Value Arbitrage: Discover lower-profile or budget alternatives in less commercial leagues with equivalent output.", size="xs", c="dimmed")),
-            html.Li(dmc.Text("Positional Transitions: Explore players in adjacent positions displaying the technical profile required for tactical role shifts.", size="xs", c="dimmed")),
-        ], style={"paddingLeft": "18px", "margin": 0}),
-        dmc.Divider(my="sm"),
+        dmc.Divider(my="xs", color=BORDER),
+        dmc.Text("PRIMARY RECRUITMENT USE CASES", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}, mb=6),
+        dmc.Stack([
+            dmc.Box([
+                dmc.Text("Replacement Succession:", size="xs", fw=600, style={"color": ACCENT}),
+                dmc.Text("Identify direct tactical successors who replicate departing key starters' output.", size="10px", c="dimmed"),
+            ]),
+            dmc.Box([
+                dmc.Text("Value Arbitrage:", size="xs", fw=600, c="cyan"),
+                dmc.Text("Discover budget-friendly alternatives in secondary markets with equivalent production.", size="10px", c="dimmed"),
+            ]),
+            dmc.Box([
+                dmc.Text("Positional Transitions:", size="xs", fw=600, c="orange"),
+                dmc.Text("Find versatile candidates in adjacent positions displaying needed technical attributes.", size="10px", c="dimmed"),
+            ]),
+        ], gap="xs"),
+        dmc.Divider(my="xs", color=BORDER),
         dmc.Text(
-            "Note: The reference player is always excluded from candidate results to guarantee valid recommendations.",
-            size="xs",
+            "Note: The benchmark reference player is omitted from result sets to guarantee distinct candidate recommendations.",
+            size="10px",
             c="dimmed",
         ),
     ])
@@ -355,42 +373,52 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
             "No candidates satisfied the filter constraints.",
             color="yellow",
             variant="light",
+            radius="sm",
         )
         return banner, radar_fig, methodology, table_container
 
     thead = dmc.TableThead(
         dmc.TableTr([
-            dmc.TableTh("Rank", style={"color": TEXT}),
-            dmc.TableTh("Player", style={"color": TEXT}),
-            dmc.TableTh("Club", style={"color": TEXT}),
-            dmc.TableTh("Pos", style={"color": TEXT}),
-            dmc.TableTh("Nat", style={"color": TEXT}),
-            dmc.TableTh("Similarity", style={"color": TEXT}),
-            dmc.TableTh("Tactical Archetype", style={"color": TEXT}),
-            dmc.TableTh("Finishing", style={"color": TEXT}),
-            dmc.TableTh("Creativity", style={"color": TEXT}),
-            dmc.TableTh("Passing", style={"color": TEXT}),
-            dmc.TableTh("Progression", style={"color": TEXT}),
-            dmc.TableTh("Defending", style={"color": TEXT}),
-            dmc.TableTh("Security", style={"color": TEXT}),
-            dmc.TableTh("Aerial", style={"color": TEXT}),
-            dmc.TableTh("Action", style={"color": TEXT, "textAlign": "center"}),
+            dmc.TableTh("RANK", style={"color": TEXT, "width": "50px", "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("SIMILARITY", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("TACTICAL DNA", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
         ])
     )
 
     rows = []
     for rank, (_, r) in enumerate(sim_results.iterrows(), start=1):
-        pos_badge_color = "blue" if r["Pos"] == "DF" else "lime" if r["Pos"] == "MF" else "orange"
+        pos_badge_color = "blue" if r["Pos"] == "DF" else "emerald" if r["Pos"] == "MF" else "orange"
         sim_pct = r["Similarity_Pct"]
-        sim_color = "#84CC16" if sim_pct >= 95 else "#38BDF8" if sim_pct >= 85 else "#F59E0B"
 
+        if rank == 1:
+            rank_badge = dmc.Badge(f"#{rank}", color="yellow", variant="filled", size="xs")
+        elif rank == 2:
+            rank_badge = dmc.Badge(f"#{rank}", color="gray", variant="light", size="xs")
+        elif rank == 3:
+            rank_badge = dmc.Badge(f"#{rank}", color="orange", variant="light", size="xs")
+        else:
+            rank_badge = dmc.Text(f"#{rank}", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})
+
+        sim_color = ACCENT if sim_pct >= 95 else "#38BDF8" if sim_pct >= 85 else "#F59E0B"
         profile_url = f"/player-profile?player={r['Player_Unique']}"
 
         rows.append(
             dmc.TableTr([
-                dmc.TableTd(dmc.Badge(f"#{rank}", color="gray", variant="light", size="sm")),
+                dmc.TableTd(rank_badge),
                 dmc.TableTd([
-                    dmc.Text(r["Player"], size="sm", fw=600, c="white"),
+                    dmc.Text(r["Player"], size="xs", fw=600, c="white"),
                     dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
@@ -403,21 +431,26 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 ]),
                 dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
                 dmc.TableTd(
-                    dmc.Badge(f"{sim_pct:.1f}%", style={"backgroundColor": "rgba(23, 36, 56, 0.9)", "color": sim_color, "border": f"1px solid {sim_color}"}, size="sm")
+                    dmc.Badge(
+                        f"{sim_pct:.1f}%",
+                        size="xs",
+                        variant="light",
+                        color="emerald" if sim_pct >= 95 else "cyan" if sim_pct >= 85 else "orange",
+                    )
                 ),
                 dmc.TableTd(dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="xs", c="dimmed")),
 
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['BallSecurity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['BallSecurity_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Aerial_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Aerial_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['BallSecurity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['BallSecurity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Aerial_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Aerial_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
 
                 dmc.TableTd(
                     dcc.Link(
-                        dmc.Button("Profile →", size="xs", variant="light", color="lime"),
+                        dmc.Button("Dossier →", size="xs", variant="subtle", color="emerald"),
                         href=profile_url,
                         style={"textDecoration": "none"},
                     ),
@@ -432,8 +465,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
         striped=True,
         highlightOnHover=True,
         withTableBorder=True,
-        style={"backgroundColor": PANEL, "fontSize": "13px", "borderColor": BORDER},
+        style={"backgroundColor": PANEL, "fontSize": "12px", "borderColor": BORDER},
     )
 
     return banner, radar_fig, methodology, table
-

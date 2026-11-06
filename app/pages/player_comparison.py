@@ -26,7 +26,6 @@ df = load_data()
 all_player_names = get_all_player_names()
 
 DEFAULT_PLAYERS = ["Erling Haaland", "Kylian Mbappé"]
-# Fallback if names differ slightly
 if not all(p in all_player_names for p in DEFAULT_PLAYERS):
     DEFAULT_PLAYERS = all_player_names[:2]
 
@@ -48,36 +47,36 @@ def layout(player1=None, player2=None, **kwargs):
     return dmc.Container(
         [
             create_page_header(
-                title="Player Comparison",
-                subtitle="Head-to-head multi-dimensional evaluation. Benchmark 2 to 4 players simultaneously across percentile attributes and volume statistics.",
-                badge_text="HEAD-TO-HEAD MATRIX",
+                title="Comparison Matrix",
+                subtitle="Head-to-head multi-dimensional evaluation. Benchmark 2 to 4 candidates simultaneously across percentile attributes and match volume.",
+                badge_text="COMPARATIVE EVALUATION",
             ),
 
-            # CONTROLS PANEL
+            # CANDIDATE SELECTION PANEL
             create_section_card(
                 dmc.Box([
                     dmc.MultiSelect(
                         id="compare-players-select",
-                        label="Select Players to Compare (2 to 4)",
-                        placeholder="Search and add up to 4 players...",
+                        label="Selected Evaluation Cohort (2 to 4 Players)",
+                        placeholder="Search and add up to 4 candidates...",
                         data=[{"label": name, "value": name} for name in all_player_names],
                         value=initial_values,
                         searchable=True,
                         maxValues=4,
                         clearable=False,
                     ),
-                    dmc.Text("Select between 2 and 4 players from any club or position.", size="xs", c="dimmed", mt=6),
+                    dmc.Text("First player acts as the baseline starter. Subsequent candidates display relative +/- differentials.", size="10px", c="dimmed", mt=6),
                 ]),
-                title="Comparison Candidates",
-                subtitle="Add or remove players to compare their statistical profiles",
+                title="Candidate Selection",
+                subtitle="Configure the head-to-head evaluation cohort across clubs and leagues",
             ),
 
-            dmc.Space(h=15),
+            dmc.Space(h=14),
 
-            # CROSS POSITION WARNING CONTAINER
+            # CROSS POSITION NOTIFICATION
             html.Div(id="compare-position-warning"),
 
-            dmc.Space(h=15),
+            dmc.Space(h=14),
 
             # RADAR & GROUPED BARS
             dmc.Grid(
@@ -90,7 +89,7 @@ def layout(player1=None, player2=None, **kwargs):
                                 responsive=True,
                             ),
                             title="Multi-Player Radar Overlay",
-                            subtitle="Direct 7-dimensional footprint comparison",
+                            subtitle="Direct 7-dimensional footprint comparison across candidates",
                         ),
                         span={"base": 12, "lg": 6},
                     ),
@@ -102,28 +101,28 @@ def layout(player1=None, player2=None, **kwargs):
                                 responsive=True,
                             ),
                             title="Attribute-by-Attribute Breakdown",
-                            subtitle="Grouped comparison across the 7 scouting dimensions",
+                            subtitle="Grouped percentile comparison across the 7 scouting dimensions",
                         ),
                         span={"base": 12, "lg": 6},
                     ),
                 ],
-                gap="lg",
+                gap="md",
             ),
 
-            dmc.Space(h=25),
+            dmc.Space(h=16),
 
             # SIDE-BY-SIDE STATISTICAL MATRIX TABLE
             create_section_card(
                 html.Div(id="compare-stats-table-container", style={"overflowX": "auto"}),
-                title="Statistical Comparison Matrix",
-                subtitle="Benchmark target candidates directly against the baseline player with +/- deltas and per-90 rates",
+                title="Head-to-Head Comparison Matrix",
+                subtitle="Direct statistical benchmark against baseline starter with live +/- deltas",
                 extra_header=dmc.Group([
                     dmc.Switch(
                         id="compare-delta-toggle",
                         label="Show Deltas (Δ vs Baseline)",
                         checked=True,
                         size="xs",
-                        color="lime",
+                        color="emerald",
                     ),
                     dmc.SegmentedControl(
                         id="compare-metric-mode",
@@ -133,26 +132,26 @@ def layout(player1=None, player2=None, **kwargs):
                         ],
                         value="per90",
                         size="xs",
-                        color="lime",
+                        color="emerald",
                     ),
                     dmc.Button(
-                        "📥 Export CSV",
+                        "Export Matrix (CSV)",
                         id="compare-export-btn",
                         size="xs",
                         variant="light",
-                        color="cyan",
+                        color="emerald",
                     ),
                     dcc.Download(id="compare-download-csv"),
-                ], gap="sm", align="center", wrap="wrap"),
+                ], gap="xs", align="center", wrap="wrap"),
             ),
 
-            dmc.Space(h=25),
+            dmc.Space(h=16),
 
             # TACTICAL PROFILES AND STRENGTHS
             create_section_card(
                 html.Div(id="compare-profiles-container"),
-                title="Tactical Strengths & Developmental Priorities",
-                subtitle="Automated scouting observations for each evaluated candidate",
+                title="Tactical Profiles & Scouting Observations",
+                subtitle="Automated analytical strengths and development areas for each evaluated candidate",
             ),
         ],
         fluid=True,
@@ -179,14 +178,15 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         warning_msg = dmc.Alert(
             "Please select at least 2 players (up to 4) to generate the comparison matrix.",
             title="Selection Needed",
-            color="yellow",
+            color="orange",
             variant="light",
+            radius="sm",
         )
         empty_fig = go.Figure()
         empty_fig.add_annotation(
             text="Select 2 to 4 players to view comparison charts.",
             showarrow=False,
-            font=dict(color=MUTED, size=14),
+            font=dict(color=MUTED, size=13),
             x=0.5,
             y=0.5,
             xref="paper",
@@ -204,44 +204,43 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
     if len(positions) > 1:
         pos_list = ", ".join(positions)
         cross_pos_warning = dmc.Alert(
-            f"Analytical Notice: You are comparing players from multiple position groups ({pos_list}). "
-            "Percentile scores (0–100) are engineered strictly relative to peers in each player's own position group "
-            "(e.g., Defender finishing is benchmarked against other defenders). Direct numerical equivalence across positions should be interpreted with caution.",
-            title="Cross-Position Percentile Comparison Detected",
+            f"Analytical Notice: You are comparing candidates from multiple position groups ({pos_list}). "
+            "Percentiles are benchmarked strictly relative to peers within each candidate's own position cohort "
+            "(e.g., Defender finishing is benchmarked against fellow defenders). Direct numerical equivalence should be interpreted in tactical context.",
+            title="Cross-Cohort Percentile Notice",
             color="yellow",
             variant="light",
-            radius="md",
+            radius="sm",
             p="sm",
             style={
-                "backgroundColor": "rgba(245, 158, 11, 0.08)",
-                "borderColor": "rgba(245, 158, 11, 0.25)",
-                "color": "#F8FAFC",
+                "backgroundColor": "rgba(245, 158, 11, 0.06)",
+                "border": "1px solid rgba(245, 158, 11, 0.2)",
             },
         )
     else:
         pos = list(positions)[0]
         pos_name = {"DF": "Defenders", "MF": "Midfielders", "FW": "Forwards"}.get(pos, pos)
         cross_pos_warning = dmc.Text(
-            f"All selected candidates are {pos_name}. Scores are directly comparable on the same position-relative percentile scale.",
+            f"✓ Homogeneous Cohort: All candidates belong to {pos_name}. Scores are directly comparable on identical position-relative percentile scales.",
             size="xs",
             c="dimmed",
         )
 
     # 2. Charts
-    radar_fig = build_radar_chart(players=players, height=380)
-    bar_fig = build_comparison_bars(players=players, height=380)
+    radar_fig = build_radar_chart(players=players, height=370)
+    bar_fig = build_comparison_bars(players=players, height=370)
 
     # 3. Statistical Comparison Table
-    table_headers = [dmc.TableTh("Metric / Dimension", style={"color": TEXT, "width": "220px"})]
+    table_headers = [dmc.TableTh("METRIC / DIMENSION", style={"color": TEXT, "width": "220px", "fontSize": "10px", "letterSpacing": "0.6px"})]
     for i, p in enumerate(players):
         color = PLAYER_COMPARE_COLORS[i % len(PLAYER_COMPARE_COLORS)]
-        role_badge = dmc.Badge("BASELINE", color="lime", variant="filled", size="xs") if i == 0 else dmc.Badge(f"TARGET #{i}", color="blue", variant="light", size="xs")
+        role_badge = dmc.Badge("BASELINE", color="emerald", variant="filled", size="xs") if i == 0 else dmc.Badge(f"TARGET #{i}", color="cyan", variant="light", size="xs")
         table_headers.append(
             dmc.TableTh(
                 dmc.Box([
                     dmc.Group([
-                        dmc.Badge("●", color=color, variant="transparent", size="xs", p=0),
-                        dmc.Text(p["Player"], fw=700, c="white"),
+                        html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
+                        dmc.Text(p["Player"], fw=700, c="white", size="xs"),
                     ], gap="xs"),
                     dmc.Group([
                         role_badge,
@@ -255,12 +254,12 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
 
     # Metric Rows Definition with Delta Support
     def make_row(label, values_fn, is_header=False, is_percentile=False, is_numeric=False, precision=1):
-        cells = [dmc.TableTd(dmc.Text(label, fw=700 if is_header else 500, c="dimmed" if not is_header else "lime"))]
+        cells = [dmc.TableTd(dmc.Text(label, fw=700 if is_header else 500, c="dimmed" if not is_header else "emerald", size="xs"))]
         baseline_num = None
         for i, p in enumerate(players):
             raw_val = values_fn(p)
             if is_header:
-                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})))
+                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=600, c="white", size="xs", style={"fontVariantNumeric": "tabular-nums"})))
             elif is_percentile or is_numeric:
                 try:
                     num = float(raw_val)
@@ -275,22 +274,22 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                             if abs(delta) < 0.001:
                                 delta_badge = dmc.Badge("0.0", size="xs", variant="light", color="gray")
                             elif delta > 0:
-                                delta_badge = dmc.Badge(f"+{delta:.{precision}f}", size="xs", variant="light", color="lime")
+                                delta_badge = dmc.Badge(f"+{delta:.{precision}f}", size="xs", variant="light", color="emerald")
                             else:
                                 delta_badge = dmc.Badge(f"{delta:.{precision}f}", size="xs", variant="light", color="red")
 
                     if is_percentile:
                         tier_info = get_percentile_tier(num)
-                        val_span = dmc.Text(f"{num:.1f}", fw=700, style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"})
+                        val_span = dmc.Text(f"{num:.1f}", fw=700, size="xs", style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"})
                     else:
-                        val_span = dmc.Text(f"{num:.{precision}f}" if precision > 0 else f"{int(round(num))}", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})
+                        val_span = dmc.Text(f"{num:.{precision}f}" if precision > 0 else f"{int(round(num))}", fw=600, size="xs", c="white", style={"fontVariantNumeric": "tabular-nums"})
 
                     content = dmc.Group([val_span, delta_badge] if delta_badge else [val_span], gap="xs", align="center")
                     cells.append(dmc.TableTd(content))
                 except (ValueError, TypeError):
-                    cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, c="white")))
+                    cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, size="xs", c="white")))
             else:
-                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, c="white")))
+                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, size="xs", c="white")))
         return dmc.TableTr(cells)
 
     rows = [
@@ -356,7 +355,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         striped=True,
         highlightOnHover=True,
         withTableBorder=True,
-        style={"backgroundColor": PANEL, "fontSize": "13px", "borderColor": BORDER},
+        style={"backgroundColor": PANEL, "fontSize": "12px", "borderColor": BORDER},
     )
 
     # 4. Tactical Profiles Cards Grid
@@ -366,31 +365,34 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         strengths, weaknesses = get_player_strengths_and_weaknesses(p)
 
         card = dmc.GridCol(
-            dmc.Card(
+            dmc.Box(
                 [
                     dmc.Group([
-                        dmc.Badge("●", color=color, variant="transparent", size="sm", p=0),
-                        dmc.Title(p["Player"], order=4, c="white"),
+                        html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
+                        dmc.Text(p["Player"], fw=700, c="white", size="sm"),
                     ], gap="xs"),
-                    dmc.Text(f"{p['Squad']} • {p['Pos']} • {p.get('SubRole', '')} • Style: {p.get('PlayingStyle_Name', 'Specialist')}", size="xs", c="dimmed", mt=2),
-                    dmc.Divider(my="sm"),
+                    dmc.Text(f"{p['Squad']} • {p['Pos']} • {p.get('SubRole', '')} • {p.get('PlayingStyle_Name', 'Specialist')}", size="10px", c="dimmed", mt=2),
+                    dmc.Divider(my="xs", color=BORDER),
 
-                    dmc.Text("KEY STRENGTHS", size="xs", fw=700, c="lime", mb=4),
+                    dmc.Text("KEY STRENGTHS", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}, mb=4),
                     dmc.Group([
-                        dmc.Badge(f"{s['attribute']} ({s['score']:.1f})", color="lime", variant="light", size="xs")
+                        dmc.Badge(f"{s['attribute']} ({s['score']:.1f})", color="emerald", variant="light", size="xs")
                         for s in strengths
-                    ], gap="xs", mb="sm", wrap="wrap"),
+                    ], gap="xs", mb="xs", wrap="wrap"),
 
-                    dmc.Text("VULNERABILITIES / LOWEST VOLUMES", size="xs", fw=700, c="orange", mb=4),
+                    dmc.Text("DEVELOPMENT PRIORITIES", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}, mb=4),
                     dmc.Group([
                         dmc.Badge(f"{w['attribute']} ({w['score']:.1f})", color="orange", variant="light", size="xs")
                         for w in weaknesses
                     ], gap="xs", wrap="wrap"),
                 ],
-                withBorder=True,
-                radius="md",
-                p="md",
-                style={"backgroundColor": "#131E30", "borderColor": BORDER, "borderTop": f"3px solid {color}"},
+                style={
+                    "backgroundColor": "#0D131F",
+                    "border": f"1px solid {BORDER}",
+                    "borderTop": f"2px solid {color}",
+                    "borderRadius": "4px",
+                    "padding": "12px 14px",
+                },
             ),
             span={"base": 12, "sm": 6, "lg": 12 // len(players)},
         )
@@ -449,5 +451,3 @@ def export_comparison_csv(n_clicks, selected_names, metric_mode):
     df_exp = pd.DataFrame(rows_data)
     ref_name = players[0]["Player"].replace(" ", "_")
     return dcc.send_data_frame(df_exp.to_csv, f"scout_comparison_{ref_name}_matrix.csv", index=False)
-
-

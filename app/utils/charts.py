@@ -16,10 +16,10 @@ from app.utils.styling import (
 )
 
 PLAYER_COMPARE_COLORS = [
-    "#84CC16",  # Primary SCOUT Lime
-    "#38BDF8",  # Cyan Blue
-    "#F59E0B",  # Amber Orange
-    "#EC4899",  # Pink
+    "#10B981",  # Pitch Emerald
+    "#38BDF8",  # Sky Cyan
+    "#F59E0B",  # Amber
+    "#A855F7",  # Purple
 ]
 
 
@@ -78,7 +78,7 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
     fig = style_figure(fig, height=height)
     fig.update_layout(
         polar=dict(
-            bgcolor="rgba(19, 30, 48, 0.7)",
+            bgcolor="rgba(15, 23, 42, 0.4)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
@@ -209,13 +209,13 @@ def build_pizza_chart(player, height=400):
     fig = style_figure(fig, height=height)
     fig.update_layout(
         polar=dict(
-            bgcolor="rgba(19, 30, 48, 0.7)",
+            bgcolor="rgba(15, 23, 42, 0.4)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
                 dtick=25,
                 tickfont=dict(color=MUTED, size=9),
-                gridcolor="rgba(255, 255, 255, 0.12)",
+                gridcolor="rgba(255, 255, 255, 0.08)",
                 linecolor=BORDER,
             ),
             angularaxis=dict(
