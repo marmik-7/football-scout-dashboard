@@ -26,6 +26,7 @@ from app.utils.styling import (
     style_figure,
     get_percentile_tier,
 )
+from app.utils.metric_definitions import get_sample_size_badge, SAMPLE_SIZE_THRESHOLD
 
 dash.register_page(__name__, path="/player-rankings", name="Rankings", order=7)
 
@@ -230,8 +231,10 @@ layout = dmc.Container(
     Input("rankings-depth", "value"),
     Input("rankings-order", "value"),
     Input("rankings-squad", "value"),
+    Input("scout-analyst-mode", "data"),
 )
-def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
+def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, scout_analyst_mode="scout"):
+    scout_analyst_mode = scout_analyst_mode or "scout"
     if not attr or attr not in ATTRIBUTE_COLUMNS:
         attr = "Finishing"
     if not pos or pos not in ["FW", "MF", "DF", "ALL"]:
@@ -376,6 +379,158 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
     )
 
     # 5. Leaderboard Table
+    if scout_analyst_mode == "scout":
+        # Role-tailored and dimension-specific production columns
+        if attr == "Finishing":
+            extra_headers = [
+                dmc.TableTh("GOALS / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("xG / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("G - xG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("SHOT QUAL.", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            ]
+        elif attr in ["Passing", "Progression"]:
+            extra_headers = [
+                dmc.TableTh("PROG. PASS / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("PROG. CARRY / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("PASS ACC. %", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("KEY PASS / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            ]
+        elif attr in ["Defending", "Aerial"]:
+            extra_headers = [
+                dmc.TableTh("pAdj DEFENDING", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("RAW TKL+INT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("AERIALS WON / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("AERIAL WIN %", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            ]
+        elif attr == "Creativity":
+            extra_headers = [
+                dmc.TableTh("KEY PASSES / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("xA / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("SCA / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("ASSISTS / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            ]
+        else: # Ball Security
+            extra_headers = [
+                dmc.TableTh("PASS ACC. %", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("MISCONTROLS / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("DISPOSSESSED / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("DRIBBLES / 90", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            ]
+
+        thead = dmc.TableThead(
+            dmc.TableTr([
+                dmc.TableTh("RANK", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "width": "50px"}),
+                dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh(f"{attr.upper()} SCORE", style={"color": "#10B981", "fontWeight": "700", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                *extra_headers,
+                dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
+            ])
+        )
+
+        rows = []
+        for rank, (_, r) in enumerate(top_candidates.iterrows(), start=1):
+            pos_badge_color = "blue" if r["Pos"] == "DF" else "teal" if r["Pos"] == "MF" else "orange"
+            target_score = r[col]
+            tier = get_percentile_tier(target_score)
+            profile_url = f"/player-profile?player={r['Player_Unique']}"
+            mins = float(r.get("Min", 0))
+
+            if rank == 1:
+                rank_badge = dmc.Badge(f"#{rank}", color="yellow", variant="filled", size="xs")
+            elif rank == 2:
+                rank_badge = dmc.Badge(f"#{rank}", color="gray", variant="filled", size="xs")
+            elif rank == 3:
+                rank_badge = dmc.Badge(f"#{rank}", color="orange", variant="filled", size="xs")
+            else:
+                rank_badge = dmc.Badge(f"#{rank}", color="gray", variant="light", size="xs")
+
+            sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
+
+            # Cells based on attr
+            if attr == "Finishing":
+                extra_cells = [
+                    dmc.TableTd(dmc.Text(f"{r.get('Gls_per90', 0.0):.2f}", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('xG_per90', 0.0):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{float(r.get('G-xG', 0.0)):+.2f}", size="xs", fw=600, style={"color": ACCENT if float(r.get('G-xG', 0.0)) >= 0 else "#F59E0B", "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{float(r.get('npxG/Sh', 0.0)):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                ]
+            elif attr in ["Passing", "Progression"]:
+                extra_cells = [
+                    dmc.TableTd(dmc.Text(f"{r.get('PrgP_per90', 0.0):.1f}", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('PrgC_per90', 0.0):.1f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{float(r.get('Cmp%', 0.0)):.1f}%", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('KP_per90', 0.0):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                ]
+            elif attr in ["Defending", "Aerial"]:
+                padj_def = float(r.get('Tkl_pAdj_per90', 0.0) + r.get('Int_pAdj_per90', 0.0))
+                raw_def = float(r.get('Tkl_per90', 0.0) + r.get('Int_per90', 0.0))
+                extra_cells = [
+                    dmc.TableTd(dmc.Text(f"{padj_def:.2f}", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{raw_def:.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('Won_per90', 0.0):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{float(r.get('Won%', 0.0)):.1f}%", size="xs", fw=600, style={"color": ACCENT if float(r.get('Won%', 0.0)) >= 60 else "#94A3B8", "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                ]
+            elif attr == "Creativity":
+                extra_cells = [
+                    dmc.TableTd(dmc.Text(f"{r.get('KP_per90', 0.0):.2f}", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('xA_per90', 0.0):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('SCA_per90', 0.0):.2f}", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('Ast_per90', 0.0):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                ]
+            else: # Ball Security
+                extra_cells = [
+                    dmc.TableTd(dmc.Text(f"{float(r.get('Cmp%', 0.0)):.1f}%", size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('Mis_per90', 0.0):.2f}", size="xs", c="#F59E0B", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('Dis_per90', 0.0):.2f}", size="xs", c="#F59E0B", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{r.get('Succ_per90', 0.0):.2f}", size="xs", c="#94A3B8", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                ]
+
+            rows.append(
+                dmc.TableTr([
+                    dmc.TableTd(rank_badge),
+                    dmc.TableTd([
+                        dmc.Group([
+                            dmc.Text(r["Player"], fw=700, size="xs", c="white"),
+                            *([sample_pill] if sample_pill else []),
+                        ], gap=4, align="center"),
+                        dmc.Text(f"{r.get('Nation_Display', r['Nation_Clean'])} • Age {r.get('Age', '-')}", size="10px", c="#64748B"),
+                    ]),
+                    dmc.TableTd([
+                        dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
+                        dmc.Text(r.get("Comp_Clean", ""), size="10px", c="#64748B"),
+                    ]),
+                    dmc.TableTd([
+                        dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
+                        dmc.Text(r.get("SubRole", ""), size="10px", c="#64748B", mt=2),
+                    ]),
+                    dmc.TableTd(dmc.Text(f"{int(mins):,}m", size="xs", c="#64748B", style={"fontVariantNumeric": "tabular-nums"})),
+                    dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="xs", fw=700, style={"color": tier["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    *extra_cells,
+                    dmc.TableTd(
+                        dcc.Link(
+                            dmc.Button("Dossier →", size="xs", variant="subtle", color="teal"),
+                            href=profile_url,
+                            style={"textDecoration": "none"},
+                        ),
+                        style={"textAlign": "center"},
+                    ),
+                ])
+            )
+
+        tbody = dmc.TableTbody(rows)
+        table = dmc.Table(
+            [thead, tbody],
+            striped=False,
+            highlightOnHover=True,
+            withTableBorder=False,
+            style={"fontSize": "12.5px"},
+        )
+        return notice, fig, table
+
+    # ANALYST VIEW: Full 7-dimension score matrix
     thead = dmc.TableThead(
         dmc.TableTr([
             dmc.TableTh("RANK", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "width": "50px"}),
@@ -401,6 +556,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
         target_score = r[col]
         tier = get_percentile_tier(target_score)
         profile_url = f"/player-profile?player={r['Player_Unique']}"
+        mins = float(r.get("Min", 0))
 
         # Podium coloring
         if rank == 1:
@@ -412,11 +568,16 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
         else:
             rank_badge = dmc.Badge(f"#{rank}", color="gray", variant="light", size="xs")
 
+        sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
+
         rows.append(
             dmc.TableTr([
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
-                    dmc.Text(r["Player"], fw=700, size="xs", c="white"),
+                    dmc.Group([
+                        dmc.Text(r["Player"], fw=700, size="xs", c="white"),
+                        *([sample_pill] if sample_pill else []),
+                    ], gap=4, align="center"),
                     dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="#64748B"),
                 ]),
                 dmc.TableTd([

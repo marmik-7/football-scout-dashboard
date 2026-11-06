@@ -272,8 +272,10 @@ layout = dmc.Container(
     Output("overview-limitation-notice", "children"),
     Input("overview-position-select", "value"),
     Input("overview-attribute-select", "value"),
+    Input("scout-analyst-mode", "data"),
 )
-def update_overview_top_players(position, attribute):
+def update_overview_top_players(position, attribute, scout_analyst_mode="scout"):
+    scout_analyst_mode = scout_analyst_mode or "scout"
     if not attribute or attribute not in ATTRIBUTE_COLUMNS:
         attribute = "Finishing"
     if not position or position not in ["FW", "MF", "DF", "ALL"]:

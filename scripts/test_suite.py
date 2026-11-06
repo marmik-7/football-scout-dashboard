@@ -106,8 +106,8 @@ def run_full_scout_test_suite():
     assert "ANALYST METHODOLOGY & MATHEMATICAL FORMULATION" in str(res_sim_analyst[2])
     print("PASS: Similar Players Page Callback & Explainable Similarity")
 
-    print("\n=== TEST 4: Player Rankings with Sub-Role Filtering ===")
-    res_rank = player_rankings.update_rankings(
+    print("\n=== TEST 4: Player Rankings with Sub-Role Filtering & Production Columns ===")
+    res_rank_scout = player_rankings.update_rankings(
         pos="FW",
         subrole="Center Forward",
         attr="Finishing",
@@ -116,14 +116,31 @@ def run_full_scout_test_suite():
         depth=10,
         order="desc",
         squad="ALL",
+        scout_analyst_mode="scout",
     )
-    assert res_rank[0] is not None
-    assert res_rank[1] is not None
-    assert res_rank[2] is not None
-    print("PASS: Player Rankings Callback")
+    assert res_rank_scout[0] is not None
+    assert res_rank_scout[1] is not None
+    assert res_rank_scout[2] is not None
+    rank_scout_str = str(res_rank_scout[2])
+    assert "GOALS / 90" in rank_scout_str
+    assert "xG / 90" in rank_scout_str
 
-    print("\n=== TEST 5: Player Explorer with Sub-Role & Advanced Sorting ===")
-    table_ui, count_text, total_pages = player_explorer.update_explorer_table(
+    res_rank_analyst = player_rankings.update_rankings(
+        pos="FW",
+        subrole="Center Forward",
+        attr="Finishing",
+        comp="Premier League",
+        age_group="ALL",
+        depth=10,
+        order="desc",
+        squad="ALL",
+        scout_analyst_mode="analyst",
+    )
+    assert "TACTICAL DNA" in str(res_rank_analyst[2])
+    print("PASS: Player Rankings Callback & Production Columns")
+
+    print("\n=== TEST 5: Player Explorer with Streamlined Scout & Comprehensive Analyst Views ===")
+    table_scout, count_text_s, total_pages_s = player_explorer.update_explorer_table(
         search="",
         pos="DF",
         subrole="Center-Back",
@@ -138,11 +155,36 @@ def run_full_scout_test_suite():
         sec_attr="NONE",
         sec_score=0,
         page=1,
+        scout_analyst_mode="scout",
     )
-    assert table_ui is not None
-    assert "Center-Back" in str(count_text) or "matching players" in str(count_text)
-    print(f" - Explorer output: {count_text}")
-    print("PASS: Player Explorer Callback")
+    assert table_scout is not None
+    table_scout_str = str(table_scout)
+    assert "PRIMARY SCOUTING ASSET" in table_scout_str
+    assert "ROLE & STYLE" in table_scout_str
+
+    table_analyst, count_text_a, total_pages_a = player_explorer.update_explorer_table(
+        search="",
+        pos="DF",
+        subrole="Center-Back",
+        comp="Premier League",
+        squad="ALL",
+        nation="ALL",
+        age_preset="ALL",
+        sort_attr="G-xG",
+        sort_order="desc",
+        min_min=600,
+        min_score=0,
+        sec_attr="NONE",
+        sec_score=0,
+        page=1,
+        scout_analyst_mode="analyst",
+    )
+    assert table_analyst is not None
+    table_analyst_str = str(table_analyst)
+    assert "FIN" in table_analyst_str
+    assert "AER" in table_analyst_str
+    print(f" - Explorer output: {count_text_s}")
+    print("PASS: Player Explorer Callback (Scout Streamlined & Analyst Matrix)")
 
     print("\n=== TEST 6: Player Profile Callback with Pizza & Radar Views ===")
     # 1. Scout View (Role-Tailored metrics & Recruitment Assessment)

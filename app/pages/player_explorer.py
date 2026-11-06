@@ -24,6 +24,7 @@ from app.utils.styling import (
     create_section_card,
     get_percentile_tier,
 )
+from app.utils.metric_definitions import get_sample_size_badge, SAMPLE_SIZE_THRESHOLD
 
 dash.register_page(__name__, path="/player-explorer", name="Player Explorer", order=2)
 
@@ -370,8 +371,10 @@ def sync_bottom_pagination(val, total):
     Input("explorer-sec-attr", "value"),
     Input("explorer-sec-score", "value"),
     Input("explorer-pagination", "value"),
+    Input("scout-analyst-mode", "data"),
 )
-def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset, sort_attr, sort_order, min_min, min_score, sec_attr, sec_score, page):
+def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset, sort_attr, sort_order, min_min, min_score, sec_attr, sec_score, page, scout_analyst_mode="scout"):
+    scout_analyst_mode = scout_analyst_mode or "scout"
     filtered = df.copy()
 
     # Search filter
@@ -445,7 +448,86 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
     else:
         count_text = f"Showing {start_idx + 1}–{end_idx} of {total_matching} matching players"
 
-    # Build High-Density Table
+    # SCOUT VIEW: Streamlined, high-signal recruitment table
+    if scout_analyst_mode == "scout":
+        thead = dmc.TableThead(
+            dmc.TableTr([
+                dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("ROLE & STYLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("G+A", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
+                dmc.TableTh("PRIMARY SCOUTING ASSET", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("ACTION", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
+            ])
+        )
+        rows = []
+        for idx, r in page_df.iterrows():
+            pos_badge_color = "blue" if r["Pos"] == "DF" else "teal" if r["Pos"] == "MF" else "orange"
+            nat_display = r.get("Nation_Display", r.get("Nation_Clean", "N/A"))
+            age_str = str(int(r["Age"])) if r["Age"] > 0 else "—"
+            mins = float(r.get("Min", 0))
+
+            gls = int(r.get("Gls", 0)) if pd.notna(r.get("Gls")) else 0
+            ast = int(r.get("Ast", 0)) if pd.notna(r.get("Ast")) else 0
+            ga = gls + ast
+            profile_url = f"/player-profile?player={r['Player_Unique']}"
+
+            sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
+
+            scores = {attr: float(r[c]) for attr, c in ATTRIBUTE_COLUMNS.items()}
+            top_attr, top_score = max(scores.items(), key=lambda x: x[1])
+            tier_info = get_percentile_tier(top_score)
+
+            rows.append(
+                dmc.TableTr([
+                    dmc.TableTd([
+                        dmc.Group([
+                            dmc.Text(r["Player"], size="xs", fw=700, c="white"),
+                            *([sample_pill] if sample_pill else []),
+                        ], gap=4, align="center"),
+                        dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="#64748B"),
+                    ]),
+                    dmc.TableTd([
+                        dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
+                        dmc.Text(r.get("Comp_Clean", ""), size="10px", c="#64748B"),
+                    ]),
+                    dmc.TableTd([
+                        dmc.Badge(r.get("SubRole", r["Pos"]), color=pos_badge_color, variant="light", size="xs"),
+                        dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="10px", c="#94A3B8", mt=2),
+                    ]),
+                    dmc.TableTd(dmc.Text(f"{int(mins):,}m", size="xs", c="#64748B", style={"fontVariantNumeric": "tabular-nums"})),
+                    dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "center"})),
+                    dmc.TableTd(
+                        dmc.Badge(
+                            f"{top_attr} ({top_score:.1f}th pct)",
+                            color=tier_info["badge_color"],
+                            variant="light",
+                            size="xs",
+                        )
+                    ),
+                    dmc.TableTd(
+                        dcc.Link(
+                            dmc.Button("Dossier →", size="xs", variant="subtle", color="teal"),
+                            href=profile_url,
+                            style={"textDecoration": "none"},
+                        ),
+                        style={"textAlign": "center"},
+                    ),
+                ])
+            )
+        tbody = dmc.TableTbody(rows)
+        table = dmc.Table(
+            [thead, tbody],
+            striped=False,
+            highlightOnHover=True,
+            withTableBorder=False,
+            withColumnBorders=False,
+            style={"fontSize": "12.5px"},
+        )
+        return table, count_text, total_pages
+
+    # ANALYST VIEW: Full 15-column multi-attribute grid
     thead = dmc.TableThead(
         dmc.TableTr([
             dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
@@ -471,12 +553,14 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
         pos_badge_color = "blue" if r["Pos"] == "DF" else "teal" if r["Pos"] == "MF" else "orange"
         nat_display = r.get("Nation_Display", r.get("Nation_Clean", "N/A"))
         age_str = str(int(r["Age"])) if r["Age"] > 0 else "—"
+        mins = float(r.get("Min", 0))
 
         gls = int(r.get("Gls", 0)) if pd.notna(r.get("Gls")) else 0
         ast = int(r.get("Ast", 0)) if pd.notna(r.get("Ast")) else 0
         ga = gls + ast
-
         profile_url = f"/player-profile?player={r['Player_Unique']}"
+
+        sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
 
         def render_score(score_val):
             tier_info = get_percentile_tier(score_val)
@@ -491,9 +575,12 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
 
         rows.append(
             dmc.TableTr([
-                dmc.TableTd(
-                    dmc.Text(r["Player"], size="xs", fw=700, c="white")
-                ),
+                dmc.TableTd([
+                    dmc.Group([
+                        dmc.Text(r["Player"], size="xs", fw=700, c="white"),
+                        *([sample_pill] if sample_pill else []),
+                    ], gap=4, align="center"),
+                ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
                     dmc.Text(r.get("Comp_Clean", ""), size="10px", c="#64748B"),
