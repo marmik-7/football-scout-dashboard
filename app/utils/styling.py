@@ -3,22 +3,26 @@ import dash_mantine_components as dmc
 from dash import html
 
 # --------------------------------------------------
-# COLOR PALETTE & DESIGN SYSTEM
+# COLOR PALETTE & DESIGN SYSTEM (SCOUT PITCH BLACK)
 # --------------------------------------------------
 
-BG = "#101827"
-PANEL = "#172438"
-PANEL_ALT = "#131E30"
-BORDER = "#263449"
-TEXT = "#F8FAFC"
-MUTED = "#94A3B8"
-ACCENT = "#84CC16"
+BG = "#090D14"  # Deep pitch black obsidian canvas
+PANEL = "#0F172A"  # Slate-900 surface for cards and charts
+PANEL_ALT = "#0B1120"  # Deeper panel surface for sub-elements
+BORDER = "rgba(255, 255, 255, 0.08)"  # Clean 1px hairline border
+BORDER_SUBTLE = "rgba(255, 255, 255, 0.04)"
+TEXT = "#F8FAFC"  # High-contrast white
+MUTED = "#94A3B8"  # Slate-400 secondary text
+SUBTLE = "#64748B"  # Slate-500 micro-labels
+ACCENT = "#10B981"  # Pitch Emerald (primary sports-tech accent)
+ACCENT_BG = "rgba(16, 185, 129, 0.10)"
+ACCENT_BORDER = "rgba(16, 185, 129, 0.25)"
 
 # Positional and cluster accents
 POSITION_COLORS = {
-    "DF": "#38BDF8",  # Defender Cyan / Blue
-    "MF": "#A3E635",  # Midfielder Lime
-    "FW": "#F59E0B",  # Forward Amber / Orange
+    "DF": "#38BDF8",  # Defender Sky Blue
+    "MF": "#10B981",  # Midfielder Pitch Emerald
+    "FW": "#F59E0B",  # Forward Amber
 }
 
 POSITION_NAMES = {
@@ -39,8 +43,8 @@ ATTRIBUTE_COLUMNS = {
 }
 
 CLUSTER_COLORS = [
-    "#38BDF8",  # Cyan
-    "#84CC16",  # Lime
+    "#38BDF8",  # Sky Blue
+    "#10B981",  # Pitch Emerald
     "#F59E0B",  # Amber
     "#EC4899",  # Pink
 ]
@@ -52,12 +56,12 @@ CLUSTER_COLORS = [
 
 def get_percentile_tier(score):
     """
-    Standardized 5-tier professional scouting color classification:
-    - 90–100: Elite (#84CC16 / Lime)
-    - 75–89:  Strong (#38BDF8 / Cyan)
+    Standardized 5-tier professional scouting classification:
+    - 90–100: Elite (#10B981 / Pitch Emerald)
+    - 75–89:  Strong (#38BDF8 / Sky Blue)
     - 50–74:  Average (#94A3B8 / Slate)
     - 25–49:  Developing (#F59E0B / Amber)
-    - 0–24:   Concern (#EF4444 / Rose Red)
+    - 0–24:   Concern (#F43F5E / Crimson)
     """
     try:
         val = float(score)
@@ -65,57 +69,57 @@ def get_percentile_tier(score):
         val = 50.0
 
     if val >= 90:
-        return {"tier": "Elite", "color": "#84CC16", "badge_color": "lime"}
+        return {"tier": "Elite", "color": "#10B981", "badge_color": "teal"}
     elif val >= 75:
-        return {"tier": "Strong", "color": "#38BDF8", "badge_color": "teal"}
+        return {"tier": "Strong", "color": "#38BDF8", "badge_color": "cyan"}
     elif val >= 50:
-        return {"tier": "Average", "color": "#94A3B8", "badge_color": "blue"}
+        return {"tier": "Average", "color": "#94A3B8", "badge_color": "gray"}
     elif val >= 25:
-        return {"tier": "Developing", "color": "#F59E0B", "badge_color": "orange"}
+        return {"tier": "Developing", "color": "#F59E0B", "badge_color": "yellow"}
     else:
-        return {"tier": "Concern", "color": "#EF4444", "badge_color": "red"}
+        return {"tier": "Concern", "color": "#F43F5E", "badge_color": "red"}
 
 
 # --------------------------------------------------
-# CHART STYLING HELPER
+# CHART STYLING HELPER (HIGH-DENSITY FLAT SLATE)
 # --------------------------------------------------
 
 def style_figure(fig, height=350, show_grid=True):
     """
-    Applies consistent SCOUT dark navy / lime styling to Plotly figures.
+    Applies consistent SCOUT pitch black / slate styling to Plotly figures.
     """
     fig.update_layout(
         height=height,
         paper_bgcolor=PANEL,
         plot_bgcolor=PANEL,
-        font=dict(color=TEXT, family="Inter, sans-serif"),
+        font=dict(color=TEXT, family="Inter, -apple-system, BlinkMacSystemFont, sans-serif"),
         title=dict(
-            font=dict(color=TEXT, size=15, family="Inter, sans-serif"),
-            subtitle=dict(font=dict(color=MUTED, size=12, family="Inter, sans-serif")),
+            font=dict(color="#FFFFFF", size=14, family="Inter, sans-serif", weight=600),
+            subtitle=dict(font=dict(color=MUTED, size=11, family="Inter, sans-serif")),
         ),
-        margin=dict(l=35, r=25, t=45, b=30),
+        margin=dict(l=35, r=25, t=40, b=30),
         legend=dict(
             bgcolor="rgba(0,0,0,0)",
             font=dict(color=MUTED, size=11),
         ),
         xaxis=dict(
-            gridcolor=BORDER if show_grid else "rgba(0,0,0,0)",
-            zerolinecolor=BORDER if show_grid else "rgba(0,0,0,0)",
-            tickfont=dict(color=MUTED, size=11),
-            title=dict(font=dict(color=MUTED, size=12)),
+            gridcolor="rgba(255, 255, 255, 0.05)" if show_grid else "rgba(0,0,0,0)",
+            zerolinecolor="rgba(255, 255, 255, 0.07)" if show_grid else "rgba(0,0,0,0)",
+            tickfont=dict(color=MUTED, size=10),
+            title=dict(font=dict(color=MUTED, size=11)),
         ),
         yaxis=dict(
-            gridcolor=BORDER if show_grid else "rgba(0,0,0,0)",
-            zerolinecolor=BORDER if show_grid else "rgba(0,0,0,0)",
-            tickfont=dict(color=TEXT, size=11),
-            title=dict(font=dict(color=MUTED, size=12)),
+            gridcolor="rgba(255, 255, 255, 0.05)" if show_grid else "rgba(0,0,0,0)",
+            zerolinecolor="rgba(255, 255, 255, 0.07)" if show_grid else "rgba(0,0,0,0)",
+            tickfont=dict(color=MUTED, size=10),
+            title=dict(font=dict(color=MUTED, size=11)),
         ),
         hoverlabel=dict(
-            bgcolor=PANEL,
-            font_size=12,
+            bgcolor="#1E293B",
+            font_size=11,
             font_family="Inter, sans-serif",
-            font_color=TEXT,
-            bordercolor=BORDER,
+            font_color="#FFFFFF",
+            bordercolor="rgba(255, 255, 255, 0.15)",
         ),
     )
     return fig
@@ -127,65 +131,78 @@ def style_figure(fig, height=350, show_grid=True):
 
 def create_page_header(title, subtitle=None, badge_text=None):
     """
-    Creates a standardized page title header with clean typography.
+    Creates an elite, minimalist header with modern typography.
     """
+    badge_el = None
+    if badge_text:
+        badge_el = dmc.Badge(
+            badge_text,
+            color="teal",
+            variant="light",
+            size="sm",
+            style={
+                "letterSpacing": "0.6px",
+                "fontSize": "10px",
+                "fontWeight": 700,
+                "textTransform": "uppercase",
+                "backgroundColor": ACCENT_BG,
+                "color": "#34D399",
+                "borderColor": ACCENT_BORDER,
+            },
+        )
+
     elements = [
-        dmc.Title(title, order=1, c="white"),
+        dmc.Group([
+            dmc.Title(title, order=2, c="#FFFFFF", style={"fontWeight": 700, "letterSpacing": "-0.5px", "fontSize": "22px"}),
+            badge_el if badge_el else html.Div(),
+        ], gap="sm", align="center"),
     ]
     if subtitle:
         elements.append(
-            dmc.Text(subtitle, size="sm", c="dimmed", mt=6)
+            dmc.Text(subtitle, size="xs", c=MUTED, mt=4, style={"lineHeight": 1.5, "maxWidth": "850px"})
         )
 
-    return dmc.Group(
-        [
-            dmc.Box(elements),
-            dmc.Badge(badge_text, color="lime", variant="light") if badge_text else html.Div(),
-        ],
-        justify="space-between",
-        align="flex-start",
-        mb="xl",
-    )
+    return dmc.Box(elements, mb="lg")
 
 
 def create_metric_card(title, value, description=None, color=None):
     """
-    Creates an elevated KPI metric card with consistent styling and tabular numerals.
+    Creates a minimalist KPI metric card with clean typography and hairline borders.
     """
     return dmc.Card(
         children=[
-            dmc.Text(title.upper(), size="xs", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
+            dmc.Text(title.upper(), size="10px", fw=700, c=SUBTLE, style={"letterSpacing": "0.8px"}),
             dmc.Title(
                 str(value),
                 order=2,
-                mt=8,
-                c=color if color else "white",
-                style={"fontVariantNumeric": "tabular-nums"},
+                mt=4,
+                c=color if color else "#FFFFFF",
+                style={"fontVariantNumeric": "tabular-nums", "fontWeight": 700, "letterSpacing": "-0.5px", "fontSize": "24px"},
             ),
-            dmc.Text(description, size="xs", c="dimmed", mt=4) if description else html.Div(),
+            dmc.Text(description, size="xs", c=MUTED, mt=4, style={"lineHeight": 1.3}) if description else html.Div(),
         ],
         withBorder=True,
-        radius="md",
-        p="lg",
+        radius="sm",
+        p="md",
         style={
             "backgroundColor": PANEL,
             "borderColor": BORDER,
+            "boxShadow": "none",
             "height": "100%",
-            "boxShadow": "0 4px 20px -2px rgba(0, 0, 0, 0.4)",
         },
     )
 
 
 def create_section_card(children, title=None, subtitle=None, extra_header=None, style=None):
     """
-    Creates an elevated container card with subtle depth shadow.
+    Creates an architectural panel with subtle hairline border and flat surface.
     """
     card_children = []
 
     if title or extra_header is not None:
         header_box = dmc.Box([
-            dmc.Title(title, order=4, c="white") if title else html.Div(),
-            dmc.Text(subtitle, size="xs", c="dimmed", mt=2) if subtitle else html.Div(),
+            dmc.Title(title, order=4, c="#FFFFFF", style={"fontWeight": 600, "letterSpacing": "-0.3px", "fontSize": "15px"}) if title else html.Div(),
+            dmc.Text(subtitle, size="xs", c=MUTED, mt=2, style={"lineHeight": 1.4}) if subtitle else html.Div(),
         ])
         if extra_header is not None:
             card_children.append(
@@ -202,7 +219,7 @@ def create_section_card(children, title=None, subtitle=None, extra_header=None, 
     base_style = {
         "backgroundColor": PANEL,
         "borderColor": BORDER,
-        "boxShadow": "0 4px 20px -2px rgba(0, 0, 0, 0.4)",
+        "boxShadow": "none",
     }
     if style:
         base_style.update(style)
@@ -211,7 +228,7 @@ def create_section_card(children, title=None, subtitle=None, extra_header=None, 
         card_children,
         withBorder=True,
         radius="md",
-        p="lg",
+        p="md",
         style=base_style,
     )
 
@@ -225,11 +242,12 @@ def position_percentile_warning():
         title="Position-Relative Percentile Benchmarking",
         color="yellow",
         variant="light",
-        radius="md",
+        radius="sm",
         p="sm",
         style={
-            "backgroundColor": "rgba(245, 158, 11, 0.08)",
-            "borderColor": "rgba(245, 158, 11, 0.25)",
+            "backgroundColor": "rgba(245, 158, 11, 0.05)",
+            "borderColor": "rgba(245, 158, 11, 0.20)",
             "color": "#F8FAFC",
+            "fontSize": "12px",
         },
     )

@@ -28,22 +28,22 @@ app = Dash(
 all_players = get_all_player_names()
 
 NAV_ITEMS = [
-    {"label": "01   Overview", "path": "/", "id": "nav-overview"},
-    {"label": "02   Player Explorer", "path": "/player-explorer", "id": "nav-explorer"},
-    {"label": "03   Player Profile", "path": "/player-profile", "id": "nav-profile"},
-    {"label": "04   Player Comparison", "path": "/player-comparison", "id": "nav-comparison"},
-    {"label": "05   Similar Players", "path": "/similar-players", "id": "nav-similar"},
-    {"label": "06   Playing Styles", "path": "/playing-styles", "id": "nav-styles"},
-    {"label": "07   Rankings", "path": "/player-rankings", "id": "nav-rankings"},
-    {"label": "08   Shortlists", "path": "/shortlists", "id": "nav-shortlists"},
+    {"label": "Executive Overview", "path": "/", "id": "nav-overview"},
+    {"label": "Player Explorer", "path": "/player-explorer", "id": "nav-explorer"},
+    {"label": "Player Profile", "path": "/player-profile", "id": "nav-profile"},
+    {"label": "Comparison Matrix", "path": "/player-comparison", "id": "nav-comparison"},
+    {"label": "Similar Players", "path": "/similar-players", "id": "nav-similar"},
+    {"label": "Tactical Styles", "path": "/playing-styles", "id": "nav-styles"},
+    {"label": "Leaderboards", "path": "/player-rankings", "id": "nav-rankings"},
+    {"label": "Recruitment Shortlists", "path": "/shortlists", "id": "nav-shortlists"},
 ]
 
 app.layout = dmc.MantineProvider(
     forceColorScheme="dark",
     theme={
-        "primaryColor": "lime",
-        "fontFamily": "Inter, sans-serif",
-        "defaultRadius": "md",
+        "primaryColor": "teal",
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+        "defaultRadius": "sm",
     },
     children=[
         dcc.Location(id="url", refresh="callback-nav"),
@@ -68,7 +68,7 @@ app.layout = dmc.MantineProvider(
         dmc.AppShell(
             id="app-shell",
             children=[
-                # HEADER WITH MOBILE BURGER & QUICK SEARCH
+                # HEADER WITH MOBILE BURGER & SEARCH COMMAND
                 dmc.AppShellHeader(
                     dmc.Group(
                         [
@@ -81,22 +81,35 @@ app.layout = dmc.MantineProvider(
                                         size="sm",
                                         color="white",
                                     ),
-                                    dmc.Text("⚽", size="lg"),
-                                    dmc.Text("SCOUT", fw=900, size="md", c="lime"),
-                                    dmc.Text("|", c="dimmed", visibleFrom="sm"),
-                                    dmc.Text("FOOTBALL INTELLIGENCE", fw=600, size="xs", c="white", visibleFrom="md"),
+                                    dmc.Text("SCOUT", fw=800, size="sm", c="white", style={"letterSpacing": "1.2px"}),
+                                    dmc.Badge(
+                                        "PRO",
+                                        color="teal",
+                                        variant="light",
+                                        size="xs",
+                                        style={"fontSize": "9px", "height": "16px", "padding": "0 5px", "borderRadius": "3px"}
+                                    ),
+                                    dmc.Text("|", c="#334155", visibleFrom="sm"),
+                                    dmc.Text(
+                                        "RECRUITMENT INTELLIGENCE",
+                                        fw=600,
+                                        size="10px",
+                                        c=MUTED,
+                                        visibleFrom="md",
+                                        style={"letterSpacing": "0.5px"}
+                                    ),
                                 ],
                                 gap="xs",
                                 align="center",
                             ),
 
-                            # GLOBAL QUICK SEARCH
+                            # GLOBAL COMMAND SEARCH
                             dmc.Select(
                                 id="header-global-search",
-                                placeholder="⚡ Quick Player Search (Jump to Profile)...",
+                                placeholder="Search candidate dossier (e.g. Saliba, Haaland)...",
                                 data=[{"label": name, "value": name} for name in all_players],
                                 searchable=True,
-                                w={"base": 190, "sm": 280, "md": 340},
+                                w={"base": 200, "sm": 300, "md": 380},
                                 size="xs",
                                 clearable=True,
                             ),
@@ -104,12 +117,19 @@ app.layout = dmc.MantineProvider(
                             dmc.Group(
                                 [
                                     dcc.Link(
-                                        dmc.Badge(id="header-shortlist-badge", children="★ Shortlist: 2", color="orange", variant="light", size="sm"),
+                                        dmc.Badge(
+                                            id="header-shortlist-badge",
+                                            children="Pipeline: 2",
+                                            color="teal",
+                                            variant="light",
+                                            size="sm",
+                                            style={"cursor": "pointer"}
+                                        ),
                                         href="/shortlists",
                                         style={"textDecoration": "none"},
                                     ),
-                                    dmc.Badge("1,692 PLAYERS", color="blue", variant="light", size="sm", visibleFrom="md"),
-                                    dmc.Badge("2024–25", color="lime", variant="light", size="sm"),
+                                    dmc.Badge("Big 5 Leagues", color="gray", variant="outline", size="xs", visibleFrom="md"),
+                                    dmc.Badge("2024–25", color="gray", variant="outline", size="xs"),
                                 ],
                                 gap="xs",
                             ),
@@ -123,14 +143,32 @@ app.layout = dmc.MantineProvider(
                 # SIDEBAR NAVIGATION
                 dmc.AppShellNavbar(
                     [
-                        dmc.Box(
-                            [
-                                dmc.Title("SCOUT", order=2, c="lime"),
-                                dmc.Text("PLAYER SCOUTING & ANALYTICS", size="xs", c="dimmed"),
-                            ],
-                            mb="md",
-                        ),
-                        dmc.Divider(my="sm", color=BORDER),
+                        dmc.Group([
+                            dmc.Box(
+                                style={
+                                    "width": "28px",
+                                    "height": "28px",
+                                    "borderRadius": "6px",
+                                    "backgroundColor": "#10B981",
+                                    "display": "flex",
+                                    "alignItems": "center",
+                                    "justifyContent": "center",
+                                    "fontWeight": 900,
+                                    "color": "#090D14",
+                                    "fontSize": "14px",
+                                },
+                                children="S",
+                            ),
+                            dmc.Box([
+                                dmc.Group([
+                                    dmc.Text("SCOUT", fw=800, size="sm", c="white", style={"letterSpacing": "1px"}),
+                                    dmc.Badge("ELITE", color="teal", variant="light", size="xs", style={"fontSize": "8px", "height": "16px", "padding": "0 4px"}),
+                                ], gap=6, align="center"),
+                                dmc.Text("Recruitment Analytics", size="10px", c="#64748B"),
+                            ]),
+                        ], gap="sm", align="center", mb="md", px=4),
+
+                        dmc.Divider(my="xs", color="rgba(255, 255, 255, 0.06)"),
 
                         html.Div(
                             [
@@ -138,26 +176,35 @@ app.layout = dmc.MantineProvider(
                                     dmc.NavLink(
                                         id=item["id"],
                                         label=item["label"],
-                                        style={"marginBottom": "4px", "borderRadius": "6px"},
+                                        style={"marginBottom": "2px", "borderRadius": "5px"},
                                     ),
                                     href=item["path"],
                                     style={"textDecoration": "none"},
                                 )
                                 for item in NAV_ITEMS
                             ],
-                            style={"marginTop": "8px"},
+                            style={"marginTop": "6px"},
                         ),
 
-                        dmc.Divider(my="md", color=BORDER),
+                        dmc.Divider(my="md", color="rgba(255, 255, 255, 0.06)"),
 
-                        # FOOTER METRIC NOTE
+                        # FOOTER STATUS NOTE
                         dmc.Box(
                             [
-                                dmc.Text("ANALYTICAL FRAMEWORK", size="xs", fw=700, c="dimmed", mb=4),
-                                dmc.Text("Position-relative percentiles benchmarked for players with ≥600 minutes.", size="xs", c="dimmed", style={"lineHeight": 1.4}),
+                                dmc.Group([
+                                    dmc.Badge("●", color="teal", variant="transparent", size="xs", p=0),
+                                    dmc.Text("Live Intelligence Cohort", size="11px", fw=600, c="#F8FAFC"),
+                                ], gap=6),
+                                dmc.Text("1,692 qualified players (≥600m)", size="10px", c="#64748B", mt=2),
+                                dmc.Text("Engine: pAdj • 7 Sub-Roles • K-Means", size="9px", c="#64748B", mt=1),
                             ],
-                            style={"marginTop": "auto"},
-                            p="xs",
+                            style={
+                                "marginTop": "auto",
+                                "padding": "10px",
+                                "backgroundColor": "#090D14",
+                                "borderRadius": "6px",
+                                "border": "1px solid rgba(255, 255, 255, 0.05)",
+                            },
                         ),
                     ],
                     p="md",
@@ -173,26 +220,26 @@ app.layout = dmc.MantineProvider(
                 ),
             ],
             navbar={
-                "width": 260,
+                "width": 240,
                 "breakpoint": "sm",
                 "collapsed": {"mobile": True},
             },
-            header={"height": 60},
+            header={"height": 56},
             padding="md",
             styles={
                 "main": {
-                    "backgroundColor": BG,
-                    "color": TEXT,
+                    "backgroundColor": "#090D14",
+                    "color": "#F8FAFC",
                     "minHeight": "100vh",
                 },
                 "navbar": {
-                    "backgroundColor": "#131E30",
-                    "borderRight": f"1px solid {BORDER}",
+                    "backgroundColor": "#0D131F",
+                    "borderRight": "1px solid rgba(255, 255, 255, 0.08)",
                 },
                 "header": {
-                    "backgroundColor": "#131E30",
-                    "borderBottom": f"1px solid {BORDER}",
-                    "color": TEXT,
+                    "backgroundColor": "#0D131F",
+                    "borderBottom": "1px solid rgba(255, 255, 255, 0.08)",
+                    "color": "#F8FAFC",
                 },
             },
         ),
@@ -210,12 +257,12 @@ app.layout = dmc.MantineProvider(
 )
 def toggle_mobile_navbar(opened, navbar):
     new_opened = not opened
-    navbar = navbar or {"width": 260, "breakpoint": "sm", "collapsed": {}}
+    navbar = navbar or {"width": 240, "breakpoint": "sm", "collapsed": {}}
     navbar["collapsed"] = {"mobile": not new_opened}
     return navbar, new_opened
 
 
-# Callback to highlight active NavLink based on current URL path
+# Callback to highlight active sidebar link
 @app.callback(
     [Output(item["id"], "active") for item in NAV_ITEMS],
     Input("url", "pathname"),
@@ -256,7 +303,7 @@ def jump_to_player_profile(selected_name):
 )
 def update_header_shortlist_badge(shortlist_data):
     count = len(shortlist_data) if isinstance(shortlist_data, list) else 0
-    return f"★ Shortlist: {count}"
+    return f"Pipeline: {count}"
 
 
 if __name__ == "__main__":

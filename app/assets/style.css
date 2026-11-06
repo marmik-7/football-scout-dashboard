@@ -1,136 +1,212 @@
+/* ==========================================================================
+   SCOUT — FOOTBALL RECRUITMENT INTELLIGENCE
+   DESIGN SYSTEM: PITCH BLACK / STATSBOMB × LINEAR AESTHETIC
+   ========================================================================== */
+
+:root {
+    --bg-canvas: #090D14;
+    --bg-sidebar: #0D131F;
+    --bg-surface: #0F172A;
+    --bg-surface-elevated: #1E293B;
+    --bg-surface-hover: rgba(255, 255, 255, 0.035);
+    
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.04);
+    --border-focus: #10B981;
+
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-tertiary: #64748B;
+    
+    --accent-emerald: #10B981;
+    --accent-emerald-light: #34D399;
+    --accent-emerald-dim: rgba(16, 185, 129, 0.12);
+    --accent-sky: #38BDF8;
+    --accent-amber: #F59E0B;
+    --accent-crimson: #F43F5E;
+}
+
 /* Global Reset & Base */
-body {
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
     margin: 0;
-    background-color: #101827;
-    color: #F8FAFC;
-    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 0;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
-/* Ensure headings and titles are crisp white against dark backgrounds */
+/* Typography Hierarchy */
 h1, h2, h3, h4, h5, h6, .mantine-Title-root {
-    color: #F8FAFC !important;
-    letter-spacing: -0.3px;
+    color: var(--text-primary) !important;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin: 0;
 }
 
-/* Header */
-header {
-    color: #F8FAFC !important;
+p, span, div {
+    letter-spacing: -0.01em;
 }
 
-/* Sidebar navigation */
+/* AppShell Layout Surfaces */
+.mantine-AppShell-root {
+    background-color: var(--bg-canvas);
+}
+
+.mantine-AppShell-header {
+    background-color: var(--bg-sidebar) !important;
+    border-bottom: 1px solid var(--border-hairline) !important;
+    backdrop-filter: blur(12px);
+    z-index: 100;
+}
+
+.mantine-AppShell-navbar {
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border-hairline) !important;
+    padding: 16px 12px !important;
+}
+
+.mantine-AppShell-main {
+    background-color: var(--bg-canvas) !important;
+    min-height: 100vh;
+}
+
+/* Sleek Minimalist Sidebar Navigation */
 .mantine-NavLink-root {
-    color: #CBD5E1;
-    border-radius: 8px;
-    margin-bottom: 5px;
+    color: var(--text-secondary) !important;
+    border-radius: 6px !important;
+    margin-bottom: 3px !important;
+    padding: 8px 12px !important;
     font-size: 13px !important;
-    font-weight: 500;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: 500 !important;
+    letter-spacing: -0.01em !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    border-left: 2px solid transparent !important;
 }
 
 .mantine-NavLink-root:hover {
-    background-color: #263449;
-    color: #FFFFFF;
+    background-color: var(--bg-surface-hover) !important;
+    color: #FFFFFF !important;
 }
 
 .mantine-NavLink-root[data-active="true"] {
-    background-color: rgba(132, 204, 22, 0.16) !important;
-    color: #A3E635 !important;
+    background-color: var(--accent-emerald-dim) !important;
+    color: var(--accent-emerald-light) !important;
     font-weight: 600 !important;
-    border-left: 3px solid #84CC16 !important;
+    border-left: 2px solid var(--accent-emerald) !important;
 }
 
-/* Welcome panel and Alerts */
-.mantine-Alert-root {
-    background-color: #172438;
-    border: 1px solid #334155;
-    border-left: 3px solid #84CC16;
-    color: #F8FAFC;
+.mantine-NavLink-label {
+    font-size: 13px !important;
 }
 
-.mantine-Alert-title {
-    color: #A3E635;
-    font-weight: 600;
+/* Flat Architectural Cards */
+.mantine-Card-root {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s ease;
 }
 
-.mantine-Alert-message {
-    color: #CBD5E1;
-    font-size: 13px;
-    line-height: 1.5;
+.mantine-Card-root:hover {
+    border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
-/* Mantine Inputs (Select, TextInput, MultiSelect) */
+/* Input Fields (Linear / Raycast Style) */
 .mantine-Select-input,
 .mantine-TextInput-input,
-.mantine-MultiSelect-input {
-    background-color: #131E30 !important;
-    border: 1px solid #263449 !important;
-    color: #F8FAFC !important;
+.mantine-MultiSelect-input,
+.mantine-Textarea-input {
+    background-color: #090D14 !important;
+    border: 1px solid var(--border-hairline) !important;
+    color: var(--text-primary) !important;
     border-radius: 6px !important;
-    font-size: 13px !important;
-    font-family: Inter, sans-serif !important;
+    font-size: 12.5px !important;
+    font-family: inherit !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 10px !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-.mantine-Select-input:focus,
-.mantine-Select-input:focus-within,
-.mantine-TextInput-input:focus,
-.mantine-TextInput-input:focus-within,
-.mantine-MultiSelect-input:focus,
-.mantine-MultiSelect-input:focus-within {
-    border-color: #84CC16 !important;
-    box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.2) !important;
+.mantine-Textarea-input {
+    height: auto !important;
+    min-height: 60px !important;
+    padding: 8px 10px !important;
 }
 
-/* Dropdown popovers */
+.mantine-Select-input:focus,
+.mantine-TextInput-input:focus,
+.mantine-MultiSelect-input:focus,
+.mantine-Textarea-input:focus {
+    border-color: var(--accent-emerald) !important;
+    box-shadow: 0 0 0 1px var(--accent-emerald) !important;
+    outline: none !important;
+}
+
+/* Input Labels */
+.mantine-Select-label,
+.mantine-TextInput-label,
+.mantine-MultiSelect-label,
+.mantine-Textarea-label {
+    color: var(--text-secondary) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Dropdown Menus */
 .mantine-Select-dropdown,
 .mantine-MultiSelect-dropdown {
-    background-color: #172438 !important;
-    border: 1px solid #263449 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.7) !important;
+    background-color: #0F172A !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8) !important;
+    padding: 4px !important;
 }
 
 .mantine-Select-option,
 .mantine-MultiSelect-option {
-    color: #F8FAFC !important;
-    font-size: 13px !important;
+    color: var(--text-primary) !important;
+    font-size: 12.5px !important;
     border-radius: 4px !important;
-    transition: background-color 0.15s ease !important;
+    padding: 6px 10px !important;
+    transition: background-color 0.1s ease !important;
 }
 
 .mantine-Select-option:hover,
 .mantine-MultiSelect-option:hover {
-    background-color: #263449 !important;
+    background-color: var(--bg-surface-elevated) !important;
     color: #FFFFFF !important;
 }
 
 .mantine-Select-option[data-checked="true"],
 .mantine-MultiSelect-option[data-checked="true"] {
-    background-color: rgba(132, 204, 22, 0.18) !important;
-    color: #84CC16 !important;
+    background-color: var(--accent-emerald-dim) !important;
+    color: var(--accent-emerald-light) !important;
     font-weight: 600 !important;
 }
 
 /* MultiSelect Pills */
 .mantine-Pill-root {
-    background-color: #172438 !important;
-    border: 1px solid #263449 !important;
-    color: #F8FAFC !important;
-    font-size: 12px !important;
+    background-color: #1E293B !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-primary) !important;
+    font-size: 11.5px !important;
+    height: 22px !important;
+    border-radius: 4px !important;
 }
 
-/* Card Elevation & Surface Depth */
-.mantine-Card-root {
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45) !important;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
-}
-
-.mantine-Card-root:hover {
-    box-shadow: 0 8px 26px -2px rgba(0, 0, 0, 0.6) !important;
-}
-
-/* Tables: Sticky Headers & Tabular Numerics */
+/* Modern Edge-to-Edge Data Grid Tables */
 table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
@@ -142,80 +218,127 @@ thead th {
     position: sticky !important;
     top: 0 !important;
     z-index: 10 !important;
-    background-color: #131E30 !important;
+    background-color: var(--bg-surface) !important;
     font-weight: 600 !important;
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     text-transform: uppercase !important;
     letter-spacing: 0.6px !important;
-    border-bottom: 2px solid #263449 !important;
-    padding: 11px 12px !important;
-    color: #CBD5E1 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding: 10px 12px !important;
+    color: var(--text-secondary) !important;
 }
 
 td {
-    border-bottom: 1px solid #1E2D44 !important;
-    font-size: 13px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-size: 12.5px !important;
     padding: 9px 12px !important;
-    font-variant-numeric: tabular-nums !important;
+    color: var(--text-primary) !important;
 }
 
 tr:hover td {
-    background-color: rgba(38, 52, 73, 0.55) !important;
+    background-color: var(--bg-surface-hover) !important;
 }
 
-/* Tabular numbers for KPI Cards and Scores */
-.tabular-nums {
-    font-variant-numeric: tabular-nums !important;
+/* Segmented Control (Pill Switcher) */
+.mantine-SegmentedControl-root {
+    background-color: #090D14 !important;
+    border: 1px solid var(--border-hairline) !important;
+    padding: 2px !important;
+    border-radius: 6px !important;
+}
+
+.mantine-SegmentedControl-indicator {
+    background-color: var(--bg-surface-elevated) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mantine-SegmentedControl-label {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    padding: 4px 10px !important;
+}
+
+.mantine-SegmentedControl-label[data-active="true"] {
+    color: #FFFFFF !important;
+}
+
+/* Badges */
+.mantine-Badge-root {
+    font-family: inherit !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
 }
 
 /* Pagination */
 .mantine-Pagination-control {
-    background-color: #131E30 !important;
-    border: 1px solid #263449 !important;
-    color: #F8FAFC !important;
-    border-radius: 6px !important;
+    background-color: #090D14 !important;
+    border: 1px solid var(--border-hairline) !important;
+    color: var(--text-secondary) !important;
+    font-size: 12px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 4px !important;
+}
+
+.mantine-Pagination-control:hover {
+    background-color: var(--bg-surface-elevated) !important;
+    color: #FFFFFF !important;
 }
 
 .mantine-Pagination-control[data-active="true"] {
-    background-color: #84CC16 !important;
-    color: #101827 !important;
+    background-color: var(--accent-emerald) !important;
+    color: #090D14 !important;
     font-weight: 700 !important;
-    border-color: #84CC16 !important;
+    border-color: var(--accent-emerald) !important;
 }
 
 /* Sliders */
 .mantine-Slider-track {
-    background-color: #263449 !important;
+    background-color: #1E293B !important;
 }
 
 .mantine-Slider-bar {
-    background-color: #84CC16 !important;
+    background-color: var(--accent-emerald) !important;
 }
 
 .mantine-Slider-thumb {
-    border-color: #84CC16 !important;
+    border-color: var(--accent-emerald) !important;
+    background-color: #FFFFFF !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3) !important;
 }
 
-.mantine-Slider-markLabel {
-    color: #94A3B8 !important;
-    font-size: 11px !important;
+/* Alerts */
+.mantine-Alert-root {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-left: 3px solid var(--accent-emerald) !important;
+    border-radius: 6px !important;
 }
 
-/* Custom modern scrollbars */
+/* Minimalist Scrollbars */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #101827;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #263449;
-    border-radius: 3px;
+    background: #1E293B;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #84CC16;
+    background: var(--text-tertiary);
 }
