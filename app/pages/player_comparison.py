@@ -15,6 +15,7 @@ from app.utils.styling import (
     ATTRIBUTE_COLUMNS,
     create_page_header,
     create_section_card,
+    get_percentile_tier,
 )
 from app.utils.charts import build_radar_chart, build_comparison_bars, PLAYER_COMPARE_COLORS
 from app.utils.player_analysis import get_player_strengths_and_weaknesses
@@ -223,17 +224,17 @@ def update_comparison_views(selected_names):
             val = values_fn(p)
             if is_percentile:
                 num = float(val)
-                color = "#84CC16" if num >= 75 else "#38BDF8" if num >= 50 else "#F59E0B"
-                cells.append(dmc.TableTd(dmc.Text(f"{num:.1f}", fw=700, style={"color": color})))
+                tier_info = get_percentile_tier(num)
+                cells.append(dmc.TableTd(dmc.Text(f"{num:.1f}", fw=700, style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"})))
             else:
-                cells.append(dmc.TableTd(dmc.Text(str(val), fw=600 if is_header else 400, c="white")))
+                cells.append(dmc.TableTd(dmc.Text(str(val), fw=600 if is_header else 400, c="white", style={"fontVariantNumeric": "tabular-nums"})))
         return dmc.TableTr(cells)
 
     rows = [
         # Metadata
         make_row("Club / Squad", lambda p: p["Squad"]),
         make_row("Position Group", lambda p: p["Pos"]),
-        make_row("Nationality", lambda p: p["Nation_Clean"]),
+        make_row("Nationality", lambda p: p.get("Nation_Display", p["Nation_Clean"])),
         make_row("Age (Born)", lambda p: f"{p['Age']} ({p['Born']})"),
         make_row("Minutes Played", lambda p: f"{p['Min']:,}m"),
         make_row("Tactical Playing Style", lambda p: p.get("PlayingStyle_Name", "N/A"), is_header=True),
@@ -306,3 +307,4 @@ def update_comparison_views(selected_names):
     profiles_container = dmc.Grid(profile_cards, gap="md")
 
     return cross_pos_warning, radar_fig, bar_fig, stats_table, profiles_container
+

@@ -7,10 +7,11 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import dash
-from dash import Dash, html, dcc, Input, Output, _dash_renderer
+from dash import Dash, html, dcc, Input, Output, State, callback, _dash_renderer
 import dash_mantine_components as dmc
 
 from app.utils.styling import BG, PANEL, BORDER, TEXT, MUTED, ACCENT
+from app.utils.data_loader import get_all_player_names
 
 # Configure React 19 BEFORE creating Dash app
 _dash_renderer._set_react_version("19.2.4")
@@ -23,6 +24,8 @@ app = Dash(
     pages_folder=PAGES_FOLDER,
     suppress_callback_exceptions=True,
 )
+
+all_players = get_all_player_names()
 
 NAV_ITEMS = [
     {"label": "01   Overview", "path": "/", "id": "nav-overview"},
@@ -44,25 +47,45 @@ app.layout = dmc.MantineProvider(
     children=[
         dcc.Location(id="url", refresh="callback-nav"),
         dmc.AppShell(
-            [
-                # HEADER
+            id="app-shell",
+            children=[
+                # HEADER WITH MOBILE BURGER & QUICK SEARCH
                 dmc.AppShellHeader(
                     dmc.Group(
                         [
                             dmc.Group(
                                 [
+                                    dmc.Burger(
+                                        id="mobile-burger",
+                                        opened=False,
+                                        hiddenFrom="sm",
+                                        size="sm",
+                                        color="white",
+                                    ),
                                     dmc.Text("⚽", size="lg"),
                                     dmc.Text("SCOUT", fw=900, size="md", c="lime"),
-                                    dmc.Text("|", c="dimmed"),
-                                    dmc.Text("PLAYER SCOUTING & ANALYTICS PLATFORM", fw=600, size="xs", c="white"),
+                                    dmc.Text("|", c="dimmed", visibleFrom="sm"),
+                                    dmc.Text("FOOTBALL INTELLIGENCE", fw=600, size="xs", c="white", visibleFrom="md"),
                                 ],
                                 gap="xs",
                                 align="center",
                             ),
+
+                            # GLOBAL QUICK SEARCH
+                            dmc.Select(
+                                id="header-global-search",
+                                placeholder="⚡ Quick Player Search (Jump to Profile)...",
+                                data=[{"label": name, "value": name} for name in all_players],
+                                searchable=True,
+                                w={"base": 190, "sm": 280, "md": 340},
+                                size="xs",
+                                clearable=True,
+                            ),
+
                             dmc.Group(
                                 [
-                                    dmc.Badge("1,692 QUALIFIED PLAYERS", color="blue", variant="light", size="sm"),
-                                    dmc.Badge("2024–25 SEASON", color="lime", variant="light", size="sm"),
+                                    dmc.Badge("1,692 PLAYERS", color="blue", variant="light", size="sm", visibleFrom="md"),
+                                    dmc.Badge("2024–25", color="lime", variant="light", size="sm"),
                                 ],
                                 gap="xs",
                             ),
@@ -79,7 +102,7 @@ app.layout = dmc.MantineProvider(
                         dmc.Box(
                             [
                                 dmc.Title("SCOUT", order=2, c="lime"),
-                                dmc.Text("FOOTBALL INTELLIGENCE", size="xs", c="dimmed"),
+                                dmc.Text("PLAYER SCOUTING & ANALYTICS", size="xs", c="dimmed"),
                             ],
                             mb="md",
                         ),
@@ -103,10 +126,10 @@ app.layout = dmc.MantineProvider(
 
                         dmc.Divider(my="md", color=BORDER),
 
-                        # FOOTER INFO IN SIDEBAR
+                        # FOOTER METRIC NOTE
                         dmc.Box(
                             [
-                                dmc.Text("METRIC FRAMEWORK", size="xs", fw=700, c="dimmed", mb=4),
+                                dmc.Text("ANALYTICAL FRAMEWORK", size="xs", fw=700, c="dimmed", mb=4),
                                 dmc.Text("Position-relative percentiles benchmarked for players with ≥600 minutes.", size="xs", c="dimmed", style={"lineHeight": 1.4}),
                             ],
                             style={"marginTop": "auto"},
@@ -116,7 +139,7 @@ app.layout = dmc.MantineProvider(
                     p="md",
                 ),
 
-                # MAIN CONTENT CONTAINER (PAGES)
+                # MAIN CONTENT CONTAINER
                 dmc.AppShellMain(
                     dmc.Container(
                         dash.page_container,
@@ -153,6 +176,21 @@ app.layout = dmc.MantineProvider(
 )
 
 
+# Callback to toggle navbar on mobile
+@app.callback(
+    Output("app-shell", "navbar"),
+    Output("mobile-burger", "opened"),
+    Input("mobile-burger", "opened"),
+    State("app-shell", "navbar"),
+    prevent_initial_call=True,
+)
+def toggle_mobile_navbar(opened, navbar):
+    new_opened = not opened
+    navbar = navbar or {"width": 260, "breakpoint": "sm", "collapsed": {}}
+    navbar["collapsed"] = {"mobile": not new_opened}
+    return navbar, new_opened
+
+
 # Callback to highlight active NavLink based on current URL path
 @app.callback(
     [Output(item["id"], "active") for item in NAV_ITEMS],
@@ -162,7 +200,6 @@ def update_active_nav(pathname):
     if not pathname or pathname == "":
         pathname = "/"
 
-    # Normalize pathname
     active_flags = []
     for item in NAV_ITEMS:
         if item["path"] == "/":
@@ -170,11 +207,22 @@ def update_active_nav(pathname):
         else:
             active_flags.append(pathname.startswith(item["path"]))
 
-    # If none active (e.g. root redirect), default first to True
     if not any(active_flags):
         active_flags[0] = True
 
     return active_flags
+
+
+# Callback on global header search to jump to Player Profile
+@app.callback(
+    Output("url", "href"),
+    Input("header-global-search", "value"),
+    prevent_initial_call=True,
+)
+def jump_to_player_profile(selected_name):
+    if selected_name and str(selected_name).strip():
+        return f"/player-profile?player={selected_name}"
+    return dash.no_update
 
 
 if __name__ == "__main__":

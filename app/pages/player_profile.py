@@ -22,6 +22,7 @@ from app.utils.styling import (
     create_page_header,
     create_section_card,
     position_percentile_warning,
+    get_percentile_tier,
 )
 from app.utils.charts import build_radar_chart
 from app.utils.player_analysis import (
@@ -200,46 +201,57 @@ def update_player_profile(selected_name):
 
     # 1. Header Banner
     header = dmc.Card(
-        dmc.Group(
-            [
-                dmc.Box([
-                    dmc.Group(
-                        [
-                            dmc.Title(name, order=2, c="white"),
-                            dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="md"),
-                            dmc.Badge(f"Style: {style_name}", color="lime", variant="outline", size="md"),
-                        ],
-                        gap="sm",
-                        wrap="wrap",
-                    ),
-                    dmc.Group(
-                        [
-                            dmc.Text(f"Club: {club}", size="sm", fw=600, c="dimmed"),
-                            dmc.Text("•", c="dimmed"),
-                            dmc.Text(f"Nation: {nation}", size="sm", c="dimmed"),
-                            dmc.Text("•", c="dimmed"),
-                            dmc.Text(f"Age: {age} (Born {born})", size="sm", c="dimmed"),
-                            dmc.Text("•", c="dimmed"),
-                            dmc.Text(f"Minutes: {minutes:,}m", size="sm", c="dimmed"),
-                        ],
-                        gap="xs",
-                        mt=8,
-                        wrap="wrap",
-                    ),
-                ]),
-                dmc.Box([
-                    dmc.Text("PLAYING STYLE DNA", size="xs", fw=700, c="dimmed"),
-                    dmc.Title(style_name, order=3, c="lime", mt=4),
-                ]),
-            ],
-            justify="space-between",
-            align="center",
-            wrap="wrap",
-        ),
+        [
+            dmc.Breadcrumbs(
+                [
+                    dmc.Anchor("Scouting Overview", href="/", size="xs", c="dimmed", style={"textDecoration": "none"}),
+                    dmc.Anchor("Player Explorer", href="/player-explorer", size="xs", c="dimmed", style={"textDecoration": "none"}),
+                    dmc.Text(name, size="xs", fw=600, c="lime"),
+                ],
+                separator="›",
+                mb="sm",
+            ),
+            dmc.Group(
+                [
+                    dmc.Box([
+                        dmc.Group(
+                            [
+                                dmc.Title(name, order=2, c="white"),
+                                dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="md"),
+                                dmc.Badge(f"Style: {style_name}", color="lime", variant="outline", size="md"),
+                            ],
+                            gap="sm",
+                            wrap="wrap",
+                        ),
+                        dmc.Group(
+                            [
+                                dmc.Text(f"Club: {club}", size="sm", fw=600, c="dimmed"),
+                                dmc.Text("•", c="dimmed"),
+                                dmc.Text(f"Nation: {player.get('Nation_Display', nation)}", size="sm", c="dimmed"),
+                                dmc.Text("•", c="dimmed"),
+                                dmc.Text(f"Age: {age} (Born {born})", size="sm", c="dimmed"),
+                                dmc.Text("•", c="dimmed"),
+                                dmc.Text(f"Minutes: {minutes:,}m", size="sm", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
+                            ],
+                            gap="xs",
+                            mt=8,
+                            wrap="wrap",
+                        ),
+                    ]),
+                    dmc.Box([
+                        dmc.Text("PLAYING STYLE DNA", size="xs", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
+                        dmc.Title(style_name, order=3, c="lime", mt=4),
+                    ]),
+                ],
+                justify="space-between",
+                align="center",
+                wrap="wrap",
+            ),
+        ],
         withBorder=True,
         radius="md",
         p="lg",
-        style={"backgroundColor": PANEL, "borderColor": BORDER},
+        style={"backgroundColor": PANEL, "borderColor": BORDER, "boxShadow": "0 4px 20px -2px rgba(0,0,0,0.4)"},
     )
 
     # 2. Radar Chart
@@ -261,19 +273,9 @@ def update_player_profile(selected_name):
         pos_avg = item["position_avg"]
         diff = item["diff"]
 
-        # Status text & color
-        if score >= 80:
-            status = "Elite"
-            bar_color = "lime"
-        elif score >= 60:
-            status = "Strong"
-            bar_color = "teal"
-        elif score >= 40:
-            status = "Average"
-            bar_color = "blue"
-        else:
-            status = "Developing"
-            bar_color = "orange"
+        tier_info = get_percentile_tier(score)
+        status = tier_info["tier"]
+        bar_color = tier_info["badge_color"]
 
         diff_str = f"+{diff:.1f}" if diff > 0 else f"{diff:.1f}"
         diff_color = "#84CC16" if diff >= 0 else "#F59E0B"
@@ -287,8 +289,17 @@ def update_player_profile(selected_name):
                             dmc.Group(
                                 [
                                     dmc.Badge(status, color=bar_color, variant="light", size="xs"),
-                                    dmc.Text(f"{score:.1f}th pct", size="sm", fw=700, c="white"),
-                                    dmc.Text(f"({diff_str} vs avg)", size="xs", style={"color": diff_color}),
+                                    dmc.Text(
+                                        f"{score:.1f}th pct",
+                                        size="sm",
+                                        fw=700,
+                                        style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"},
+                                    ),
+                                    dmc.Text(
+                                        f"({diff_str} vs avg)",
+                                        size="xs",
+                                        style={"color": diff_color, "fontVariantNumeric": "tabular-nums"},
+                                    ),
                                 ],
                                 gap="xs",
                             ),
@@ -396,3 +407,4 @@ def update_player_profile(selected_name):
     similar_url = f"/similar-players?player={selected_name}"
 
     return header, radar_fig, attributes_breakdown, scouting_summary, stats_grid, compare_url, similar_url
+

@@ -16,6 +16,7 @@ from app.utils.styling import (
     ATTRIBUTE_COLUMNS,
     create_page_header,
     create_section_card,
+    get_percentile_tier,
 )
 from app.utils.charts import build_pca_cluster_scatter, build_cluster_dna_radar
 
@@ -302,11 +303,11 @@ def update_playing_styles(pos, cluster_filter):
                 dmc.TableTd(dmc.Badge(r.get("PlayingStyle_Name", f"Cluster {c_id}"), color=color, variant="light", size="xs")),
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", c="white")),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"]})),
                 dmc.TableTd(
                     dcc.Link(
                         dmc.Button("Profile →", size="xs", variant="light", color="lime"),
@@ -327,3 +328,4 @@ def update_playing_styles(pos, cluster_filter):
     )
 
     return cards_container, pca_fig, radar_fig, summary_table, roster_table
+

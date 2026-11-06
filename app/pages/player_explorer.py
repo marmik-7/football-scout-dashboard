@@ -15,6 +15,7 @@ from app.utils.styling import (
     ATTRIBUTE_COLUMNS,
     create_page_header,
     create_section_card,
+    get_percentile_tier,
 )
 
 dash.register_page(__name__, path="/player-explorer", name="Player Explorer", order=2)
@@ -334,24 +335,24 @@ def update_explorer_table(search, pos, squad, nation, sort_attr, sort_order, min
         ])
     )
 
-    # Function to color badge or text by score
-    def score_color(val):
-        if val >= 80:
-            return "#84CC16"  # Lime
-        if val >= 60:
-            return "#38BDF8"  # Cyan
-        if val >= 40:
-            return "#94A3B8"  # Muted
-        return "#F59E0B"      # Amber
-
     # Table Rows
     rows = []
     for _, r in page_df.iterrows():
         pos_badge_color = "blue" if r["Pos"] == "DF" else "lime" if r["Pos"] == "MF" else "orange"
         ga = int(r.get("Gls", 0) + r.get("Ast", 0))
+        nat_display = r.get("Nation_Display", r["Nation_Clean"])
 
         # View profile link passing query parameter
         profile_url = f"/player-profile?player={r['Player_Unique']}"
+
+        def render_score(score_val):
+            tier_info = get_percentile_tier(score_val)
+            return dmc.Text(
+                f"{score_val:.1f}",
+                size="xs",
+                fw=700,
+                style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"},
+            )
 
         rows.append(
             dmc.TableTr([
@@ -360,17 +361,17 @@ def update_explorer_table(search, pos, squad, nation, sort_attr, sort_order, min
                 ),
                 dmc.TableTd(dmc.Text(r["Squad"], size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
-                dmc.TableTd(dmc.Text(r["Nation_Clean"], size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Text(f"{r['Min']:,}", size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white")),
+                dmc.TableTd(dmc.Text(nat_display, size="xs", c="white")),
+                dmc.TableTd(dmc.Text(f"{r['Min']:,}", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})),
 
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['Finishing_Score'])})),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['Creativity_Score'])})),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['Passing_Score'])})),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['Progression_Score'])})),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['Defending_Score'])})),
-                dmc.TableTd(dmc.Text(f"{r['BallSecurity_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['BallSecurity_Score'])})),
-                dmc.TableTd(dmc.Text(f"{r['Aerial_Score']:.1f}", size="xs", fw=600, style={"color": score_color(r['Aerial_Score'])})),
+                dmc.TableTd(render_score(r['Finishing_Score'])),
+                dmc.TableTd(render_score(r['Creativity_Score'])),
+                dmc.TableTd(render_score(r['Passing_Score'])),
+                dmc.TableTd(render_score(r['Progression_Score'])),
+                dmc.TableTd(render_score(r['Defending_Score'])),
+                dmc.TableTd(render_score(r['BallSecurity_Score'])),
+                dmc.TableTd(render_score(r['Aerial_Score'])),
 
                 dmc.TableTd(
                     dcc.Link(
@@ -399,3 +400,4 @@ def update_explorer_table(search, pos, squad, nation, sort_attr, sort_order, min
     )
 
     return table, count_text, total_pages
+

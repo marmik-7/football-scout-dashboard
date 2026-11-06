@@ -327,9 +327,7 @@ def update_overview_top_players(position, attribute):
         .copy()
     )
 
-    top_players["Nation_Clean"] = top_players["Nation"].fillna("N/A").apply(
-        lambda x: x.split()[-1] if x != "N/A" and str(x).strip() else "N/A"
-    )
+    nat_col = "Nation_Display" if "Nation_Display" in top_players.columns else "Nation_Clean"
 
     fig = go.Figure(
         go.Bar(
@@ -340,7 +338,7 @@ def update_overview_top_players(position, attribute):
             text=top_players[column].apply(lambda v: f"{v:.1f}"),
             textposition="outside",
             cliponaxis=False,
-            customdata=top_players[["Player", "Squad", "Pos", "Nation_Clean"]].values,
+            customdata=top_players[["Player", "Squad", "Pos", nat_col]].values,
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
                 "Percentile Score: <b>%{x:.1f}</b><br>"
@@ -373,3 +371,4 @@ def update_overview_top_players(position, attribute):
     )
 
     return fig, notice
+

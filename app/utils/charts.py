@@ -55,11 +55,13 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
         )
 
     # Add each player trace
+    multi_player = len(players) >= 3
     for i, p in enumerate(players):
         color = PLAYER_COMPARE_COLORS[i % len(PLAYER_COMPARE_COLORS)]
         values = [float(p[ATTRIBUTE_COLUMNS[c]]) for c in categories]
         values_closed = values + [values[0]]
         player_label = p.get("Player_Unique", p.get("Player", f"Player {i+1}"))
+        fill_opacity = 0.04 if multi_player else 0.18
 
         fig.add_trace(
             go.Scatterpolar(
@@ -67,8 +69,8 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
                 theta=categories_closed,
                 fill="toself",
                 name=player_label,
-                line=dict(color=color, width=2.2),
-                fillcolor=f"rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.18)",
+                line=dict(color=color, width=2.4),
+                fillcolor=f"rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, {fill_opacity})",
                 hovertemplate=f"<b>{player_label}</b><br>%{{theta}}: <b>%{{r:.1f}}</b><extra></extra>",
             )
         )
@@ -205,18 +207,21 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", height=480):
     fig = style_figure(fig, height=height)
     fig.update_layout(
         title=dict(
-            text=f"2D PCA Projection — {pos} Playing Styles",
+            text=f"2D PCA Tactical Space — {pos} Playing Styles",
             font=dict(color=TEXT, size=15),
-            subtitle=dict(text="Clustered using K-Means on the 7 core scouting dimensions", font=dict(color=MUTED, size=11)),
+            subtitle=dict(
+                text="Decomposition: PC1 captures defensive duel work vs forward progression; PC2 separates box threat from build-up play",
+                font=dict(color=MUTED, size=11),
+            ),
         ),
         xaxis=dict(
-            title=dict(text="Principal Component 1 (PC1)", font=dict(color=MUTED, size=11)),
+            title=dict(text="PC1 — [← Defensive & Duel Solidity | Attacking Progression & Creation →]", font=dict(color=MUTED, size=11)),
             gridcolor=BORDER,
             zerolinecolor=BORDER,
             tickfont=dict(color=MUTED),
         ),
         yaxis=dict(
-            title=dict(text="Principal Component 2 (PC2)", font=dict(color=MUTED, size=11)),
+            title=dict(text="PC2 — [← Direct Goal Threat | Controlled Possession & Distribution ↑]", font=dict(color=MUTED, size=11)),
             gridcolor=BORDER,
             zerolinecolor=BORDER,
             tickfont=dict(color=MUTED),

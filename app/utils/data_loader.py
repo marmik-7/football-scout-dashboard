@@ -22,6 +22,31 @@ CLUSTER_NAMES = {
     ("FW", 3): "Dynamic Inverted Creator",
 }
 
+# IOC / FIFA 3-letter country code to Flag emoji mapping
+COUNTRY_FLAGS = {
+    "ESP": "🇪🇸", "FRA": "🇫🇷", "GER": "🇩🇪", "ENG": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "ITA": "🇮🇹", "BRA": "🇧🇷",
+    "ARG": "🇦🇷", "NED": "🇳🇱", "POR": "🇵🇹", "BEL": "🇧🇪", "DEN": "🇩🇰", "MAR": "🇲🇦",
+    "CIV": "🇨🇮", "AUT": "🇦🇹", "SEN": "🇸🇳", "CRO": "🇭🇷", "NGA": "🇳🇬", "SWE": "🇸🇪",
+    "SUI": "🇨🇭", "ALG": "🇩🇿", "USA": "🇺🇸", "NOR": "🇳🇴", "GHA": "🇬🇭", "MLI": "🇲🇱",
+    "URU": "🇺🇾", "SRB": "🇷🇸", "JPN": "🇯🇵", "SCO": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "CMR": "🇨🇲", "COL": "🇨🇴",
+    "POL": "🇵🇱", "WAL": "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "IRL": "🇮🇪", "CZE": "🇨🇿", "GRE": "🇬🇷", "HUN": "🇭🇺",
+    "TUR": "🇹🇷", "GUI": "🇬🇳", "ALB": "🇦🇱", "CAN": "🇨🇦", "UKR": "🇺🇦", "SVN": "🇸🇮",
+    "SVK": "🇸🇰", "TUN": "🇹🇳", "KOR": "🇰🇷", "MEX": "🇲🇽", "CHI": "🇨🇱", "ECU": "🇪🇨",
+    "PAR": "🇵🇾", "ROU": "🇷🇴", "BIH": "🇧🇦", "GEO": "🇬🇪", "EGY": "🇪🇬", "BFA": "🇧🇫",
+    "COD": "🇨🇩", "GAB": "🇬🇦", "JAM": "🇯🇲", "AUS": "🇦🇺", "VEN": "🇻🇪", "KOS": "🇽🇰",
+    "MNE": "🇲🇪", "MKD": "🇲🇰", "NIR": "🇬🇧", "ISL": "🇮🇸", "FIN": "🇫🇮", "ISR": "🇮🇱",
+}
+
+def format_nation_flag(nation_code):
+    """
+    Returns country code with its corresponding national flag emoji.
+    """
+    if not nation_code or nation_code == "N/A":
+        return "N/A"
+    flag = COUNTRY_FLAGS.get(str(nation_code).strip(), "🌐")
+    return f"{flag} {nation_code}"
+
+
 _CACHED_DF = None
 _CACHED_SUMMARY = None
 
@@ -43,6 +68,8 @@ def load_data():
         lambda x: x.split()[-1] if x != "Unknown" and str(x).strip() else "N/A"
     )
 
+    nation_display = nation_clean.apply(format_nation_flag)
+
     # Disambiguate duplicate player names by appending club in parentheses
     name_counts = df["Player"].value_counts()
     dup_names = set(name_counts[name_counts > 1].index)
@@ -60,6 +87,7 @@ def load_data():
     # Batch assign to avoid DataFrame fragmentation warning
     df = df.assign(
         Nation_Clean=nation_clean,
+        Nation_Display=nation_display,
         Player_Unique=player_unique,
         PlayingStyle_Name=cluster_names,
         Age=pd.to_numeric(df["Age"], errors="coerce").fillna(0).astype(int),

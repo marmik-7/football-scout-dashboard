@@ -47,6 +47,36 @@ CLUSTER_COLORS = [
 
 
 # --------------------------------------------------
+# STANDARDIZED 5-TIER SCOUTING SCALE
+# --------------------------------------------------
+
+def get_percentile_tier(score):
+    """
+    Standardized 5-tier professional scouting color classification:
+    - 90–100: Elite (#84CC16 / Lime)
+    - 75–89:  Strong (#38BDF8 / Cyan)
+    - 50–74:  Average (#94A3B8 / Slate)
+    - 25–49:  Developing (#F59E0B / Amber)
+    - 0–24:   Concern (#EF4444 / Rose Red)
+    """
+    try:
+        val = float(score)
+    except (TypeError, ValueError):
+        val = 50.0
+
+    if val >= 90:
+        return {"tier": "Elite", "color": "#84CC16", "badge_color": "lime"}
+    elif val >= 75:
+        return {"tier": "Strong", "color": "#38BDF8", "badge_color": "teal"}
+    elif val >= 50:
+        return {"tier": "Average", "color": "#94A3B8", "badge_color": "blue"}
+    elif val >= 25:
+        return {"tier": "Developing", "color": "#F59E0B", "badge_color": "orange"}
+    else:
+        return {"tier": "Concern", "color": "#EF4444", "badge_color": "red"}
+
+
+# --------------------------------------------------
 # CHART STYLING HELPER
 # --------------------------------------------------
 
@@ -120,12 +150,18 @@ def create_page_header(title, subtitle=None, badge_text=None):
 
 def create_metric_card(title, value, description=None, color=None):
     """
-    Creates a KPI metric card with consistent styling.
+    Creates an elevated KPI metric card with consistent styling and tabular numerals.
     """
     return dmc.Card(
         children=[
-            dmc.Text(title.upper(), size="xs", fw=700, c="dimmed"),
-            dmc.Title(str(value), order=2, mt=8, c=color if color else "white"),
+            dmc.Text(title.upper(), size="xs", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
+            dmc.Title(
+                str(value),
+                order=2,
+                mt=8,
+                c=color if color else "white",
+                style={"fontVariantNumeric": "tabular-nums"},
+            ),
             dmc.Text(description, size="xs", c="dimmed", mt=4) if description else html.Div(),
         ],
         withBorder=True,
@@ -135,13 +171,14 @@ def create_metric_card(title, value, description=None, color=None):
             "backgroundColor": PANEL,
             "borderColor": BORDER,
             "height": "100%",
+            "boxShadow": "0 4px 20px -2px rgba(0, 0, 0, 0.4)",
         },
     )
 
 
 def create_section_card(children, title=None, subtitle=None, extra_header=None, style=None):
     """
-    Creates a container card for a chart or section.
+    Creates an elevated container card with subtle depth shadow.
     """
     card_children = []
 
@@ -165,6 +202,7 @@ def create_section_card(children, title=None, subtitle=None, extra_header=None, 
     base_style = {
         "backgroundColor": PANEL,
         "borderColor": BORDER,
+        "boxShadow": "0 4px 20px -2px rgba(0, 0, 0, 0.4)",
     }
     if style:
         base_style.update(style)
@@ -188,7 +226,7 @@ def position_percentile_warning():
         color="yellow",
         variant="light",
         radius="md",
-        p="xs",
+        p="sm",
         style={
             "backgroundColor": "rgba(245, 158, 11, 0.08)",
             "borderColor": "rgba(245, 158, 11, 0.25)",

@@ -3,12 +3,14 @@ body {
     margin: 0;
     background-color: #101827;
     color: #F8FAFC;
-    font-family: Inter, sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Ensure headings and titles are crisp white against dark backgrounds */
 h1, h2, h3, h4, h5, h6, .mantine-Title-root {
     color: #F8FAFC !important;
+    letter-spacing: -0.3px;
 }
 
 /* Header */
@@ -21,6 +23,8 @@ header {
     color: #CBD5E1;
     border-radius: 8px;
     margin-bottom: 5px;
+    font-size: 13px !important;
+    font-weight: 500;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -30,9 +34,10 @@ header {
 }
 
 .mantine-NavLink-root[data-active="true"] {
-    background-color: rgba(132, 204, 22, 0.15) !important;
+    background-color: rgba(132, 204, 22, 0.16) !important;
     color: #A3E635 !important;
     font-weight: 600 !important;
+    border-left: 3px solid #84CC16 !important;
 }
 
 /* Welcome panel and Alerts */
@@ -45,10 +50,13 @@ header {
 
 .mantine-Alert-title {
     color: #A3E635;
+    font-weight: 600;
 }
 
 .mantine-Alert-message {
     color: #CBD5E1;
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 /* Mantine Inputs (Select, TextInput, MultiSelect) */
@@ -61,6 +69,7 @@ header {
     border-radius: 6px !important;
     font-size: 13px !important;
     font-family: Inter, sans-serif !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
 .mantine-Select-input:focus,
@@ -70,6 +79,7 @@ header {
 .mantine-MultiSelect-input:focus,
 .mantine-MultiSelect-input:focus-within {
     border-color: #84CC16 !important;
+    box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.2) !important;
 }
 
 /* Dropdown popovers */
@@ -78,7 +88,7 @@ header {
     background-color: #172438 !important;
     border: 1px solid #263449 !important;
     border-radius: 8px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.7) !important;
 }
 
 .mantine-Select-option,
@@ -97,7 +107,7 @@ header {
 
 .mantine-Select-option[data-checked="true"],
 .mantine-MultiSelect-option[data-checked="true"] {
-    background-color: rgba(132, 204, 22, 0.15) !important;
+    background-color: rgba(132, 204, 22, 0.18) !important;
     color: #84CC16 !important;
     font-weight: 600 !important;
 }
@@ -107,31 +117,55 @@ header {
     background-color: #172438 !important;
     border: 1px solid #263449 !important;
     color: #F8FAFC !important;
+    font-size: 12px !important;
 }
 
-/* Tables */
+/* Card Elevation & Surface Depth */
+.mantine-Card-root {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45) !important;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.mantine-Card-root:hover {
+    box-shadow: 0 8px 26px -2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Tables: Sticky Headers & Tabular Numerics */
 table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
     width: 100% !important;
+    font-variant-numeric: tabular-nums !important;
 }
 
-th {
+thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
     background-color: #131E30 !important;
     font-weight: 600 !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-    border-bottom: 1px solid #263449 !important;
+    letter-spacing: 0.6px !important;
+    border-bottom: 2px solid #263449 !important;
+    padding: 11px 12px !important;
+    color: #CBD5E1 !important;
 }
 
 td {
     border-bottom: 1px solid #1E2D44 !important;
     font-size: 13px !important;
+    padding: 9px 12px !important;
+    font-variant-numeric: tabular-nums !important;
 }
 
 tr:hover td {
-    background-color: rgba(38, 52, 73, 0.45) !important;
+    background-color: rgba(38, 52, 73, 0.55) !important;
+}
+
+/* Tabular numbers for KPI Cards and Scores */
+.tabular-nums {
+    font-variant-numeric: tabular-nums !important;
 }
 
 /* Pagination */
@@ -139,12 +173,14 @@ tr:hover td {
     background-color: #131E30 !important;
     border: 1px solid #263449 !important;
     color: #F8FAFC !important;
+    border-radius: 6px !important;
 }
 
 .mantine-Pagination-control[data-active="true"] {
     background-color: #84CC16 !important;
     color: #101827 !important;
     font-weight: 700 !important;
+    border-color: #84CC16 !important;
 }
 
 /* Sliders */

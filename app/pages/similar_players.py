@@ -20,6 +20,7 @@ from app.utils.styling import (
     ATTRIBUTE_COLUMNS,
     create_page_header,
     create_section_card,
+    get_percentile_tier,
 )
 from app.utils.similarity import find_similar_players
 from app.utils.charts import build_radar_chart
@@ -204,7 +205,7 @@ def update_similar_players(ref_name, pos_filter, club_filter, top_n):
                             dmc.Group(
                                 [
                                     dmc.Badge(ref_player["Pos"], color=ref_pos_color, variant="filled", size="xs"),
-                                    dmc.Text(f"{ref_player['Squad']} • {ref_player['Nation_Clean']}", size="xs", c="dimmed"),
+                                    dmc.Text(f"{ref_player['Squad']} • {ref_player.get('Nation_Display', ref_player['Nation_Clean'])}", size="xs", c="dimmed"),
                                     dmc.Text(f"Min: {ref_player['Min']:,}m", size="xs", c="dimmed"),
                                 ],
                                 gap="xs",
@@ -230,7 +231,7 @@ def update_similar_players(ref_name, pos_filter, club_filter, top_n):
                             dmc.Group(
                                 [
                                     dmc.Badge(best_match["Pos"], color=match_pos_color, variant="filled", size="xs"),
-                                    dmc.Text(f"{best_match['Squad']} • {best_match['Nation_Clean']}", size="xs", c="dimmed"),
+                                    dmc.Text(f"{best_match['Squad']} • {best_match.get('Nation_Display', best_match['Nation_Clean'])}", size="xs", c="dimmed"),
                                     dmc.Text(f"Min: {best_match['Min']:,}m", size="xs", c="dimmed"),
                                 ],
                                 gap="xs",
@@ -330,19 +331,19 @@ def update_similar_players(ref_name, pos_filter, club_filter, top_n):
                 dmc.TableTd(dmc.Text(r["Player"], size="sm", fw=600, c="white")),
                 dmc.TableTd(dmc.Text(r["Squad"], size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
-                dmc.TableTd(dmc.Text(r["Nation_Clean"], size="xs", c="dimmed")),
+                dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
                 dmc.TableTd(
                     dmc.Badge(f"{sim_pct:.1f}%", style={"backgroundColor": "rgba(23, 36, 56, 0.9)", "color": sim_color, "border": f"1px solid {sim_color}"}, size="sm")
                 ),
                 dmc.TableTd(dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="xs", c="dimmed")),
 
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['BallSecurity_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Aerial_Score']:.1f}", size="xs", c="white")),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['BallSecurity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['BallSecurity_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Aerial_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Aerial_Score'])["color"]})),
 
                 dmc.TableTd(
                     dcc.Link(
@@ -365,3 +366,4 @@ def update_similar_players(ref_name, pos_filter, club_filter, top_n):
     )
 
     return banner, radar_fig, methodology, table
+

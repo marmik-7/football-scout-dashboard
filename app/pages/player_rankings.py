@@ -21,6 +21,7 @@ from app.utils.styling import (
     create_page_header,
     create_section_card,
     style_figure,
+    get_percentile_tier,
 )
 
 dash.register_page(__name__, path="/player-rankings", name="Rankings", order=7)
@@ -239,6 +240,8 @@ def update_rankings(pos, attr, depth, order, squad):
     chart_height = max(420, min(850, len(chart_candidates) * 28 + 120))
     chart_title = f"Top {len(chart_candidates)} {pos_display} — {attr}"
 
+    nat_col = "Nation_Display" if "Nation_Display" in chart_candidates.columns else "Nation_Clean"
+
     fig = go.Figure(
         go.Bar(
             x=chart_candidates[col],
@@ -248,7 +251,7 @@ def update_rankings(pos, attr, depth, order, squad):
             text=chart_candidates[col].apply(lambda v: f"{v:.1f}"),
             textposition="outside",
             cliponaxis=False,
-            customdata=chart_candidates[["Player", "Squad", "Pos", "Nation_Clean", "Min"]].values,
+            customdata=chart_candidates[["Player", "Squad", "Pos", nat_col, "Min"]].values,
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
                 "Percentile Score: <b>%{x:.1f}</b><br>"
@@ -305,6 +308,7 @@ def update_rankings(pos, attr, depth, order, squad):
     for rank, (_, r) in enumerate(top_candidates.iterrows(), start=1):
         pos_badge_color = "blue" if r["Pos"] == "DF" else "lime" if r["Pos"] == "MF" else "orange"
         target_score = r[col]
+        tier = get_percentile_tier(target_score)
         profile_url = f"/player-profile?player={r['Player_Unique']}"
 
         rows.append(
@@ -313,16 +317,16 @@ def update_rankings(pos, attr, depth, order, squad):
                 dmc.TableTd(dmc.Text(r["Player"], fw=600, c="white")),
                 dmc.TableTd(dmc.Text(r["Squad"], size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
-                dmc.TableTd(dmc.Text(r["Nation_Clean"], size="xs", c="dimmed")),
+                dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="sm", fw=700, c="lime")),
+                dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="sm", fw=700, style={"color": tier["color"]})),
                 dmc.TableTd(dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="xs", c="dimmed")),
 
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", c="white")),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"]})),
 
                 dmc.TableTd(
                     dcc.Link(
@@ -345,3 +349,4 @@ def update_rankings(pos, attr, depth, order, squad):
     )
 
     return notice, fig, table
+
