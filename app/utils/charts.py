@@ -232,12 +232,12 @@ def build_pizza_chart(player, height=400):
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.22,
+            y=-0.16,
             xanchor="center",
             x=0.5,
-            font=dict(color=TEXT, size=11),
+            font=dict(color=TEXT, size=10),
         ),
-        margin=dict(l=45, r=45, t=30, b=45),
+        margin=dict(l=40, r=40, t=30, b=35),
     )
     return fig
 
@@ -488,7 +488,7 @@ def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420):
     fig = style_figure(fig, height=height)
     fig.update_layout(
         polar=dict(
-            bgcolor="rgba(19, 30, 48, 0.7)",
+            bgcolor="rgba(15, 23, 42, 0.4)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],

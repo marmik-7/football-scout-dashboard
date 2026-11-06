@@ -170,6 +170,7 @@ def layout(player=None, **kwargs):
                                     id="profile-radar-chart",
                                     config={"displayModeBar": False},
                                     responsive=True,
+                                    style={"height": "410px", "width": "100%"},
                                 ),
                                 dmc.Space(h=8),
                                 html.Div(
@@ -355,7 +356,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             players=[player],
             include_position_avg=True,
             position_avg_scores=pos_avgs,
-            height=370,
+            height=410,
         )
         chart_note = dmc.Text(
             "7-Dimensional Scouting Radar: Dashed grey line represents position peer group average (50.0 baseline).",
@@ -364,7 +365,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             mt=4,
         )
     else:
-        chart_fig = build_pizza_chart(player, height=390)
+        chart_fig = build_pizza_chart(player, height=410)
         chart_note = dmc.Text(
             "12-Slice Percentile Pizza: Uniform angular wedges grouped by Attacking, Possession, and Defending.",
             size="xs",

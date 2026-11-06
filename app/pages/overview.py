@@ -194,7 +194,7 @@ layout = dmc.Container(
             [
                 dmc.GridCol(
                     create_section_card(
-                        dcc.Graph(figure=position_fig, config={"displayModeBar": False}, responsive=True),
+                        dcc.Graph(figure=position_fig, config={"displayModeBar": False}, responsive=True, style={"height": "320px"}),
                         title="Position Balance",
                         subtitle="Player distribution across positional cohorts",
                     ),
@@ -202,9 +202,9 @@ layout = dmc.Container(
                 ),
                 dmc.GridCol(
                     create_section_card(
-                        dcc.Graph(figure=attribute_box_fig, config={"displayModeBar": False}, responsive=True),
+                        dcc.Graph(figure=attribute_box_fig, config={"displayModeBar": False}, responsive=True, style={"height": "320px"}),
                         title="Scouting Attribute Distributions",
-                        subtitle="Quartiles ($Q_1$, median, $Q_3$) across all 7 scouting dimensions",
+                        subtitle="Quartiles (Q1, Median, Q3) across all 7 scouting dimensions",
                     ),
                     span={"base": 12, "md": 7},
                 ),

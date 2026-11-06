@@ -183,6 +183,7 @@ def layout(player=None, **kwargs):
                                 id="similar-radar-chart",
                                 config={"displayModeBar": False},
                                 responsive=True,
+                                style={"height": "380px", "width": "100%"},
                             ),
                             title="Reference vs Closest Match Radar",
                             subtitle="Direct 7D fingerprint comparison between reference and top statistical twin",
