@@ -118,21 +118,41 @@ def run_full_scout_test_suite():
     print("PASS: Player Explorer Callback")
 
     print("\n=== TEST 6: Player Profile Callback with Pizza & Radar Views ===")
-    # Default: Percentile Pizza mode
-    res_prof_pizza = player_profile.update_player_profile("Erling Haaland", metric_mode="per90", chart_type="pizza")
-    assert len(res_prof_pizza) == 8
-    assert res_prof_pizza[0] is not None
-    assert res_prof_pizza[1] is not None  # Pizza Chart Figure
-    assert res_prof_pizza[2] is not None  # Chart note
-    assert len(res_prof_pizza[1].data) == 3  # 3 polar traces (Attacking, Possession, Defending)
+    # 1. Scout View (Role-Tailored metrics & Recruitment Assessment)
+    res_prof_scout = player_profile.update_player_profile("Erling Haaland", metric_mode="per90", chart_type="pizza", scout_analyst_mode="scout")
+    assert len(res_prof_scout) == 8
+    assert res_prof_scout[0] is not None
+    assert res_prof_scout[1] is not None  # Pizza Chart Figure
+    assert res_prof_scout[2] is not None  # Chart note
+    assert len(res_prof_scout[1].data) == 3  # 3 polar traces (Attacking, Possession, Defending)
+    
+    # Verify Scout View recruitment suitability assessment and role metrics
+    scouting_summary_str = str(res_prof_scout[4])
+    assert "RECRUITMENT SUITABILITY ASSESSMENT" in scouting_summary_str
+    assert "Statistical Attractions" in scouting_summary_str
+    assert "Recommended Next Scouting Steps" in scouting_summary_str
+    assert "NOTICE: This assessment is an automated statistical synthesis" in scouting_summary_str
+    
+    stats_grid_scout_str = str(res_prof_scout[5])
+    assert "ROLE-TAILORED METRICS" in stats_grid_scout_str
+    assert "Center Forward" in stats_grid_scout_str
 
-    # Radar mode
-    res_prof_radar = player_profile.update_player_profile("William Saliba", metric_mode="total", chart_type="radar")
-    assert len(res_prof_radar) == 8
-    assert res_prof_radar[0] is not None
-    assert res_prof_radar[1] is not None  # Radar Figure
-    assert len(res_prof_radar[1].data) >= 1
-    print("PASS: Player Profile Callback (Pizza & Radar)")
+    # 2. Analyst View (Comprehensive 15-item matrix)
+    res_prof_analyst = player_profile.update_player_profile("William Saliba", metric_mode="total", chart_type="radar", scout_analyst_mode="analyst")
+    assert len(res_prof_analyst) == 8
+    assert res_prof_analyst[0] is not None
+    assert res_prof_analyst[1] is not None  # Radar Figure
+    assert len(res_prof_analyst[1].data) >= 1
+    stats_grid_analyst_str = str(res_prof_analyst[5])
+    assert "pAdj Defending Actions" in stats_grid_analyst_str or "PADJ" in stats_grid_analyst_str
+
+    # 3. Low-Minutes Player Sample-Size Warning (<900m)
+    df_all = load_data()
+    low_min_player = df_all[df_all["Min"] < 800].iloc[0]["Player"]
+    res_prof_low = player_profile.update_player_profile(low_min_player, metric_mode="per90", chart_type="pizza", scout_analyst_mode="scout")
+    assert "Limited Sample" in str(res_prof_low[0]) or "Limited" in str(res_prof_low[4])
+    print(f" - Low minutes test verified for {low_min_player} (<900m sample warning badge present)")
+    print("PASS: Player Profile Callback (Scout, Analyst, Pizza, Radar & Sample Size)")
 
     print("\n=== TEST 7: Player Comparison Delta Calculation & Export ===")
     warn, rad, bar, stats_tbl, profs = player_comparison.update_comparison_views(
