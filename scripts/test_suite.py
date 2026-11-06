@@ -281,18 +281,40 @@ def run_full_scout_test_suite():
     assert len(opts) > 50
     assert default_val == "NONE"
 
-    # 2. Test PCA Scatter with highlighted target
+    # 2. Test PCA Scatter with highlighted target and Scout View
     cards_ui, pca_fig, dna_fig, tbl_ui, roster_ui = playing_styles.update_playing_styles(
         pos="FW",
         cluster_filter="ALL",
         locator_player="Erling Haaland",
+        scout_analyst_mode="scout",
     )
     assert pca_fig is not None
+    # Verify PCA axes titles are mathematically honest without fake subjective labels
+    xaxis_title = pca_fig.layout.xaxis.title.text
+    yaxis_title = pca_fig.layout.yaxis.title.text
+    assert "Principal Component 1" in xaxis_title
+    assert "Principal Component 2" in yaxis_title
+    assert "Defensive & Duel Solidity" not in xaxis_title  # Verified no fake axis definitions
+
     # Verify highlight traces (halo + diamond marker + annotations)
     trace_names = [tr.name for tr in pca_fig.data]
     assert any("Erling Haaland" in str(n) for n in trace_names), "Expected player pin trace in PCA plot!"
     print(" - Highlight pin and annotation verified for Erling Haaland in 2D PCA Space")
-    print("PASS: Tactical Playing Styles & 2D PCA Locator")
+
+    # Verify cluster cards contain empirical archetype names and anchors
+    cards_str = str(cards_ui)
+    assert "EMPIRICAL FW TACTICAL ARCHETYPES" in cards_str
+    assert "Aerial Target Man" in cards_str
+    assert "Anchors:" in cards_str
+
+    # Analyst View check
+    cards_a, _, _, _, _ = playing_styles.update_playing_styles(
+        pos="MF",
+        cluster_filter="ALL",
+        scout_analyst_mode="analyst",
+    )
+    assert "ANALYST VIEW" in str(cards_a)
+    print("PASS: Tactical Playing Styles, Objective PCA Axes & 2D Locator")
 
     print("\n=== TEST 12: All 8 Page Layouts Instantiation ===")
     def get_layout(mod, *args, **kwargs):

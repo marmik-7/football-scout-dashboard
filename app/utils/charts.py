@@ -412,21 +412,21 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
     fig = style_figure(fig, height=height)
     fig.update_layout(
         title=dict(
-            text=f"2D PCA Tactical Space — {pos} Playing Styles",
+            text=f"2D PCA Projection — {pos} Tactical Clusters",
             font=dict(color=TEXT, size=15),
             subtitle=dict(
-                text="Decomposition: PC1 captures defensive duel work vs forward progression; PC2 separates box threat from build-up play",
+                text="Mathematical dimensionality reduction preserving multi-dimensional distance. Clusters reflect observed feature distributions.",
                 font=dict(color=MUTED, size=11),
             ),
         ),
         xaxis=dict(
-            title=dict(text="PC1 — [← Defensive & Duel Solidity | Attacking Progression & Creation →]", font=dict(color=MUTED, size=11)),
+            title=dict(text="Principal Component 1 (PC1) — Primary Variance Axis", font=dict(color=MUTED, size=11)),
             gridcolor=BORDER,
             zerolinecolor=BORDER,
             tickfont=dict(color=MUTED),
         ),
         yaxis=dict(
-            title=dict(text="PC2 — [← Direct Goal Threat | Controlled Possession & Distribution ↑]", font=dict(color=MUTED, size=11)),
+            title=dict(text="Principal Component 2 (PC2) — Secondary Variance Axis", font=dict(color=MUTED, size=11)),
             gridcolor=BORDER,
             zerolinecolor=BORDER,
             tickfont=dict(color=MUTED),
