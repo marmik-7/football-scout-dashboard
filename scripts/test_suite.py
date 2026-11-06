@@ -64,8 +64,19 @@ def run_full_scout_test_suite():
         print(f" - {r['Player']} ({r['Squad']}, Age {r['Age']}): {r['Similarity_Pct']:.1f}%")
     print("PASS: Tactical Sub-Role Similarity Modeling")
 
-    print("\n=== TEST 3: Similar Players Page Callback ===")
-    res_sim = similar_players.update_similar_players(
+    print("\n=== TEST 3: Similar Players Page Callback & Explainable Similarity ===")
+    from app.utils.similarity import explain_similarity
+    p_ref = get_player_by_name("Trent Alexander-Arnold")
+    p_cand = get_player_by_name("Achraf Hakimi")
+    explanation = explain_similarity(p_ref, p_cand)
+    assert "shared_strengths" in explanation and len(explanation["shared_strengths"]) > 0
+    assert "key_differences" in explanation and len(explanation["key_differences"]) > 0
+    assert "succession_note" in explanation
+    assert "positional_compatibility" in explanation
+    assert "tactical_disclaimer" in explanation
+
+    # Scout View test
+    res_sim_scout = similar_players.update_similar_players(
         ref_name="Trent Alexander-Arnold",
         pos_filter="DF",
         subrole_filter="Full-Back / Wing-Back",
@@ -73,11 +84,27 @@ def run_full_scout_test_suite():
         comp_filter="ALL",
         max_age="ALL",
         top_n=5,
+        scout_analyst_mode="scout",
     )
-    assert res_sim[0] is not None
-    assert res_sim[1] is not None
-    assert res_sim[3] is not None
-    print("PASS: Similar Players Page Callback")
+    assert res_sim_scout[0] is not None
+    assert res_sim_scout[1] is not None
+    assert "THE 3 DRIVERS OF SIMILARITY" in str(res_sim_scout[2])
+    assert "Strongest Shared Tactical Attributes" in str(res_sim_scout[2])
+    assert "Direct Twin" in str(res_sim_scout[3]) or "Strong Match" in str(res_sim_scout[3]) or "Partial Match" in str(res_sim_scout[3])
+
+    # Analyst View test
+    res_sim_analyst = similar_players.update_similar_players(
+        ref_name="Trent Alexander-Arnold",
+        pos_filter="DF",
+        subrole_filter="Full-Back / Wing-Back",
+        club_filter="ALL",
+        comp_filter="ALL",
+        max_age="ALL",
+        top_n=5,
+        scout_analyst_mode="analyst",
+    )
+    assert "ANALYST METHODOLOGY & MATHEMATICAL FORMULATION" in str(res_sim_analyst[2])
+    print("PASS: Similar Players Page Callback & Explainable Similarity")
 
     print("\n=== TEST 4: Player Rankings with Sub-Role Filtering ===")
     res_rank = player_rankings.update_rankings(
