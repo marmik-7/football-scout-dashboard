@@ -11,6 +11,7 @@ from app.utils.styling import (
     BORDER,
     TEXT,
     MUTED,
+    SUBTLE,
     ACCENT,
     POSITION_COLORS,
     POSITION_NAMES,
@@ -53,7 +54,7 @@ position_fig = px.pie(
     position_data,
     names="Position",
     values="Players",
-    hole=0.68,
+    hole=0.70,
     color="Position",
     color_discrete_map={
         "Defenders": POSITION_COLORS["DF"],
@@ -64,28 +65,28 @@ position_fig = px.pie(
 position_fig.update_traces(
     textposition="outside",
     textinfo="percent",
-    textfont=dict(color=TEXT, size=12),
-    marker=dict(line=dict(color=PANEL, width=3)),
+    textfont=dict(color=MUTED, size=11),
+    marker=dict(line=dict(color="#0F172A", width=2.5)),
 )
 position_fig.add_annotation(
-    text=f"<b>{total_players}</b><br><span style='font-size:12px;color:{MUTED}'>Players</span>",
+    text=f"<b>{total_players}</b><br><span style='font-size:11px;color:{MUTED}'>Qualified</span>",
     x=0.5,
     y=0.5,
     showarrow=False,
-    font=dict(size=22, color=TEXT),
+    font=dict(size=20, color="#FFFFFF"),
 )
-position_fig = style_figure(position_fig, 330)
+position_fig = style_figure(position_fig, 320)
 position_fig.update_layout(
     showlegend=True,
     legend=dict(
         orientation="h",
         yanchor="bottom",
-        y=-0.15,
+        y=-0.18,
         xanchor="center",
         x=0.5,
         font=dict(color=MUTED, size=11),
     ),
-    margin=dict(l=20, r=20, t=20, b=40),
+    margin=dict(l=20, r=20, t=15, b=35),
 )
 
 # 2. Attribute Distribution Box Plots
@@ -104,32 +105,30 @@ attribute_box_fig = px.box(
     category_orders={"Attribute": list(ATTRIBUTE_COLUMNS.keys())},
 )
 attribute_box_fig.update_traces(
-    marker_color=ACCENT,
-    line_color=ACCENT,
-    fillcolor="rgba(132, 204, 22, 0.20)",
+    marker_color="#10B981",
+    line_color="#10B981",
+    fillcolor="rgba(16, 185, 129, 0.15)",
     boxpoints=False,
 )
-attribute_box_fig = style_figure(attribute_box_fig, 330)
+attribute_box_fig = style_figure(attribute_box_fig, 320)
 attribute_box_fig.update_layout(
     xaxis=dict(
-        title=dict(text="Percentile Score", font=dict(color=MUTED, size=11)),
+        title=dict(text="Percentile Score (0–100)", font=dict(color=MUTED, size=11)),
         range=[0, 100],
         dtick=20,
-        gridcolor=BORDER,
-        zerolinecolor=BORDER,
-        tickfont=dict(color=MUTED),
+        gridcolor="rgba(255, 255, 255, 0.05)",
+        tickfont=dict(color=MUTED, size=10),
     ),
     yaxis=dict(
         title="",
         categoryorder="array",
         categoryarray=list(ATTRIBUTE_COLUMNS.keys()),
         autorange="reversed",
-        gridcolor=BORDER,
-        zerolinecolor=BORDER,
-        tickfont=dict(color=TEXT, size=12),
+        gridcolor="rgba(255, 255, 255, 0.05)",
+        tickfont=dict(color=TEXT, size=11),
         automargin=True,
     ),
-    margin=dict(l=100, r=25, t=15, b=40),
+    margin=dict(l=95, r=25, t=15, b=35),
 )
 
 
@@ -140,8 +139,8 @@ attribute_box_fig.update_layout(
 layout = dmc.Container(
     [
         create_page_header(
-            title="Football Analytics Overview",
-            subtitle="Executive summary of squad composition, attribute distributions, and leading talent benchmarks across Europe's top leagues.",
+            title="Executive Market Briefing",
+            subtitle="High-level evaluation of squad composition, attribute distributions, and talent benchmarks across Europe's top 5 leagues.",
             badge_text="2024–25 SEASON",
         ),
 
@@ -150,9 +149,10 @@ layout = dmc.Container(
             [
                 dmc.GridCol(
                     create_metric_card(
-                        "Total Players",
-                        total_players,
-                        "Qualified players with at least 600 minutes",
+                        "Total Qualified Talent",
+                        f"{total_players:,}",
+                        "Players with ≥600 minutes played",
+                        color="#FFFFFF",
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
                 ),
@@ -160,7 +160,7 @@ layout = dmc.Container(
                     create_metric_card(
                         "Defenders",
                         total_defenders,
-                        "DF position group (41.5% of dataset)",
+                        "DF cohort (41.5% of database)",
                         color=POSITION_COLORS["DF"],
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
@@ -169,7 +169,7 @@ layout = dmc.Container(
                     create_metric_card(
                         "Midfielders",
                         total_midfielders,
-                        "MF position group (33.3% of dataset)",
+                        "MF cohort (33.3% of database)",
                         color=POSITION_COLORS["MF"],
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
@@ -178,16 +178,16 @@ layout = dmc.Container(
                     create_metric_card(
                         "Forwards",
                         total_forwards,
-                        "FW position group (25.2% of dataset)",
+                        "FW cohort (25.2% of database)",
                         color=POSITION_COLORS["FW"],
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
                 ),
             ],
-            gap="lg",
+            gap="md",
         ),
 
-        dmc.Space(h=25),
+        dmc.Space(h=20),
 
         # SQUAD COMPOSITION AND ATTRIBUTE DISTRIBUTION
         dmc.Grid(
@@ -195,38 +195,38 @@ layout = dmc.Container(
                 dmc.GridCol(
                     create_section_card(
                         dcc.Graph(figure=position_fig, config={"displayModeBar": False}, responsive=True),
-                        title="Squad Composition",
-                        subtitle="Player distribution across position groups",
+                        title="Position Balance",
+                        subtitle="Player distribution across positional cohorts",
                     ),
                     span={"base": 12, "md": 5},
                 ),
                 dmc.GridCol(
                     create_section_card(
                         dcc.Graph(figure=attribute_box_fig, config={"displayModeBar": False}, responsive=True),
-                        title="Attribute Distribution",
-                        subtitle="Position-adjusted percentile score distributions (median, quartiles, range) across all 7 scouting dimensions",
+                        title="Scouting Attribute Distributions",
+                        subtitle="Quartiles ($Q_1$, median, $Q_3$) across all 7 scouting dimensions",
                     ),
                     span={"base": 12, "md": 7},
                 ),
             ],
-            gap="lg",
+            gap="md",
         ),
 
-        dmc.Space(h=25),
+        dmc.Space(h=20),
 
         # TOP PERFORMERS
         create_section_card(
             [
-                html.Div(id="overview-limitation-notice", style={"marginTop": "4px"}),
-                dmc.Space(h=15),
+                html.Div(id="overview-limitation-notice", style={"marginTop": "2px"}),
+                dmc.Space(h=10),
                 dcc.Graph(
                     id="overview-top-players-chart",
                     config={"displayModeBar": False},
                     responsive=True,
                 ),
             ],
-            title="Top Performers",
-            subtitle="Explore leading players ranked by position-relative percentile scores",
+            title="Top Benchmark Performers",
+            subtitle="Leading candidates ranked by position-relative percentile scores",
             extra_header=dmc.Group(
                 [
                     dmc.Select(
@@ -238,7 +238,8 @@ layout = dmc.Container(
                             {"label": "All Positions", "value": "ALL"},
                         ],
                         value="FW",
-                        w=175,
+                        w=165,
+                        size="xs",
                         allowDeselect=False,
                     ),
                     dmc.Select(
@@ -248,11 +249,12 @@ layout = dmc.Container(
                             for name in ATTRIBUTE_COLUMNS
                         ],
                         value="Finishing",
-                        w=175,
+                        w=165,
+                        size="xs",
                         allowDeselect=False,
                     ),
                 ],
-                gap="sm",
+                gap="xs",
             ),
         ),
     ],
@@ -282,43 +284,46 @@ def update_overview_top_players(position, attribute):
     if position == "ALL":
         filtered_df = df
         pos_display = "Players (All Positions)"
-        title_text = f"Top 10 Players (All Positions) — {attribute}"
+        title_text = f"Top 10 Candidates (All Positions) — {attribute}"
         notice = dmc.Alert(
             "Analytical Note: Percentile scores are benchmarked within each player's position peer group. Direct comparisons across different positions reflect within-position rank rather than absolute skill parity.",
             title="Cross-Position Percentile Comparison",
             color="yellow",
             variant="light",
-            radius="md",
+            radius="sm",
             p="xs",
             style={
-                "backgroundColor": "rgba(245, 158, 11, 0.08)",
-                "borderColor": "rgba(245, 158, 11, 0.25)",
+                "backgroundColor": "rgba(245, 158, 11, 0.05)",
+                "borderColor": "rgba(245, 158, 11, 0.20)",
                 "color": "#F8FAFC",
+                "fontSize": "12px",
             },
         )
     else:
         filtered_df = df[df["Pos"] == position]
         pos_display = POSITION_NAMES.get(position, position)
         title_text = f"Top 10 {pos_display} — {attribute}"
-        notice = dmc.Text(
-            f"Rankings benchmarked strictly against other {pos_display.lower()} with ≥600 minutes played. Scores range from 0 to 100 percentile.",
-            size="xs",
-            c="dimmed",
-            mt=2,
-        )
+        notice = dmc.Group([
+            dmc.Badge("●", color="teal", variant="transparent", size="xs", p=0),
+            dmc.Text(
+                f"Rankings benchmarked strictly against other {pos_display.lower()} with ≥600 minutes played. Scores span 0 to 100 percentile.",
+                size="xs",
+                c=MUTED,
+            ),
+        ], gap=6)
 
     if filtered_df.empty:
         fig = go.Figure()
         fig.add_annotation(
             text="No players found matching the selected criteria.",
             showarrow=False,
-            font=dict(color=MUTED, size=14),
+            font=dict(color=MUTED, size=13),
             x=0.5,
             y=0.5,
             xref="paper",
             yref="paper",
         )
-        fig = style_figure(fig, 420)
+        fig = style_figure(fig, 380)
         return fig, notice
 
     top_players = (
@@ -334,7 +339,10 @@ def update_overview_top_players(position, attribute):
             x=top_players[column],
             y=top_players["Player_Unique"],
             orientation="h",
-            marker=dict(color=ACCENT),
+            marker=dict(
+                color="#10B981",
+                line=dict(color="#090D14", width=1),
+            ),
             text=top_players[column].apply(lambda v: f"{v:.1f}"),
             textposition="outside",
             cliponaxis=False,
@@ -350,25 +358,24 @@ def update_overview_top_players(position, attribute):
         )
     )
 
-    fig = style_figure(fig, 420)
+    fig = style_figure(fig, 380)
     fig.update_layout(
-        title=dict(text=title_text, font=dict(color=TEXT, size=15)),
+        title=dict(text=title_text, font=dict(color="#FFFFFF", size=14)),
         xaxis=dict(
-            title=dict(text="Percentile Score", font=dict(color=MUTED, size=12)),
+            title=dict(text="Percentile Score", font=dict(color=MUTED, size=11)),
             range=[0, 110],
-            gridcolor=BORDER,
-            tickfont=dict(color=MUTED),
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            tickfont=dict(color=MUTED, size=10),
         ),
         yaxis=dict(
             title="",
-            gridcolor=BORDER,
-            tickfont=dict(color=TEXT, size=12),
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            tickfont=dict(color=TEXT, size=11),
             categoryorder="array",
             categoryarray=top_players["Player_Unique"].tolist(),
             automargin=True,
         ),
-        margin=dict(l=150, r=35, t=55, b=40),
+        margin=dict(l=150, r=35, t=45, b=35),
     )
 
     return fig, notice
-

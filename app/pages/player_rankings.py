@@ -16,6 +16,7 @@ from app.utils.styling import (
     BORDER,
     TEXT,
     MUTED,
+    SUBTLE,
     ACCENT,
     POSITION_COLORS,
     POSITION_NAMES,
@@ -42,14 +43,14 @@ unique_subroles = get_unique_subroles()
 layout = dmc.Container(
     [
         create_page_header(
-            title="Player Rankings & Leaderboards",
-            subtitle="Explore high-volume percentile rankings and category leaders across all 7 scouting dimensions and position groups.",
-            badge_text="GLOBAL LEADERBOARDS",
+            title="Player Leaderboards",
+            subtitle="Benchmark top-ranked candidates across scouting dimensions, position groups, and tactical archetypes.",
+            badge_text="GLOBAL RANKINGS",
         ),
 
         # FILTER AND RANKING CONTROLS
-        create_section_card(
-            dmc.Box([
+        dmc.Card(
+            [
                 # Row 1: Positional & Geographic Scope
                 dmc.Grid(
                     [
@@ -78,25 +79,25 @@ layout = dmc.Container(
                                 value="ALL",
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 2},
+                            span={"base": 12, "sm": 6, "md": 2.5},
                         ),
                         dmc.GridCol(
                             dmc.Select(
                                 id="rankings-attr",
-                                label="Target Attribute",
+                                label="Scouting Dimension",
                                 data=[
-                                    {"label": name, "value": name}
+                                    {"label": f"{name} (Percentile)", "value": name}
                                     for name in ATTRIBUTE_COLUMNS
                                 ],
                                 value="Finishing",
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 3},
+                            span={"base": 12, "sm": 6, "md": 2.5},
                         ),
                         dmc.GridCol(
                             dmc.Select(
                                 id="rankings-comp",
-                                label="League / Competition",
+                                label="Competition / League",
                                 data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
                                     {"label": c, "value": c} for c in unique_competitions
                                 ],
@@ -122,10 +123,10 @@ layout = dmc.Container(
                             span={"base": 12, "sm": 6, "md": 2.5},
                         ),
                     ],
-                    gap="md",
+                    gap="sm",
                 ),
 
-                dmc.Space(h=12),
+                dmc.Divider(my="sm", color="rgba(255, 255, 255, 0.06)"),
 
                 # Row 2: Club & Output Depth
                 dmc.Grid(
@@ -161,10 +162,10 @@ layout = dmc.Container(
                         dmc.GridCol(
                             dmc.Select(
                                 id="rankings-order",
-                                label="Sort Direction",
+                                label="Ranking Order",
                                 data=[
-                                    {"label": "Highest First (Ascending = False)", "value": "desc"},
-                                    {"label": "Lowest First (Ascending = True)", "value": "asc"},
+                                    {"label": "Highest to Lowest (Desc)", "value": "desc"},
+                                    {"label": "Lowest to Highest (Asc)", "value": "asc"},
                                 ],
                                 value="desc",
                                 allowDeselect=False,
@@ -172,11 +173,13 @@ layout = dmc.Container(
                             span={"base": 12, "sm": 6, "md": 4},
                         ),
                     ],
-                    gap="md",
+                    gap="sm",
                 ),
-            ]),
-            title="Leaderboard Filters",
-            subtitle="Benchmark players across position groups, tactical sub-roles, competitions, and age brackets",
+            ],
+            withBorder=True,
+            radius="md",
+            p="md",
+            style={"backgroundColor": "#0F172A", "borderColor": "rgba(255, 255, 255, 0.08)"},
         ),
 
         dmc.Space(h=15),
@@ -194,16 +197,16 @@ layout = dmc.Container(
                 responsive=True,
             ),
             title="Visual Leaderboard",
-            subtitle="Percentile score distribution of top-ranked players",
+            subtitle="Percentile score distribution of top-ranked candidates",
         ),
 
-        dmc.Space(h=25),
+        dmc.Space(h=20),
 
         # LEADERBOARD TABLE
         create_section_card(
             html.Div(id="rankings-table-container", style={"overflowX": "auto"}),
-            title="Complete Leaderboard Matrix",
-            subtitle="Official rank numbers, candidate records, and full 7-attribute profile",
+            title="Statistical Leaderboard Matrix",
+            subtitle="Candidate records, empirical scores, and multidimensional profile",
         ),
     ],
     fluid=True,
@@ -248,22 +251,26 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
             title="Cross-Position Percentile Comparison Notice",
             color="yellow",
             variant="light",
-            radius="md",
+            radius="sm",
             p="sm",
             style={
-                "backgroundColor": "rgba(245, 158, 11, 0.08)",
-                "borderColor": "rgba(245, 158, 11, 0.25)",
+                "backgroundColor": "rgba(245, 158, 11, 0.05)",
+                "borderColor": "rgba(245, 158, 11, 0.20)",
                 "color": "#F8FAFC",
+                "fontSize": "12px",
             },
         )
         pos_display = "Players (All Positions)"
     else:
         pos_display = POSITION_NAMES.get(pos, pos)
-        notice = dmc.Text(
-            f"Rankings benchmarked strictly among {pos_display.lower()} with ≥600 minutes. Scores span 0 to 100 percentile.",
-            size="xs",
-            c="dimmed",
-        )
+        notice = dmc.Group([
+            dmc.Badge("●", color="teal", variant="transparent", size="xs", p=0),
+            dmc.Text(
+                f"Rankings benchmarked strictly among {pos_display.lower()} with ≥600 minutes. Scores span 0 to 100 percentile.",
+                size="xs",
+                c=MUTED,
+            ),
+        ], gap=6)
 
     # 2. Filter dataset
     filtered = df.copy()
@@ -298,7 +305,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
         empty_fig.add_annotation(
             text="No players found matching the filter criteria.",
             showarrow=False,
-            font=dict(color=MUTED, size=14),
+            font=dict(color=MUTED, size=13),
             x=0.5,
             y=0.5,
             xref="paper",
@@ -312,11 +319,11 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
     filtered = filtered.sort_values(col, ascending=ascending)
     top_candidates = filtered.head(depth).copy()
 
-    # For horizontal bar chart, sort ascending so rank #1 is at the top of the chart!
+    # For horizontal bar chart, sort ascending so rank #1 is at the top of the chart
     chart_candidates = top_candidates.sort_values(col, ascending=(not ascending)).copy()
 
     # 4. Ranked Bar Chart
-    chart_height = max(420, min(850, len(chart_candidates) * 28 + 120))
+    chart_height = max(380, min(800, len(chart_candidates) * 26 + 100))
     comp_title = f" ({comp})" if comp and comp != "ALL" else ""
     age_title = f" [{age_group}]" if age_group and age_group != "ALL" else ""
     chart_title = f"Top {len(chart_candidates)} {pos_display}{comp_title}{age_title} — {attr}"
@@ -328,7 +335,10 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
             x=chart_candidates[col],
             y=chart_candidates["Player_Unique"],
             orientation="h",
-            marker=dict(color=ACCENT),
+            marker=dict(
+                color="#10B981",
+                line=dict(color="#090D14", width=1),
+            ),
             text=chart_candidates[col].apply(lambda v: f"{v:.1f}"),
             textposition="outside",
             cliponaxis=False,
@@ -347,22 +357,22 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
 
     fig = style_figure(fig, height=chart_height)
     fig.update_layout(
-        title=dict(text=chart_title, font=dict(color=TEXT, size=15)),
+        title=dict(text=chart_title, font=dict(color="#FFFFFF", size=14)),
         xaxis=dict(
-            title=dict(text="Percentile Score", font=dict(color=MUTED, size=12)),
+            title=dict(text="Percentile Score (0–100)", font=dict(color=MUTED, size=11)),
             range=[0, 110],
-            gridcolor=BORDER,
-            tickfont=dict(color=MUTED),
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            tickfont=dict(color=MUTED, size=10),
         ),
         yaxis=dict(
             title="",
-            gridcolor=BORDER,
-            tickfont=dict(color=TEXT, size=12),
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            tickfont=dict(color=TEXT, size=11),
             categoryorder="array",
             categoryarray=chart_candidates["Player_Unique"].tolist(),
             automargin=True,
         ),
-        margin=dict(l=160, r=35, t=55, b=40),
+        margin=dict(l=160, r=35, t=50, b=35),
     )
 
     # 5. Leaderboard Table
@@ -374,7 +384,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
             dmc.TableTh("Pos", style={"color": TEXT}),
             dmc.TableTh("Nat", style={"color": TEXT}),
             dmc.TableTh("Min", style={"color": TEXT}),
-            dmc.TableTh(f"{attr} Score", style={"color": ACCENT, "fontWeight": "700"}),
+            dmc.TableTh(f"{attr} Score", style={"color": "#10B981", "fontWeight": "700"}),
             dmc.TableTh("Style DNA", style={"color": TEXT}),
             dmc.TableTh("Finishing", style={"color": TEXT}),
             dmc.TableTh("Creativity", style={"color": TEXT}),
@@ -387,40 +397,50 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
 
     rows = []
     for rank, (_, r) in enumerate(top_candidates.iterrows(), start=1):
-        pos_badge_color = "blue" if r["Pos"] == "DF" else "lime" if r["Pos"] == "MF" else "orange"
+        pos_badge_color = "blue" if r["Pos"] == "DF" else "teal" if r["Pos"] == "MF" else "orange"
         target_score = r[col]
         tier = get_percentile_tier(target_score)
         profile_url = f"/player-profile?player={r['Player_Unique']}"
 
+        # Podium coloring
+        if rank == 1:
+            rank_badge = dmc.Badge(f"#{rank}", color="yellow", variant="filled", size="xs")
+        elif rank == 2:
+            rank_badge = dmc.Badge(f"#{rank}", color="gray", variant="filled", size="xs")
+        elif rank == 3:
+            rank_badge = dmc.Badge(f"#{rank}", color="orange", variant="filled", size="xs")
+        else:
+            rank_badge = dmc.Badge(f"#{rank}", color="gray", variant="light", size="xs")
+
         rows.append(
             dmc.TableTr([
-                dmc.TableTd(dmc.Badge(f"#{rank}", color="gray", variant="light", size="sm")),
+                dmc.TableTd(rank_badge),
                 dmc.TableTd([
-                    dmc.Text(r["Player"], fw=600, c="white"),
-                    dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="dimmed"),
+                    dmc.Text(r["Player"], fw=700, size="xs", c="white"),
+                    dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="#64748B"),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
-                    dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
+                    dmc.Text(r.get("Comp_Clean", ""), size="10px", c="#64748B"),
                 ]),
                 dmc.TableTd([
                     dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
-                    dmc.Text(r.get("SubRole", ""), size="10px", c="dimmed", mt=2),
+                    dmc.Text(r.get("SubRole", ""), size="10px", c="#64748B", mt=2),
                 ]),
-                dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="sm", fw=700, style={"color": tier["color"]})),
-                dmc.TableTd(dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="xs", c="dimmed")),
+                dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="white")),
+                dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="#64748B", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="xs", fw=700, style={"color": tier["color"], "fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="xs", c="#94A3B8")),
 
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"]})),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
 
                 dmc.TableTd(
                     dcc.Link(
-                        dmc.Button("Profile →", size="xs", variant="light", color="lime"),
+                        dmc.Button("Dossier →", size="xs", variant="subtle", color="teal"),
                         href=profile_url,
                         style={"textDecoration": "none"},
                     ),
@@ -432,11 +452,10 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
     tbody = dmc.TableTbody(rows)
     table = dmc.Table(
         [thead, tbody],
-        striped=True,
+        striped=False,
         highlightOnHover=True,
-        withTableBorder=True,
-        style={"backgroundColor": PANEL, "fontSize": "13px", "borderColor": BORDER},
+        withTableBorder=False,
+        style={"fontSize": "12.5px"},
     )
 
     return notice, fig, table
-
