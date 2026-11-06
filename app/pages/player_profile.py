@@ -168,10 +168,10 @@ def layout(player=None, **kwargs):
 
             dmc.Space(h=16),
 
-            # MAIN VISUAL PROFILE: 12-SLICE PIZZA / RADAR + ATTRIBUTE BREAKDOWN
+            # LAYER 1: FIRST SCREEN HERO — 12-SLICE PIZZA + EXECUTIVE SCOUTING SYNTHESIS
             dmc.Grid(
                 [
-                    # LEFT: PIZZA / RADAR
+                    # LEFT: 12-SLICE PERCENTILE PIZZA (PRIMARY VISUAL FOOTPRINT)
                     dmc.GridCol(
                         create_section_card(
                             [
@@ -179,16 +179,16 @@ def layout(player=None, **kwargs):
                                     id="profile-radar-chart",
                                     config={"displayModeBar": False},
                                     responsive=True,
-                                    style={"height": "410px", "width": "100%"},
+                                    style={"height": "400px", "width": "100%"},
                                 ),
-                                dmc.Space(h=8),
+                                dmc.Space(h=6),
                                 html.Div(
                                     id="profile-chart-note",
                                     style={"textAlign": "center"},
                                 ),
                             ],
-                            title="Visual Scouting Footprint",
-                            subtitle="Multidimensional footprint benchmarked against positional cohort",
+                            title="Visual Performance Footprint",
+                            subtitle="12-Slice Percentile Pizza benchmarked against positional cohort",
                             extra_header=dmc.SegmentedControl(
                                 id="profile-chart-type-toggle",
                                 data=[
@@ -200,17 +200,17 @@ def layout(player=None, **kwargs):
                                 color="emerald",
                             ),
                         ),
-                        span={"base": 12, "lg": 6},
+                        span={"base": 12, "lg": 5},
                     ),
 
-                    # RIGHT: ATTRIBUTE PERCENTILE SPECTRUM
+                    # RIGHT: EXECUTIVE SCOUTING DOSSIER & RECRUITMENT SYNTHESIS
                     dmc.GridCol(
                         create_section_card(
-                            html.Div(id="profile-attributes-breakdown"),
-                            title="Attribute Percentile Spectrum",
-                            subtitle="Engineered score cards and deviation from positional benchmark",
+                            html.Div(id="profile-scouting-summary"),
+                            title="Executive Scouting Dossier",
+                            subtitle="Core assets, data-backed watch-outs, and evidence-based recruitment suitability",
                         ),
-                        span={"base": 12, "lg": 6},
+                        span={"base": 12, "lg": 7},
                     ),
                 ],
                 gap="md",
@@ -218,40 +218,78 @@ def layout(player=None, **kwargs):
 
             dmc.Space(h=16),
 
-            # SCOUTING REPORT & MATCH PRODUCTION
-            dmc.Grid(
-                [
-                    dmc.GridCol(
-                        create_section_card(
-                            html.Div(id="profile-scouting-summary"),
-                            title="Tactical Assessment & Scouting Synthesis",
-                            subtitle="Algorithmic strengths, developmental priorities, and recruitment summary",
-                        ),
-                        span={"base": 12, "md": 5},
-                    ),
-                    dmc.GridCol(
-                        create_section_card(
-                            html.Div(id="profile-stats-grid"),
-                            title="Season Production Statistics",
-                            subtitle="Key volume and efficiency metrics (2024–25 European Season)",
-                            extra_header=dmc.SegmentedControl(
-                                id="profile-metric-mode",
-                                data=[
-                                    {"label": "Standard Per-90 Rates", "value": "per90"},
-                                    {"label": "Season Total Counts", "value": "total"},
-                                ],
-                                value="per90",
-                                size="xs",
-                                color="emerald",
+            # LAYER 2 & LAYER 3: PROGRESSIVE DISCLOSURE ACCORDIONS
+            dmc.Accordion(
+                multiple=True,
+                value=["production"],
+                styles={
+                    "item": {
+                        "backgroundColor": PANEL,
+                        "border": f"1px solid {BORDER}",
+                        "borderRadius": "6px",
+                        "marginBottom": "12px",
+                    },
+                    "control": {
+                        "color": "white",
+                        "padding": "12px 18px",
+                    },
+                    "panel": {
+                        "padding": "0px 18px 18px 18px",
+                    },
+                },
+                children=[
+                    # ACCORDION 1: SEASON PRODUCTION STATISTICS
+                    dmc.AccordionItem(
+                        [
+                            dmc.AccordionControl(
+                                dmc.Group([
+                                    dmc.Text("Season Match Production Statistics", fw=700, size="sm", c="white"),
+                                    dmc.Badge("PRODUCTION MATRIX", color="teal", variant="light", size="xs"),
+                                    dmc.Text("Key volume, rates, and role-tailored indicators (2024–25)", size="xs", c="dimmed"),
+                                ], gap="xs")
                             ),
-                        ),
-                        span={"base": 12, "md": 7},
+                            dmc.AccordionPanel(
+                                dmc.Box([
+                                    dmc.Group([
+                                        dmc.Text("Select statistical metric rate:", size="11px", c="dimmed"),
+                                        dmc.SegmentedControl(
+                                            id="profile-metric-mode",
+                                            data=[
+                                                {"label": "Standard Per-90 Rates", "value": "per90"},
+                                                {"label": "Season Total Counts", "value": "total"},
+                                            ],
+                                            value="per90",
+                                            size="xs",
+                                            color="emerald",
+                                        ),
+                                    ], justify="space-between", align="center", mb="sm"),
+                                    html.Div(id="profile-stats-grid"),
+                                ])
+                            ),
+                        ],
+                        value="production",
+                    ),
+
+                    # ACCORDION 2: ATTRIBUTE PERCENTILE SPECTRUM & BENCHMARK DEVIATION
+                    dmc.AccordionItem(
+                        [
+                            dmc.AccordionControl(
+                                dmc.Group([
+                                    dmc.Text("Positional Percentile Spectrum & Benchmarks", fw=700, size="sm", c="white"),
+                                    dmc.Badge("7-DIMENSIONAL SPECTRUM", color="blue", variant="light", size="xs"),
+                                    dmc.Text("Detailed trait scores and +/- deviation against position cohort average", size="xs", c="dimmed"),
+                                ], gap="xs")
+                            ),
+                            dmc.AccordionPanel(
+                                html.Div(id="profile-attributes-breakdown", style={"paddingTop": "8px"})
+                            ),
+                        ],
+                        value="attributes",
                     ),
                 ],
-                gap="md",
             ),
 
-            dmc.Space(h=20),
+            dmc.Space(h=16),
             position_percentile_warning(),
         ],
         fluid=True,
@@ -378,19 +416,19 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             players=[player],
             include_position_avg=True,
             position_avg_scores=pos_avgs,
-            height=410,
+            height=400,
         )
         chart_note = dmc.Text(
-            "7-Dimensional Scouting Radar: Dashed grey line represents position peer group average (50.0 baseline).",
+            "7-Dimensional Scouting Radar: Dashed line represents position cohort baseline (50.0).",
             size="xs",
             c="dimmed",
             mt=4,
         )
     else:
-        chart_fig = build_pizza_chart(player, height=410)
+        chart_fig = build_pizza_chart(player, height=400)
         if scout_analyst_mode == "scout":
             chart_note = dmc.Text(
-                "12-Slice Percentile Pizza: Radial length represents percentile rank (0–100) vs positional peers. Longer slices indicate elite performance.",
+                "12-Slice Percentile Pizza: Radial wedge length indicates percentile rank (0–100) vs positional cohort.",
                 size="xs",
                 c="dimmed",
                 mt=4,
@@ -403,7 +441,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                 mt=4,
             )
 
-    # 3. Attribute Breakdown Progress Bars (Clean Linear-style meters)
+    # 3. Attribute Breakdown Progress Bars (Layer 3 Progressive Disclosure)
     comparisons = get_player_attribute_comparison(player)
     attribute_cards = []
 
@@ -457,14 +495,15 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
 
     attributes_breakdown = html.Div(attribute_cards)
 
-    # 4. Tactical Assessment, Strengths/Weaknesses & Evidence-Based Recruitment Suitability
+    # 4. Tactical Assessment, Standout Strengths & Evidence-Based Recruitment Suitability
     strengths, weaknesses = get_player_strengths_and_weaknesses(player)
     report_text = generate_scouting_report(player)
     recruitment_assessment = get_recruitment_suitability_assessment(player)
 
-    # Format Strengths UI
+    # Format Strengths UI: STRICT LIMIT OF MAX 3 PRIMARY STRENGTHS
+    primary_strengths = strengths[:3]
     strength_badges = []
-    for s in strengths:
+    for s in primary_strengths:
         level_color = "emerald" if s["level"] in ["Elite", "Outperformer", "High Efficiency"] else "teal"
         badge_text = f"{s['attribute']}"
         if s.get("score") and s["score"] <= 100:
@@ -481,14 +520,15 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                     color=level_color,
                     variant="light",
                     size="xs",
-                    style={"cursor": "help"},
+                    style={"cursor": "help", "fontWeight": 600},
                 ),
             )
         )
 
-    # Format Weaknesses / Monitoring UI
+    # Format Weaknesses / Monitoring UI: STRICT LIMIT OF MAX 2 PRIMARY CONCERNS
+    primary_weaknesses = weaknesses[:2]
     weakness_badges = []
-    for w in weaknesses:
+    for w in primary_weaknesses:
         w_color = "red" if "Priority" in w["level"] else "orange"
         badge_text = f"{w['attribute']}"
         if w.get("score"):
@@ -505,50 +545,53 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                     color=w_color,
                     variant="light",
                     size="xs",
-                    style={"cursor": "help"},
+                    style={"cursor": "help", "fontWeight": 600},
                 ),
             )
         )
 
-    # Recruitment Suitability UI Elements
+    # Recruitment Suitability UI Elements (Concise 2–3 items)
     attractions_list = [
         html.Li(
             dmc.Text(att, size="xs", c="#CBD5E1", style={"lineHeight": 1.45}),
-            style={"marginBottom": "4px"}
+            style={"marginBottom": "3px"}
         )
-        for att in recruitment_assessment.get("attractions", [])
+        for att in recruitment_assessment.get("attractions", [])[:3]
     ]
     concerns_list = [
         html.Li(
             dmc.Text(con, size="xs", c="#CBD5E1", style={"lineHeight": 1.45}),
-            style={"marginBottom": "4px"}
+            style={"marginBottom": "3px"}
         )
-        for con in recruitment_assessment.get("concerns", [])
+        for con in recruitment_assessment.get("concerns", [])[:2]
     ]
     actions_list = [
         html.Li(
             dmc.Text(act, size="xs", c="#CBD5E1", style={"lineHeight": 1.45}),
-            style={"marginBottom": "4px"}
+            style={"marginBottom": "3px"}
         )
-        for act in recruitment_assessment.get("scouting_actions", [])
+        for act in recruitment_assessment.get("scouting_actions", [])[:2]
     ]
 
     scouting_summary = html.Div([
-        dmc.Text(report_text, size="xs", c="#CBD5E1", style={"lineHeight": 1.65}),
-        dmc.Divider(my="sm", color=BORDER),
+        dmc.Text(report_text, size="xs", c="#E2E8F0", style={"lineHeight": 1.6, "marginBottom": "10px"}),
 
-        dmc.Text("ROLE TECHNICAL ASSETS", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}, mb=6),
-        dmc.Group(strength_badges, gap="xs", mb="md", wrap="wrap"),
+        dmc.Grid([
+            dmc.GridCol([
+                dmc.Text("TOP 3 STANDOUT CHARACTERISTICS", size="10px", fw=700, c="teal", style={"letterSpacing": "0.6px"}, mb=6),
+                dmc.Group(strength_badges if strength_badges else [dmc.Badge("Balanced Profile", color="gray", variant="light", size="xs")], gap="xs", wrap="wrap"),
+            ], span={"base": 12, "sm": 7}),
+            dmc.GridCol([
+                dmc.Text("TACTICAL WATCH-OUTS (MAX 2)", size="10px", fw=700, c="orange", style={"letterSpacing": "0.6px"}, mb=6),
+                dmc.Group(
+                    weakness_badges if weakness_badges else [dmc.Badge("Balanced Profile (No Critical Deficits)", color="gray", variant="light", size="xs")],
+                    gap="xs",
+                    wrap="wrap",
+                ),
+            ], span={"base": 12, "sm": 5}),
+        ], gap="sm", mb="xs"),
 
-        dmc.Text("TACTICAL MONITORING PRIORITIES", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}, mb=6),
-        dmc.Group(
-            weakness_badges if weakness_badges else [dmc.Badge("Balanced Profile (No Critical Deficits)", color="gray", variant="light", size="xs")],
-            gap="xs",
-            mb="md",
-            wrap="wrap",
-        ),
-
-        dmc.Divider(my="sm", color=BORDER),
+        dmc.Divider(my="xs", color=BORDER),
 
         # EVIDENCE-BASED RECRUITMENT ASSESSMENT
         dmc.Box(
@@ -561,36 +604,36 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                         variant="light",
                         size="xs",
                     ),
-                ], justify="space-between", align="center", mb="xs"),
+                ], justify="space-between", align="center", mb=4),
 
                 dmc.Text("Statistical Attractions:", size="10px", fw=700, c="#10B981", mt=4),
-                html.Ul(attractions_list, style={"paddingLeft": "16px", "margin": "4px 0"}),
+                html.Ul(attractions_list, style={"paddingLeft": "16px", "margin": "3px 0"}),
 
-                dmc.Text("Recruitment Watch-Outs / Flags:", size="10px", fw=700, c="#F59E0B", mt=6),
-                html.Ul(concerns_list, style={"paddingLeft": "16px", "margin": "4px 0"}),
+                dmc.Text("Recruitment Watch-Outs / Flags:", size="10px", fw=700, c="#F59E0B", mt=4),
+                html.Ul(concerns_list, style={"paddingLeft": "16px", "margin": "3px 0"}),
 
-                dmc.Text("Recommended Next Scouting Steps:", size="10px", fw=700, c="#38BDF8", mt=6),
-                html.Ul(actions_list, style={"paddingLeft": "16px", "margin": "4px 0"}),
+                dmc.Text("Recommended Next Scouting Steps:", size="10px", fw=700, c="#38BDF8", mt=4),
+                html.Ul(actions_list, style={"paddingLeft": "16px", "margin": "3px 0"}),
 
                 dmc.Text(
                     recruitment_assessment.get("disclaimer", ""),
                     size="9px",
                     c="#64748B",
-                    style={"fontStyle": "italic", "lineHeight": 1.4},
-                    mt="xs",
+                    style={"fontStyle": "italic", "lineHeight": 1.35},
+                    mt=6,
                 ),
             ],
             style={
                 "backgroundColor": "#090D14",
                 "border": "1px solid rgba(16, 185, 129, 0.2)",
                 "borderRadius": "5px",
-                "padding": "10px 12px",
-                "marginTop": "8px",
+                "padding": "10px 14px",
+                "marginTop": "6px",
             },
         ),
     ])
 
-    # 5. Season Production Statistics Grid
+    # 5. Season Production Statistics Grid (Layer 2 Progressive Disclosure)
     cmp_pct = float(player.get("Cmp%", 0.0))
     won_pct = float(player.get("Won%", 0.0))
     padj_factor = float(player.get("pAdj_Factor", 1.0))
@@ -605,7 +648,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             info = get_metric_info(mk)
             label = info["scout_name"]
             desc = info["description"]
-            
+
             # Compute value based on per90 or total
             if mk == "Gls_per90":
                 val = f"{player.get('Gls_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Gls', 0)))
@@ -748,32 +791,57 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             for label, val, desc in stat_items
         ]
 
-        stats_grid = dmc.Grid(stat_cols, gap="xs")
+        stats_grid = dmc.Box([
+            dmc.Grid(stat_cols, gap="xs"),
+            dmc.Group([
+                dmc.Badge("ANALYST VIEW ACTIVE", color="indigo", variant="outline", size="xs"),
+                dmc.Text(
+                    f"Showing complete 15-attribute analytical matrix with possession-adjusted (pAdj) defending factors ({padj_factor:.2f}x), shot quality, and finishing differentials.",
+                    size="10.5px",
+                    c="#818CF8",
+                ),
+            ], gap="xs", align="center", mt="md"),
+        ])
 
-    # Links for quick navigation
-    compare_url = f"/player-comparison?player1={selected_name}"
-    similar_url = f"/similar-players?player={selected_name}"
+    compare_href = f"/player-comparison?player1={player['Player_Unique']}"
+    similar_href = f"/similar-players?player={player['Player_Unique']}"
 
-    return header, chart_fig, chart_note, attributes_breakdown, scouting_summary, stats_grid, compare_url, similar_url
+    return (
+        header,
+        chart_fig,
+        chart_note,
+        attributes_breakdown,
+        scouting_summary,
+        stats_grid,
+        compare_href,
+        similar_href,
+    )
 
 
-# Toggle Profile Shortlist Modal
+# --------------------------------------------------
+# SHORTLIST BOOKMARKING CALLBACKS
+# --------------------------------------------------
+
 @callback(
     Output("profile-shortlist-modal", "opened"),
     Output("profile-modal-player-title", "children"),
     Input("profile-open-shortlist-btn", "n_clicks"),
     Input("profile-modal-cancel", "n_clicks"),
-    Input("profile-modal-submit", "n_clicks"),
     State("profile-player-select", "value"),
-    State("profile-shortlist-modal", "opened"),
     prevent_initial_call=True,
 )
-def toggle_profile_shortlist_modal(n_open, n_cancel, n_submit, player_name, is_open):
-    title_text = f"Target: {player_name}" if player_name else "Candidate"
-    return not is_open, title_text
+def toggle_profile_shortlist_modal(open_clicks, cancel_clicks, selected_name):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return False, ""
+    button_id = ctx.triggered_id
+    if button_id == "profile-open-shortlist-btn":
+        player = get_player_by_name(selected_name)
+        title = f"Candidate: {player['Player']} ({player['Squad']} • {player.get('SubRole', player['Pos'])})" if player is not None else ""
+        return True, title
+    return False, ""
 
 
-# Save Profile Target to Global Shortlist Store
 @callback(
     Output("scout-shortlists", "data", allow_duplicate=True),
     Output("profile-shortlist-feedback", "children"),
@@ -784,22 +852,45 @@ def toggle_profile_shortlist_modal(n_open, n_cancel, n_submit, player_name, is_o
     State("scout-shortlists", "data"),
     prevent_initial_call=True,
 )
-def save_profile_to_shortlist(n_clicks, player_name, tier, notes, current_data):
-    if not player_name:
+def save_profile_to_shortlist(n_clicks=None, player_name=None, tier=None, notes=None, current_data=None, submit_clicks=None):
+    clicks = n_clicks or submit_clicks
+    if not clicks or not player_name:
         return dash.no_update, dash.no_update
+
     current_data = current_data or []
-    updated = [item for item in current_data if item.get("player") != player_name]
-    updated.append({
-        "player": player_name,
-        "tier": tier or "A-List Target",
-        "notes": notes or "Target scouted directly from Player Profile view.",
-        "added_at": "2024-25 Season",
-    })
+    updated = save_candidate_to_store(current_data, player_name, tier, notes)
     feedback = dmc.Alert(
-        f"✓ Successfully bookmarked {player_name} to {tier}",
+        f"✓ Successfully bookmarked {player_name} to {tier}.",
         color="emerald",
         variant="light",
+        radius="sm",
         p="xs",
-        mb="xs",
+        mb="sm",
     )
     return updated, feedback
+
+
+def save_candidate_to_store(current_data, player_name, tier, notes):
+    updated = []
+    found = False
+    for item in current_data:
+        if item.get("player") == player_name:
+            updated.append({
+                "player": player_name,
+                "tier": tier or "A-List Target",
+                "notes": notes or item.get("notes", ""),
+                "added_at": item.get("added_at", "2024-25 Season"),
+            })
+            found = True
+        else:
+            updated.append(item)
+
+    if not found:
+        updated.append({
+            "player": player_name,
+            "tier": tier or "A-List Target",
+            "notes": notes or "Target bookmarked for recruitment evaluation.",
+            "added_at": "2024-25 Season",
+        })
+
+    return updated

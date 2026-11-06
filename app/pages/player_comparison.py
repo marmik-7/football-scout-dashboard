@@ -84,32 +84,48 @@ def layout(player1=None, player2=None, **kwargs):
 
             dmc.Space(h=14),
 
-            # RADAR & GROUPED BARS
+            # HERO DECISION LAYER: RADAR FOOTPRINT + SIDE-BY-SIDE TACTICAL PROFILES
             dmc.Grid(
                 [
                     dmc.GridCol(
                         create_section_card(
-                            dcc.Graph(
-                                id="compare-radar-chart",
-                                config={"displayModeBar": False},
-                                responsive=True,
-                                style={"height": "380px", "width": "100%"},
+                            dmc.Tabs(
+                                value="radar",
+                                children=[
+                                    dmc.TabsList([
+                                        dmc.TabsTab("Radar Overlay (7D)", value="radar"),
+                                        dmc.TabsTab("Attribute Breakdown (Bars)", value="bars"),
+                                    ]),
+                                    dmc.TabsPanel(
+                                        dcc.Graph(
+                                            id="compare-radar-chart",
+                                            config={"displayModeBar": False},
+                                            responsive=True,
+                                            style={"height": "380px", "width": "100%"},
+                                        ),
+                                        value="radar",
+                                    ),
+                                    dmc.TabsPanel(
+                                        dcc.Graph(
+                                            id="compare-bar-chart",
+                                            config={"displayModeBar": False},
+                                            responsive=True,
+                                            style={"height": "380px", "width": "100%"},
+                                        ),
+                                        value="bars",
+                                    ),
+                                ],
                             ),
-                            title="Multi-Player Radar Overlay",
+                            title="Multi-Player Visual Footprint",
                             subtitle="Direct 7-dimensional footprint comparison across candidates",
                         ),
                         span={"base": 12, "lg": 6},
                     ),
                     dmc.GridCol(
                         create_section_card(
-                            dcc.Graph(
-                                id="compare-bar-chart",
-                                config={"displayModeBar": False},
-                                responsive=True,
-                                style={"height": "380px", "width": "100%"},
-                            ),
-                            title="Attribute-by-Attribute Breakdown",
-                            subtitle="Grouped percentile comparison across the 7 scouting dimensions",
+                            html.Div(id="compare-profiles-container"),
+                            title="Tactical Candidate Profiles",
+                            subtitle="Automated analytical strengths, watch-outs, and role context for each candidate",
                         ),
                         span={"base": 12, "lg": 6},
                     ),
@@ -119,11 +135,11 @@ def layout(player1=None, player2=None, **kwargs):
 
             dmc.Space(h=16),
 
-            # SIDE-BY-SIDE STATISTICAL MATRIX TABLE
+            # EXECUTIVE VERDICT & COLLAPSIBLE STATISTICAL MATRIX TABLE
             create_section_card(
                 html.Div(id="compare-stats-table-container", style={"overflowX": "auto"}),
-                title="Head-to-Head Comparison Matrix",
-                subtitle="Direct statistical benchmark against baseline starter with live +/- deltas",
+                title="Head-to-Head Comparison Matrix & Verdict",
+                subtitle="Executive decision trade-offs, live +/- deltas, and deep statistical breakdown",
                 extra_header=dmc.Group([
                     dmc.Switch(
                         id="compare-delta-toggle",
@@ -151,15 +167,6 @@ def layout(player1=None, player2=None, **kwargs):
                     ),
                     dcc.Download(id="compare-download-csv"),
                 ], gap="xs", align="center", wrap="wrap"),
-            ),
-
-            dmc.Space(h=16),
-
-            # TACTICAL PROFILES AND STRENGTHS
-            create_section_card(
-                html.Div(id="compare-profiles-container"),
-                title="Tactical Profiles & Scouting Observations",
-                subtitle="Automated analytical strengths and development areas for each evaluated candidate",
             ),
         ],
         fluid=True,
@@ -457,7 +464,46 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         withTableBorder=True,
         style={"backgroundColor": PANEL, "fontSize": "12px", "borderColor": BORDER},
     )
-    stats_matrix_ui = html.Div([executive_verdict, stats_table])
+    stats_table_accordion = dmc.Accordion(
+        value="matrix" if scout_analyst_mode == "analyst" else None,
+        styles={
+            "item": {
+                "backgroundColor": "#090D14",
+                "border": f"1px solid {BORDER}",
+                "borderRadius": "4px",
+                "marginTop": "10px",
+            },
+            "control": {
+                "color": "white",
+                "padding": "10px 14px",
+            },
+            "panel": {
+                "padding": "0 14px 14px 14px",
+                "overflowX": "auto",
+            },
+        },
+        children=[
+            dmc.AccordionItem(
+                [
+                    dmc.AccordionControl(
+                        dmc.Group([
+                            dmc.Text("Comprehensive Statistical Delta Matrix & Volume Breakdown (15 Metrics)", fw=700, size="xs", c="white"),
+                            dmc.Badge(
+                                "ANALYST MATRIX (OPEN)" if scout_analyst_mode == "analyst" else "PROGRESSIVE DISCLOSURE",
+                                color="indigo" if scout_analyst_mode == "analyst" else "teal",
+                                variant="light",
+                                size="xs",
+                            ),
+                            dmc.Text("Click to expand side-by-side production and +/- differentials", size="10px", c="dimmed"),
+                        ], gap="xs")
+                    ),
+                    dmc.AccordionPanel(stats_table),
+                ],
+                value="matrix",
+            )
+        ],
+    )
+    stats_matrix_ui = html.Div([executive_verdict, stats_table_accordion])
 
     # 4. Tactical Profiles Cards Grid
     profile_cards = []

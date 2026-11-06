@@ -122,156 +122,184 @@ layout = dmc.Container(
                     gap="sm",
                 ),
 
-                dmc.Divider(my="sm", color="rgba(255, 255, 255, 0.06)"),
+                # Progressive Disclosure: Secondary & Compound Filters Accordion (Layer 2)
+                dmc.Accordion(
+                    styles={
+                        "item": {"border": "none", "backgroundColor": "transparent"},
+                        "control": {
+                            "padding": "6px 0px",
+                            "color": "#94A3B8",
+                            "&:hover": {"backgroundColor": "transparent"},
+                        },
+                        "panel": {"padding": "8px 0px 0px 0px"},
+                    },
+                    children=[
+                        dmc.AccordionItem(
+                            [
+                                dmc.AccordionControl(
+                                    dmc.Group([
+                                        dmc.Badge("⚙ ADVANCED SCREENING", color="gray", variant="outline", size="xs"),
+                                        dmc.Text("Club, Nationality, Sort Metric, Min Minutes & Compound Threshold Sliders", size="xs", c="dimmed"),
+                                    ], gap="xs")
+                                ),
+                                dmc.AccordionPanel(
+                                    dmc.Box([
+                                        dmc.Divider(mb="sm", color="rgba(255, 255, 255, 0.06)"),
+                                        # Secondary Sorting & Screening Row
+                                        dmc.Grid(
+                                            [
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="explorer-sort-attr",
+                                                        label="Sort Metric",
+                                                        data=[
+                                                            {"label": f"{name} (Percentile)", "value": col}
+                                                            for name, col in ATTRIBUTE_COLUMNS.items()
+                                                        ] + [
+                                                            {"label": "Finishing Diff (G - xG)", "value": "G-xG"},
+                                                            {"label": "Shot Quality (npxG/Sh)", "value": "npxG/Sh"},
+                                                            {"label": "Minutes Played", "value": "Min"},
+                                                            {"label": "Goals", "value": "Gls"},
+                                                            {"label": "Assists", "value": "Ast"},
+                                                            {"label": "Expected Goals (xG)", "value": "xG"},
+                                                            {"label": "pAdj Defending Actions", "value": "Tkl_pAdj_per90"},
+                                                            {"label": "Age", "value": "Age"},
+                                                        ],
+                                                        value="Finishing_Score",
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="explorer-sort-order",
+                                                        label="Order",
+                                                        data=[
+                                                            {"label": "Highest First (Desc)", "value": "desc"},
+                                                            {"label": "Lowest First (Asc)", "value": "asc"},
+                                                        ],
+                                                        value="desc",
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 2},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="explorer-squad",
+                                                        label="Club / Squad",
+                                                        data=[{"label": "All Clubs", "value": "ALL"}] + [
+                                                            {"label": s, "value": s} for s in unique_squads
+                                                        ],
+                                                        value="ALL",
+                                                        searchable=True,
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3.5},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="explorer-nation",
+                                                        label="Nationality",
+                                                        data=[{"label": "All Nationalities", "value": "ALL"}] + [
+                                                            {"label": n, "value": n} for n in unique_nations
+                                                        ],
+                                                        value="ALL",
+                                                        searchable=True,
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3.5},
+                                                ),
+                                            ],
+                                            gap="sm",
+                                        ),
 
-                # Secondary Sorting & Screening Row
-                dmc.Grid(
-                    [
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="explorer-sort-attr",
-                                label="Sort Metric",
-                                data=[
-                                    {"label": f"{name} (Percentile)", "value": col}
-                                    for name, col in ATTRIBUTE_COLUMNS.items()
-                                ] + [
-                                    {"label": "Finishing Diff (G - xG)", "value": "G-xG"},
-                                    {"label": "Shot Quality (npxG/Sh)", "value": "npxG/Sh"},
-                                    {"label": "Minutes Played", "value": "Min"},
-                                    {"label": "Goals", "value": "Gls"},
-                                    {"label": "Assists", "value": "Ast"},
-                                    {"label": "Expected Goals (xG)", "value": "xG"},
-                                    {"label": "pAdj Defending Actions", "value": "Tkl_pAdj_per90"},
-                                    {"label": "Age", "value": "Age"},
-                                ],
-                                value="Finishing_Score",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="explorer-sort-order",
-                                label="Order",
-                                data=[
-                                    {"label": "Highest First (Desc)", "value": "desc"},
-                                    {"label": "Lowest First (Asc)", "value": "asc"},
-                                ],
-                                value="desc",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 2},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="explorer-squad",
-                                label="Club / Squad",
-                                data=[{"label": "All Clubs", "value": "ALL"}] + [
-                                    {"label": s, "value": s} for s in unique_squads
-                                ],
-                                value="ALL",
-                                searchable=True,
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 3.5},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="explorer-nation",
-                                label="Nationality",
-                                data=[{"label": "All Nationalities", "value": "ALL"}] + [
-                                    {"label": n, "value": n} for n in unique_nations
-                                ],
-                                value="ALL",
-                                searchable=True,
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 3.5},
-                        ),
+                                        dmc.Space(h=10),
+
+                                        # Tertiary Threshold Sliders Row
+                                        dmc.Grid(
+                                            [
+                                                dmc.GridCol(
+                                                    dmc.Box([
+                                                        dmc.Text("Minimum Minutes", size="11px", fw=600, c=SUBTLE, mb=4),
+                                                        dmc.Slider(
+                                                            id="explorer-min-minutes",
+                                                            min=600,
+                                                            max=3000,
+                                                            step=100,
+                                                            value=600,
+                                                            marks=[
+                                                                {"value": 600, "label": "600m"},
+                                                                {"value": 1500, "label": "1500m"},
+                                                                {"value": 2500, "label": "2500m"},
+                                                            ],
+                                                            color="teal",
+                                                            size="xs",
+                                                        ),
+                                                    ]),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Box([
+                                                        dmc.Text("Min Score (Primary Metric)", size="11px", fw=600, c=SUBTLE, mb=4),
+                                                        dmc.Slider(
+                                                            id="explorer-min-score",
+                                                            min=0,
+                                                            max=90,
+                                                            step=5,
+                                                            value=0,
+                                                            marks=[
+                                                                {"value": 0, "label": "0"},
+                                                                {"value": 50, "label": "50"},
+                                                                {"value": 80, "label": "80"},
+                                                            ],
+                                                            color="teal",
+                                                            size="xs",
+                                                        ),
+                                                    ]),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="explorer-sec-attr",
+                                                        label="Compound Secondary Attribute",
+                                                        data=[{"label": "None (No Secondary Filter)", "value": "NONE"}] + [
+                                                            {"label": name, "value": col}
+                                                            for name, col in ATTRIBUTE_COLUMNS.items()
+                                                        ],
+                                                        value="NONE",
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Box([
+                                                        dmc.Text("Min Score (Secondary Metric)", size="11px", fw=600, c=SUBTLE, mb=4),
+                                                        dmc.Slider(
+                                                            id="explorer-sec-score",
+                                                            min=0,
+                                                            max=90,
+                                                            step=5,
+                                                            value=0,
+                                                            marks=[
+                                                                {"value": 0, "label": "0"},
+                                                                {"value": 50, "label": "50"},
+                                                                {"value": 80, "label": "80"},
+                                                            ],
+                                                            color="teal",
+                                                            size="xs",
+                                                        ),
+                                                    ]),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                            ],
+                                            gap="sm",
+                                        ),
+                                    ])
+                                ),
+                            ],
+                            value="advanced",
+                        )
                     ],
-                    gap="sm",
-                ),
-
-                dmc.Divider(my="sm", color="rgba(255, 255, 255, 0.06)"),
-
-                # Tertiary Threshold Sliders Row
-                dmc.Grid(
-                    [
-                        dmc.GridCol(
-                            dmc.Box([
-                                dmc.Text("Minimum Minutes", size="11px", fw=600, c=SUBTLE, mb=4),
-                                dmc.Slider(
-                                    id="explorer-min-minutes",
-                                    min=600,
-                                    max=3000,
-                                    step=100,
-                                    value=600,
-                                    marks=[
-                                        {"value": 600, "label": "600m"},
-                                        {"value": 1500, "label": "1500m"},
-                                        {"value": 2500, "label": "2500m"},
-                                    ],
-                                    color="teal",
-                                    size="xs",
-                                ),
-                            ]),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                        dmc.GridCol(
-                            dmc.Box([
-                                dmc.Text("Min Score (Primary Metric)", size="11px", fw=600, c=SUBTLE, mb=4),
-                                dmc.Slider(
-                                    id="explorer-min-score",
-                                    min=0,
-                                    max=90,
-                                    step=5,
-                                    value=0,
-                                    marks=[
-                                        {"value": 0, "label": "0"},
-                                        {"value": 50, "label": "50"},
-                                        {"value": 80, "label": "80"},
-                                    ],
-                                    color="teal",
-                                    size="xs",
-                                ),
-                            ]),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="explorer-sec-attr",
-                                label="Compound Secondary Attribute",
-                                data=[{"label": "None (No Secondary Filter)", "value": "NONE"}] + [
-                                    {"label": name, "value": col}
-                                    for name, col in ATTRIBUTE_COLUMNS.items()
-                                ],
-                                value="NONE",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                        dmc.GridCol(
-                            dmc.Box([
-                                dmc.Text("Min Score (Secondary Metric)", size="11px", fw=600, c=SUBTLE, mb=4),
-                                dmc.Slider(
-                                    id="explorer-sec-score",
-                                    min=0,
-                                    max=90,
-                                    step=5,
-                                    value=0,
-                                    marks=[
-                                        {"value": 0, "label": "0"},
-                                        {"value": 50, "label": "50"},
-                                        {"value": 80, "label": "80"},
-                                    ],
-                                    color="teal",
-                                    size="xs",
-                                ),
-                            ]),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                    ],
-                    gap="sm",
                 ),
             ],
             withBorder=True,
