@@ -182,12 +182,12 @@ def create_section_card(children, title=None, subtitle=None, extra_header=None, 
     """
     card_children = []
 
-    if title or extra_header:
+    if title or extra_header is not None:
         header_box = dmc.Box([
             dmc.Title(title, order=4, c="white") if title else html.Div(),
             dmc.Text(subtitle, size="xs", c="dimmed", mt=2) if subtitle else html.Div(),
         ])
-        if extra_header:
+        if extra_header is not None:
             card_children.append(
                 dmc.Group([header_box, extra_header], justify="space-between", align="center", wrap="wrap", mb="md")
             )
