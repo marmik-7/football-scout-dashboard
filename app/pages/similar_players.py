@@ -10,6 +10,7 @@ from app.utils.data_loader import (
     get_all_player_names,
     get_unique_squads,
     get_unique_competitions,
+    get_unique_subroles,
 )
 from app.utils.styling import (
     PANEL,
@@ -32,6 +33,7 @@ df = load_data()
 all_player_names = get_all_player_names()
 unique_squads = get_unique_squads()
 unique_competitions = get_unique_competitions()
+unique_subroles = get_unique_subroles()
 
 DEFAULT_PLAYER = "Trent Alexander-Arnold" if "Trent Alexander-Arnold" in all_player_names else all_player_names[0]
 
@@ -49,96 +51,120 @@ def layout(player=None, **kwargs):
 
             # FILTER AND CONFIG PANEL
             create_section_card(
-                dmc.Grid(
-                    [
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="similar-ref-player",
-                                label="Target / Benchmark Player",
-                                placeholder="Choose reference player...",
-                                data=[{"label": name, "value": name} for name in all_player_names],
-                                value=initial_player,
-                                searchable=True,
-                                allowDeselect=False,
+                dmc.Box([
+                    # Row 1: Target Player & Positional / Geographic Filters
+                    dmc.Grid(
+                        [
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-ref-player",
+                                    label="Target / Benchmark Player",
+                                    placeholder="Choose reference player...",
+                                    data=[{"label": name, "value": name} for name in all_player_names],
+                                    value=initial_player,
+                                    searchable=True,
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 6, "md": 3},
                             ),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="similar-pos-filter",
-                                label="Candidate Position Scope",
-                                data=[
-                                    {"label": "Same Position (Recommended)", "value": "SAME"},
-                                    {"label": "All Positions (Cross-Position)", "value": "ALL"},
-                                    {"label": "Defenders Only (DF)", "value": "DF"},
-                                    {"label": "Midfielders Only (MF)", "value": "MF"},
-                                    {"label": "Forwards Only (FW)", "value": "FW"},
-                                ],
-                                value="SAME",
-                                allowDeselect=False,
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-pos-filter",
+                                    label="Candidate Position Scope",
+                                    data=[
+                                        {"label": "Same Position (Recommended)", "value": "SAME"},
+                                        {"label": "All Positions (Cross-Position)", "value": "ALL"},
+                                        {"label": "Defenders Only (DF)", "value": "DF"},
+                                        {"label": "Midfielders Only (MF)", "value": "MF"},
+                                        {"label": "Forwards Only (FW)", "value": "FW"},
+                                    ],
+                                    value="SAME",
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 6, "md": 2},
                             ),
-                            span={"base": 12, "sm": 6, "md": 2},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="similar-comp-filter",
-                                label="Target League",
-                                data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
-                                    {"label": c, "value": c} for c in unique_competitions
-                                ],
-                                value="ALL",
-                                allowDeselect=False,
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-subrole-filter",
+                                    label="Tactical Sub-Role",
+                                    data=[{"label": "All Sub-Roles", "value": "ALL"}] + [
+                                        {"label": s, "value": s} for s in unique_subroles
+                                    ],
+                                    value="ALL",
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 6, "md": 2.5},
                             ),
-                            span={"base": 12, "sm": 6, "md": 2},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="similar-club-filter",
-                                label="Candidate Club",
-                                data=[{"label": "All Clubs", "value": "ALL"}] + [
-                                    {"label": s, "value": s} for s in unique_squads
-                                ],
-                                value="ALL",
-                                searchable=True,
-                                allowDeselect=False,
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-comp-filter",
+                                    label="Target League",
+                                    data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
+                                        {"label": c, "value": c} for c in unique_competitions
+                                    ],
+                                    value="ALL",
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 6, "md": 2.5},
                             ),
-                            span={"base": 12, "sm": 6, "md": 2},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="similar-age-filter",
-                                label="Max Age (Succession)",
-                                data=[
-                                    {"label": "Any Age", "value": "ALL"},
-                                    {"label": "U-21 Only (≤21)", "value": "21"},
-                                    {"label": "U-23 Only (≤23)", "value": "23"},
-                                    {"label": "Under 26 (≤26)", "value": "26"},
-                                ],
-                                value="ALL",
-                                allowDeselect=False,
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-age-filter",
+                                    label="Max Age (Succession)",
+                                    data=[
+                                        {"label": "Any Age", "value": "ALL"},
+                                        {"label": "U-21 Only (≤21)", "value": "21"},
+                                        {"label": "U-23 Only (≤23)", "value": "23"},
+                                        {"label": "Under 26 (≤26)", "value": "26"},
+                                    ],
+                                    value="ALL",
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 6, "md": 2},
                             ),
-                            span={"base": 12, "sm": 6, "md": 2},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="similar-top-n",
-                                label="Results Count",
-                                data=[
-                                    {"label": "Top 5", "value": 5},
-                                    {"label": "Top 10", "value": 10},
-                                    {"label": "Top 15", "value": 15},
-                                    {"label": "Top 20", "value": 20},
-                                ],
-                                value=10,
-                                allowDeselect=False,
+                        ],
+                        gap="md",
+                    ),
+
+                    dmc.Space(h=12),
+
+                    # Row 2: Candidate Club & Depth
+                    dmc.Grid(
+                        [
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-club-filter",
+                                    label="Candidate Club",
+                                    data=[{"label": "All Clubs", "value": "ALL"}] + [
+                                        {"label": s, "value": s} for s in unique_squads
+                                    ],
+                                    value="ALL",
+                                    searchable=True,
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 8, "md": 8},
                             ),
-                            span={"base": 12, "sm": 6, "md": 1},
-                        ),
-                    ],
-                    gap="md",
-                ),
+                            dmc.GridCol(
+                                dmc.Select(
+                                    id="similar-top-n",
+                                    label="Results Count",
+                                    data=[
+                                        {"label": "Top 5", "value": 5},
+                                        {"label": "Top 10", "value": 10},
+                                        {"label": "Top 15", "value": 15},
+                                        {"label": "Top 20", "value": 20},
+                                    ],
+                                    value=10,
+                                    allowDeselect=False,
+                                ),
+                                span={"base": 12, "sm": 4, "md": 4},
+                            ),
+                        ],
+                        gap="md",
+                    ),
+                ]),
                 title="Similarity Query Parameters",
-                subtitle="Select the benchmark player and configure candidate search constraints",
+                subtitle="Select the benchmark player and configure candidate search constraints across leagues and roles",
             ),
 
             dmc.Space(h=20),
@@ -200,12 +226,13 @@ def layout(player=None, **kwargs):
     Output("similar-table-container", "children"),
     Input("similar-ref-player", "value"),
     Input("similar-pos-filter", "value"),
+    Input("similar-subrole-filter", "value"),
     Input("similar-club-filter", "value"),
     Input("similar-comp-filter", "value"),
     Input("similar-age-filter", "value"),
     Input("similar-top-n", "value"),
 )
-def update_similar_players(ref_name, pos_filter, club_filter, comp_filter, max_age, top_n):
+def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, comp_filter, max_age, top_n):
     ref_player = get_player_by_name(ref_name)
     if ref_player is None:
         ref_player = get_player_by_name(DEFAULT_PLAYER)
@@ -217,6 +244,7 @@ def update_similar_players(ref_name, pos_filter, club_filter, comp_filter, max_a
         club_filter=club_filter,
         comp_filter=comp_filter,
         max_age=max_age,
+        subrole_filter=subrole_filter,
         top_n=top_n,
     )
 
@@ -369,7 +397,10 @@ def update_similar_players(ref_name, pos_filter, club_filter, comp_filter, max_a
                     dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
                     dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
                 ]),
-                dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
+                dmc.TableTd([
+                    dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
+                    dmc.Text(r.get("SubRole", ""), size="10px", c="dimmed", mt=2),
+                ]),
                 dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
                 dmc.TableTd(
                     dmc.Badge(f"{sim_pct:.1f}%", style={"backgroundColor": "rgba(23, 36, 56, 0.9)", "color": sim_color, "border": f"1px solid {sim_color}"}, size="sm")

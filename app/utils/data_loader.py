@@ -182,6 +182,21 @@ def get_unique_competitions():
     return ["Bundesliga", "La Liga", "Ligue 1", "Premier League", "Serie A"]
 
 
+def get_unique_subroles():
+    """
+    Returns ordered list of tactical sub-roles.
+    """
+    return [
+        "Center-Back",
+        "Full-Back / Wing-Back",
+        "Defensive Midfielder",
+        "Central Midfielder",
+        "Attacking Midfielder",
+        "Center Forward",
+        "Winger",
+    ]
+
+
 def get_unique_nations():
     """
     Returns sorted list of unique clean nations.

@@ -9,6 +9,7 @@ from app.utils.data_loader import (
     get_unique_squads,
     get_unique_nations,
     get_unique_competitions,
+    get_unique_subroles,
 )
 from app.utils.styling import (
     PANEL,
@@ -31,6 +32,7 @@ df = load_data()
 unique_squads = get_unique_squads()
 unique_nations = get_unique_nations()
 unique_competitions = get_unique_competitions()
+unique_subroles = get_unique_subroles()
 
 
 # --------------------------------------------------
@@ -47,110 +49,134 @@ layout = dmc.Container(
 
         # FILTER AND RANKING CONTROLS
         create_section_card(
-            dmc.Grid(
-                [
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-pos",
-                            label="Position Scope",
-                            data=[
-                                {"label": "Forwards (FW) — Default", "value": "FW"},
-                                {"label": "Midfielders (MF)", "value": "MF"},
-                                {"label": "Defenders (DF)", "value": "DF"},
-                                {"label": "All Positions (Cross-Position)", "value": "ALL"},
-                            ],
-                            value="FW",
-                            allowDeselect=False,
+            dmc.Box([
+                # Row 1: Positional & Geographic Scope
+                dmc.Grid(
+                    [
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-pos",
+                                label="Position Scope",
+                                data=[
+                                    {"label": "Forwards (FW) — Default", "value": "FW"},
+                                    {"label": "Midfielders (MF)", "value": "MF"},
+                                    {"label": "Defenders (DF)", "value": "DF"},
+                                    {"label": "All Positions (Cross-Position)", "value": "ALL"},
+                                ],
+                                value="FW",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 2},
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
-                    ),
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-attr",
-                            label="Target Attribute",
-                            data=[
-                                {"label": name, "value": name}
-                                for name in ATTRIBUTE_COLUMNS
-                            ],
-                            value="Finishing",
-                            allowDeselect=False,
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-subrole",
+                                label="Tactical Sub-Role",
+                                data=[{"label": "All Sub-Roles", "value": "ALL"}] + [
+                                    {"label": s, "value": s} for s in unique_subroles
+                                ],
+                                value="ALL",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 2},
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
-                    ),
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-comp",
-                            label="League / Competition",
-                            data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
-                                {"label": c, "value": c} for c in unique_competitions
-                            ],
-                            value="ALL",
-                            allowDeselect=False,
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-attr",
+                                label="Target Attribute",
+                                data=[
+                                    {"label": name, "value": name}
+                                    for name in ATTRIBUTE_COLUMNS
+                                ],
+                                value="Finishing",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 3},
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
-                    ),
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-age-group",
-                            label="Age Bracket",
-                            data=[
-                                {"label": "All Ages", "value": "ALL"},
-                                {"label": "U-21 Prospects (≤21)", "value": "U21"},
-                                {"label": "U-23 Emerging (≤23)", "value": "U23"},
-                                {"label": "Peak Prime (24–29)", "value": "PRIME"},
-                                {"label": "Experienced (30+)", "value": "30PLUS"},
-                            ],
-                            value="ALL",
-                            allowDeselect=False,
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-comp",
+                                label="League / Competition",
+                                data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
+                                    {"label": c, "value": c} for c in unique_competitions
+                                ],
+                                value="ALL",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 2.5},
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
-                    ),
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-depth",
-                            label="Leaderboard Depth",
-                            data=[
-                                {"label": "Top 10 Leaders", "value": 10},
-                                {"label": "Top 25 Leaders", "value": 25},
-                                {"label": "Top 50 Leaders", "value": 50},
-                                {"label": "Top 100 Leaders", "value": 100},
-                            ],
-                            value=10,
-                            allowDeselect=False,
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-age-group",
+                                label="Age Bracket",
+                                data=[
+                                    {"label": "All Ages", "value": "ALL"},
+                                    {"label": "U-21 Prospects (≤21)", "value": "U21"},
+                                    {"label": "U-23 Emerging (≤23)", "value": "U23"},
+                                    {"label": "Peak Prime (24–29)", "value": "PRIME"},
+                                    {"label": "Experienced (30+)", "value": "30PLUS"},
+                                ],
+                                value="ALL",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 2.5},
                         ),
-                        span={"base": 6, "sm": 6, "md": 1},
-                    ),
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-order",
-                            label="Sort Direction",
-                            data=[
-                                {"label": "Highest First", "value": "desc"},
-                                {"label": "Lowest First", "value": "asc"},
-                            ],
-                            value="desc",
-                            allowDeselect=False,
+                    ],
+                    gap="md",
+                ),
+
+                dmc.Space(h=12),
+
+                # Row 2: Club & Output Depth
+                dmc.Grid(
+                    [
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-squad",
+                                label="Club / Squad",
+                                data=[{"label": "All Clubs", "value": "ALL"}] + [
+                                    {"label": s, "value": s} for s in unique_squads
+                                ],
+                                value="ALL",
+                                searchable=True,
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 4},
                         ),
-                        span={"base": 6, "sm": 6, "md": 1},
-                    ),
-                    dmc.GridCol(
-                        dmc.Select(
-                            id="rankings-squad",
-                            label="Club / Squad",
-                            data=[{"label": "All Clubs", "value": "ALL"}] + [
-                                {"label": s, "value": s} for s in unique_squads
-                            ],
-                            value="ALL",
-                            searchable=True,
-                            allowDeselect=False,
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-depth",
+                                label="Leaderboard Depth",
+                                data=[
+                                    {"label": "Top 10 Leaders", "value": 10},
+                                    {"label": "Top 25 Leaders", "value": 25},
+                                    {"label": "Top 50 Leaders", "value": 50},
+                                    {"label": "Top 100 Leaders", "value": 100},
+                                ],
+                                value=10,
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 4},
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
-                    ),
-                ],
-                gap="md",
-            ),
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-order",
+                                label="Sort Direction",
+                                data=[
+                                    {"label": "Highest First (Ascending = False)", "value": "desc"},
+                                    {"label": "Lowest First (Ascending = True)", "value": "asc"},
+                                ],
+                                value="desc",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 4},
+                        ),
+                    ],
+                    gap="md",
+                ),
+            ]),
             title="Leaderboard Filters",
-            subtitle="Select the ranking dimension, positional scope, and candidate sample depth",
+            subtitle="Benchmark players across position groups, tactical sub-roles, competitions, and age brackets",
         ),
 
         dmc.Space(h=15),
@@ -194,6 +220,7 @@ layout = dmc.Container(
     Output("rankings-bar-chart", "figure"),
     Output("rankings-table-container", "children"),
     Input("rankings-pos", "value"),
+    Input("rankings-subrole", "value"),
     Input("rankings-attr", "value"),
     Input("rankings-comp", "value"),
     Input("rankings-age-group", "value"),
@@ -201,7 +228,7 @@ layout = dmc.Container(
     Input("rankings-order", "value"),
     Input("rankings-squad", "value"),
 )
-def update_rankings(pos, attr, comp, age_group, depth, order, squad):
+def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
     if not attr or attr not in ATTRIBUTE_COLUMNS:
         attr = "Finishing"
     if not pos or pos not in ["FW", "MF", "DF", "ALL"]:
@@ -242,6 +269,11 @@ def update_rankings(pos, attr, comp, age_group, depth, order, squad):
     filtered = df.copy()
     if pos != "ALL":
         filtered = filtered[filtered["Pos"] == pos]
+
+    # Tactical Sub-Role filter
+    if subrole and subrole != "ALL" and "SubRole" in filtered.columns:
+        filtered = filtered[filtered["SubRole"] == subrole]
+        pos_display = f"{subrole}s" if not subrole.endswith("s") else subrole
 
     # League / Competition filter
     if comp and comp != "ALL":
@@ -371,7 +403,10 @@ def update_rankings(pos, attr, comp, age_group, depth, order, squad):
                     dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
                     dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
                 ]),
-                dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
+                dmc.TableTd([
+                    dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
+                    dmc.Text(r.get("SubRole", ""), size="10px", c="dimmed", mt=2),
+                ]),
                 dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="sm", fw=700, style={"color": tier["color"]})),

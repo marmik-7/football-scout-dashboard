@@ -43,7 +43,7 @@ def _init_similarity_cache():
     }
 
 
-def find_similar_players(player_name, position_filter=None, club_filter=None, comp_filter=None, max_age=None, top_n=10):
+def find_similar_players(player_name, position_filter=None, club_filter=None, comp_filter=None, max_age=None, subrole_filter=None, top_n=10):
     """
     Finds the most statistically similar players to a reference player
     using cosine similarity on standardized attribute features.
@@ -54,6 +54,7 @@ def find_similar_players(player_name, position_filter=None, club_filter=None, co
         club_filter (str): Optional club name to filter candidates.
         comp_filter (str): Optional league name (e.g. "Premier League") to filter candidates.
         max_age (int/str): Optional max age threshold for youth/succession planning.
+        subrole_filter (str): Optional tactical sub-role (e.g. "Center-Back", "Winger").
         top_n (int): Number of similar players to retrieve.
 
     Returns:
@@ -116,6 +117,10 @@ def find_similar_players(player_name, position_filter=None, club_filter=None, co
             candidates = candidates[(candidates["Age"] > 0) & (candidates["Age"] <= m_age)]
         except (ValueError, TypeError):
             pass
+
+    # Optional tactical sub-role filter
+    if subrole_filter and str(subrole_filter).strip() and subrole_filter != "ALL":
+        candidates = candidates[candidates["SubRole"] == subrole_filter]
 
     if candidates.empty:
         return pd.DataFrame()

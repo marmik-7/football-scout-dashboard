@@ -9,6 +9,7 @@ from app.utils.data_loader import (
     get_unique_squads,
     get_unique_nations,
     get_unique_competitions,
+    get_unique_subroles,
 )
 from app.utils.styling import (
     PANEL,
@@ -29,6 +30,7 @@ df = load_data()
 unique_squads = get_unique_squads()
 unique_nations = get_unique_nations()
 unique_competitions = get_unique_competitions()
+unique_subroles = get_unique_subroles()
 
 PAGE_SIZE = 15
 
@@ -119,9 +121,21 @@ layout = dmc.Container(
 
                 dmc.Space(h=15),
 
-                # Row 2: Age Bracket, Minutes & Sorting
+                # Row 2: Sub-Role, Age Bracket & Sorting
                 dmc.Grid(
                     [
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="explorer-subrole",
+                                label="Tactical Sub-Role",
+                                data=[{"label": "All Sub-Roles", "value": "ALL"}] + [
+                                    {"label": s, "value": s} for s in unique_subroles
+                                ],
+                                value="ALL",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 3},
+                        ),
                         dmc.GridCol(
                             dmc.Select(
                                 id="explorer-age-preset",
@@ -139,25 +153,6 @@ layout = dmc.Container(
                             span={"base": 12, "sm": 6, "md": 3},
                         ),
                         dmc.GridCol(
-                            dmc.Box([
-                                dmc.Text("Minimum Minutes", size="xs", fw=500, c="dimmed", mb=4),
-                                dmc.Slider(
-                                    id="explorer-min-minutes",
-                                    min=600,
-                                    max=3000,
-                                    step=100,
-                                    value=600,
-                                    marks=[
-                                        {"value": 600, "label": "600m"},
-                                        {"value": 1500, "label": "1500m"},
-                                        {"value": 2500, "label": "2500m"},
-                                    ],
-                                    color="lime",
-                                ),
-                            ]),
-                            span={"base": 12, "sm": 6, "md": 3},
-                        ),
-                        dmc.GridCol(
                             dmc.Select(
                                 id="explorer-sort-attr",
                                 label="Rank / Sort By",
@@ -165,10 +160,13 @@ layout = dmc.Container(
                                     {"label": name, "value": col}
                                     for name, col in ATTRIBUTE_COLUMNS.items()
                                 ] + [
+                                    {"label": "Finishing Overperf. (G - xG)", "value": "G-xG"},
+                                    {"label": "Shot Quality (npxG/Sh)", "value": "npxG/Sh"},
                                     {"label": "Minutes Played", "value": "Min"},
                                     {"label": "Goals", "value": "Gls"},
                                     {"label": "Assists", "value": "Ast"},
                                     {"label": "Expected Goals (xG)", "value": "xG"},
+                                    {"label": "pAdj Defending Actions/90", "value": "Tkl_pAdj_per90"},
                                     {"label": "Age", "value": "Age"},
                                 ],
                                 value="Finishing_Score",
@@ -195,12 +193,31 @@ layout = dmc.Container(
 
                 dmc.Space(h=15),
 
-                # Row 3: Multi-Attribute Screening Thresholds
+                # Row 3: Minimum Minutes & Multi-Attribute Screening Thresholds
                 dmc.Grid(
                     [
                         dmc.GridCol(
                             dmc.Box([
-                                dmc.Text("Min Score (Sorted Attribute)", size="xs", fw=500, c="dimmed", mb=4),
+                                dmc.Text("Minimum Minutes", size="xs", fw=500, c="dimmed", mb=4),
+                                dmc.Slider(
+                                    id="explorer-min-minutes",
+                                    min=600,
+                                    max=3000,
+                                    step=100,
+                                    value=600,
+                                    marks=[
+                                        {"value": 600, "label": "600m"},
+                                        {"value": 1500, "label": "1500m"},
+                                        {"value": 2500, "label": "2500m"},
+                                    ],
+                                    color="lime",
+                                ),
+                            ]),
+                            span={"base": 12, "sm": 6, "md": 3},
+                        ),
+                        dmc.GridCol(
+                            dmc.Box([
+                                dmc.Text("Min Score (Primary Attribute)", size="xs", fw=500, c="dimmed", mb=4),
                                 dmc.Slider(
                                     id="explorer-min-score",
                                     min=0,
@@ -215,7 +232,7 @@ layout = dmc.Container(
                                     color="lime",
                                 ),
                             ]),
-                            span={"base": 12, "sm": 6, "md": 4},
+                            span={"base": 12, "sm": 6, "md": 3},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -228,7 +245,7 @@ layout = dmc.Container(
                                 value="NONE",
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 4},
+                            span={"base": 12, "sm": 6, "md": 3},
                         ),
                         dmc.GridCol(
                             dmc.Box([
@@ -247,7 +264,7 @@ layout = dmc.Container(
                                     color="cyan",
                                 ),
                             ]),
-                            span={"base": 12, "sm": 6, "md": 4},
+                            span={"base": 12, "sm": 6, "md": 3},
                         ),
                     ],
                     gap="md",
@@ -330,6 +347,7 @@ def sync_bottom_pagination(val, total):
     Output("explorer-pagination", "total"),
     Input("explorer-search", "value"),
     Input("explorer-pos", "value"),
+    Input("explorer-subrole", "value"),
     Input("explorer-comp", "value"),
     Input("explorer-squad", "value"),
     Input("explorer-nation", "value"),
@@ -342,7 +360,7 @@ def sync_bottom_pagination(val, total):
     Input("explorer-sec-score", "value"),
     Input("explorer-pagination", "value"),
 )
-def update_explorer_table(search, pos, comp, squad, nation, age_preset, sort_attr, sort_order, min_min, min_score, sec_attr, sec_score, page):
+def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset, sort_attr, sort_order, min_min, min_score, sec_attr, sec_score, page):
     filtered = df.copy()
 
     # Search filter
@@ -353,6 +371,10 @@ def update_explorer_table(search, pos, comp, squad, nation, age_preset, sort_att
     # Position filter
     if pos and pos != "ALL":
         filtered = filtered[filtered["Pos"] == pos]
+
+    # Tactical Sub-Role filter
+    if subrole and subrole != "ALL" and "SubRole" in filtered.columns:
+        filtered = filtered[filtered["SubRole"] == subrole]
 
     # Competition / League filter
     if comp and comp != "ALL":
@@ -466,7 +488,10 @@ def update_explorer_table(search, pos, comp, squad, nation, age_preset, sort_att
                     dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
                     dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
                 ]),
-                dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
+                dmc.TableTd([
+                    dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
+                    dmc.Text(r.get("SubRole", ""), size="10px", c="dimmed", mt=2),
+                ]),
                 dmc.TableTd(dmc.Text(nat_display, size="xs", c="white")),
                 dmc.TableTd(dmc.Text(age_str, size="xs", c="white", style={"fontVariantNumeric": "tabular-nums"})),
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),

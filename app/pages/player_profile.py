@@ -202,6 +202,7 @@ def update_player_profile(selected_name, metric_mode="per90"):
     club = player["Squad"]
     pos = player["Pos"]
     pos_name = POSITION_NAMES.get(pos, pos)
+    subrole = player.get("SubRole", "Tactical Specialist")
     nation = player["Nation_Clean"]
     age = player["Age"]
     born = player["Born"]
@@ -229,6 +230,7 @@ def update_player_profile(selected_name, metric_mode="per90"):
                             [
                                 dmc.Title(name, order=2, c="white"),
                                 dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="md"),
+                                dmc.Badge(subrole, color="cyan", variant="light", size="md"),
                                 dmc.Badge(f"Style: {style_name}", color="lime", variant="outline", size="md"),
                             ],
                             gap="sm",
@@ -367,20 +369,26 @@ def update_player_profile(selected_name, metric_mode="per90"):
     # 5. Production Statistics Grid
     cmp_pct = float(player.get("Cmp%", 0.0))
     won_pct = float(player.get("Won%", 0.0))
+    padj_factor = float(player.get("pAdj_Factor", 1.0))
+    g_xg = float(player.get("G-xG", 0.0))
+    npxg_sh = float(player.get("npxG/Sh", 0.0))
 
     if metric_mode == "per90":
         stat_items = [
             ("Goals / 90", f"{player.get('Gls_per90', 0.0):.2f}", "Goals scored per 90 min"),
-            ("Assists / 90", f"{player.get('Ast_per90', 0.0):.2f}", "Goal assists per 90 min"),
             ("Expected Goals (xG) / 90", f"{player.get('xG_per90', 0.0):.2f}", "Shot quality generated / 90"),
+            ("Finishing Diff (G - xG)", f"{g_xg:+.2f}", "Over/underperformance vs xG"),
+            ("Shot Quality (npxG/Sh)", f"{npxg_sh:.2f}", "Avg chance quality per shot"),
+            ("Assists / 90", f"{player.get('Ast_per90', 0.0):.2f}", "Goal assists per 90 min"),
             ("Expected Assists (xA) / 90", f"{player.get('xA_per90', 0.0):.2f}", "Assisting chance quality / 90"),
-            ("Shots (on Target) / 90", f"{player.get('Sh_per90', 0.0):.2f} ({player.get('SoT_per90', 0.0):.2f})", "Shot volume / 90"),
             ("Key Passes / 90", f"{player.get('KP_per90', 0.0):.2f}", "Shot-creating passes / 90"),
             ("SCA / 90", f"{player.get('SCA_per90', 0.0):.2f}", "Shot-creating actions / 90"),
             ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy rate"),
             ("Prog. Passes / 90", f"{player.get('PrgP_per90', 0.0):.1f}", "Passes moving ≥10 yds closer"),
             ("Prog. Carries / 90", f"{player.get('PrgC_per90', 0.0):.1f}", "Carries moving ≥10 yds closer"),
-            ("Tackles + Int / 90", f"{player.get('Tkl_per90', 0.0) + player.get('Int_per90', 0.0):.2f}", "Defensive actions / 90"),
+            ("Shots (on Target) / 90", f"{player.get('Sh_per90', 0.0):.2f} ({player.get('SoT_per90', 0.0):.2f})", "Shot volume / 90"),
+            ("pAdj Defending / 90", f"{player.get('Tkl_pAdj_per90', 0.0) + player.get('Int_pAdj_per90', 0.0):.2f}", f"Possession-adjusted ({padj_factor:.2f}x)"),
+            ("Raw Tackles + Int / 90", f"{player.get('Tkl_per90', 0.0) + player.get('Int_per90', 0.0):.2f}", "Unadjusted match rate"),
             ("Aerials Won / 90", f"{player.get('Won_per90', 0.0):.2f}", f"Duel win rate: {won_pct:.1f}%"),
         ]
     else:
@@ -394,21 +402,25 @@ def update_player_profile(selected_name, metric_mode="per90"):
         sca = int(player.get("SCA", 0))
         prgp = int(player.get("PrgP", 0))
         prgc = int(player.get("PrgC", 0))
+        tkl_int_padj = int(player.get("Tkl_pAdj", 0) + player.get("Int_pAdj", 0))
         tkl_int = int(player.get("Tkl", 0) + player.get("Int", 0))
         won = int(player.get("Won", 0))
 
         stat_items = [
             ("Goals", str(gls), "Season total goals"),
-            ("Assists", str(ast), "Season total assists"),
             ("Expected Goals (xG)", f"{xg:.2f}", "Season total expected goals"),
+            ("Finishing Diff (G - xG)", f"{g_xg:+.2f}", "Total finishing variance vs xG"),
+            ("Shot Quality (npxG/Sh)", f"{npxg_sh:.2f}", "Avg chance quality per shot"),
+            ("Assists", str(ast), "Season total assists"),
             ("Expected Assists (xA)", f"{xa:.2f}", "Season total expected assists"),
-            ("Shots (on Target)", f"{sh} ({sot})", "Season total shooting frequency"),
             ("Key Passes", str(kp), "Season total key passes"),
             ("Shot-Creating Actions", str(sca), "Season total creation actions"),
             ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy rate"),
             ("Progressive Passes", str(prgp), "Season total prog passes"),
             ("Progressive Carries", str(prgc), "Season total prog carries"),
-            ("Tackles + Interceptions", str(tkl_int), "Season total defensive actions"),
+            ("Shots (on Target)", f"{sh} ({sot})", "Season total shooting frequency"),
+            ("pAdj Defending Actions", str(tkl_int_padj), f"Possession-adjusted ({padj_factor:.2f}x)"),
+            ("Raw Tackles + Int", str(tkl_int), "Unadjusted defensive actions"),
             ("Aerial Duels Won", str(won), f"Season won ({won_pct:.1f}% win rate)"),
         ]
 
