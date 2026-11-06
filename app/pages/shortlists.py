@@ -372,29 +372,18 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
         )
         return metrics_grid, empty_filter
 
-    # 3. Build Shortlist Table
+    # 3. Build Recruitment Pipeline Management Table (Streamlined)
     thead = dmc.TableThead(
         dmc.TableTr([
             dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("AGE (MIN)", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("ROLE DNA", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("AGE (MINUTES)", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("PRIORITY TIER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("SCOUT NOTES", style={"color": TEXT, "width": "220px", "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("ACTIONS", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("SCOUT INTELLIGENCE NOTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("RECRUITMENT ACTIONS", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
         ])
     )
-
-    def render_tier_score(score_val):
-        t = get_percentile_tier(score_val)
-        return dmc.TableTd(dmc.Text(f"{score_val:.1f}", fw=600, size="xs", style={"color": t["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"}))
 
     rows = []
     for entry, p in items:
@@ -405,15 +394,21 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
 
         pos_badge_color = "blue" if p["Pos"] == "DF" else "emerald" if p["Pos"] == "MF" else "orange"
         notes = entry.get("notes", "No notes recorded.")
+        mins = float(p.get("Min", 0))
 
         profile_url = f"/player-profile?player={p['Player_Unique']}"
         compare_url = f"/player-comparison?player1={p['Player_Unique']}"
 
+        sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px", "marginLeft": "4px"}) if mins < 900 else None
+
         rows.append(
             dmc.TableTr([
                 dmc.TableTd([
-                    dmc.Text(p_name, fw=600, size="xs", c="white"),
-                    dmc.Text(f"Added {entry.get('added_at', '2024-25')}", size="10px", c="dimmed"),
+                    dmc.Group([
+                        dmc.Text(p_name, fw=700, size="xs", c="white"),
+                        *([sample_pill] if sample_pill else []),
+                    ], gap=4, align="center"),
+                    dmc.Text(f"Added {entry.get('added_at', '2024-25 Season')} • {p.get('Nation_Display', p['Nation_Clean'])}", size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
                     dmc.Text(p["Squad"], size="xs", fw=500, c="white"),
@@ -423,24 +418,15 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
                     dmc.Badge(p["Pos"], color=pos_badge_color, variant="light", size="xs"),
                     dmc.Text(p.get("SubRole", "Specialist"), size="10px", c="dimmed", mt=2),
                 ]),
-                dmc.TableTd(dmc.Text(f"{p['Age']} ({p['Min']:,}m)", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"Age {p['Age']} ({int(mins):,}m)", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
                 dmc.TableTd(tier_badge),
                 dmc.TableTd(
-                    dmc.Text(notes, size="xs", c="#94A3B8", style={"maxWidth": "220px", "overflow": "hidden", "textOverflow": "ellipsis", "whiteSpace": "nowrap"})
+                    dmc.Text(notes, size="xs", c="#CBD5E1", style={"lineHeight": 1.45, "maxWidth": "300px"})
                 ),
-
-                render_tier_score(p["Finishing_Score"]),
-                render_tier_score(p["Creativity_Score"]),
-                render_tier_score(p["Passing_Score"]),
-                render_tier_score(p["Progression_Score"]),
-                render_tier_score(p["Defending_Score"]),
-                render_tier_score(p["BallSecurity_Score"]),
-                render_tier_score(p["Aerial_Score"]),
-
                 dmc.TableTd(
                     dmc.Group([
                         dcc.Link(
-                            dmc.Button("Dossier", size="xs", variant="subtle", color="emerald"),
+                            dmc.Button("Dossier →", size="xs", variant="subtle", color="emerald"),
                             href=profile_url,
                             style={"textDecoration": "none"},
                         ),
