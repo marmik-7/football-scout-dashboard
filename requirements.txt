@@ -2,4 +2,5 @@ dash>=4.5.0
 dash-mantine-components>=3.0.0
 plotly>=7.0.0
 pandas>=3.0.0
+numpy>=1.26.0
 scikit-learn>=1.9.0

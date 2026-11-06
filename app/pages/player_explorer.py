@@ -273,9 +273,9 @@ def update_explorer_table(search, pos, squad, nation, sort_attr, sort_order, min
     if pos and pos != "ALL":
         filtered = filtered[filtered["Pos"] == pos]
 
-    # Squad filter
+    # Squad filter (matches individual club or multi-club stint)
     if squad and squad != "ALL":
-        filtered = filtered[filtered["Squad"] == squad]
+        filtered = filtered[filtered["Squad"].apply(lambda s: squad in [c.strip() for c in str(s).split(",")])]
 
     # Nation filter
     if nation and nation != "ALL":

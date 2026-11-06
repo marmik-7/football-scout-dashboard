@@ -99,9 +99,9 @@ def find_similar_players(player_name, position_filter=None, club_filter=None, to
     # Exclude the reference player itself
     candidates = candidates[candidates.index != ref_idx]
 
-    # Optional club filter
+    # Optional club filter (supports multi-club transfer records)
     if club_filter and str(club_filter).strip() and club_filter != "ALL":
-        candidates = candidates[candidates["Squad"] == club_filter]
+        candidates = candidates[candidates["Squad"].apply(lambda s: club_filter in [c.strip() for c in str(s).split(",")])]
 
     if candidates.empty:
         return pd.DataFrame()
@@ -110,10 +110,10 @@ def find_similar_players(player_name, position_filter=None, club_filter=None, to
     results = candidates.sort_values("Similarity_Score", ascending=False).head(top_n).copy()
 
     # Scale similarity score to intuitive percentage (0 to 100%)
-    # Cosine similarity of standardized vectors can be negative, so map smoothly:
-    # Most close players have cosine similarity between 0.70 and 0.99
+    # Similarity_Score is Pearson correlation r in [-1, 1] on standardized attributes.
+    # Positive correlation scales linearly to 0–100%; negative or zero correlation represents 0% match.
     results["Similarity_Pct"] = results["Similarity_Score"].apply(
-        lambda s: max(0.0, min(100.0, ((s + 1.0) / 2.0) * 100.0))
+        lambda s: max(0.0, min(100.0, float(s) * 100.0))
     )
 
     return results

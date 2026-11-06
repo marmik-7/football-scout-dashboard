@@ -212,7 +212,7 @@ def update_rankings(pos, attr, depth, order, squad):
         filtered = filtered[filtered["Pos"] == pos]
 
     if squad and squad != "ALL":
-        filtered = filtered[filtered["Squad"] == squad]
+        filtered = filtered[filtered["Squad"].apply(lambda s: squad in [c.strip() for c in str(s).split(",")])]
 
     if filtered.empty:
         empty_fig = go.Figure()

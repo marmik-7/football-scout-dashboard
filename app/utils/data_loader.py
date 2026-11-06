@@ -12,13 +12,13 @@ CLUSTER_NAMES = {
     ("DF", 1): "Ball-Playing Centre-Back",
     ("DF", 2): "Wide Transition Defender",
     ("DF", 3): "Stopper / Defensive Anchor",
-    ("MF", 0): "Ball-Winning Anchor",
-    ("MF", 1): "Box-to-Box Threat",
+    ("MF", 0): "Box-to-Box Threat",
+    ("MF", 1): "Ball-Winning Anchor",
     ("MF", 2): "Deep-Lying Controller",
     ("MF", 3): "Advanced Playmaker",
-    ("FW", 0): "Aerial Target Man",
-    ("FW", 1): "High-Pressing Winger",
-    ("FW", 2): "Complete Forward",
+    ("FW", 0): "Complete Forward",
+    ("FW", 1): "Aerial Target Man",
+    ("FW", 2): "High-Pressing Forward",
     ("FW", 3): "Dynamic Inverted Creator",
 }
 
@@ -140,10 +140,17 @@ def get_all_player_names():
 
 def get_unique_squads():
     """
-    Returns sorted list of unique club squads.
+    Returns sorted list of distinct individual club names.
+    Splits multi-club transfer strings so every club appears cleanly.
     """
     df = load_data()
-    return sorted([s for s in df["Squad"].dropna().unique() if str(s).strip()])
+    squads = set()
+    for s in df["Squad"].dropna():
+        for club in str(s).split(","):
+            clean_club = club.strip()
+            if clean_club:
+                squads.add(clean_club)
+    return sorted(list(squads))
 
 
 def get_unique_nations():
