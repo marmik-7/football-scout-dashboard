@@ -153,6 +153,16 @@ def layout(player=None, **kwargs):
                             html.Div(id="profile-stats-grid"),
                             title="Season Production Statistics",
                             subtitle="Key volume and efficiency metrics (2024–25 Season)",
+                            extra_header=dmc.SegmentedControl(
+                                id="profile-metric-mode",
+                                data=[
+                                    {"label": "Standard Per-90 Rates", "value": "per90"},
+                                    {"label": "Season Total Counts", "value": "total"},
+                                ],
+                                value="per90",
+                                size="xs",
+                                color="lime",
+                            ),
                         ),
                         span={"base": 12, "md": 7},
                     ),
@@ -181,8 +191,9 @@ def layout(player=None, **kwargs):
     Output("profile-compare-btn", "href"),
     Output("profile-similar-btn", "href"),
     Input("profile-player-select", "value"),
+    Input("profile-metric-mode", "value"),
 )
-def update_player_profile(selected_name):
+def update_player_profile(selected_name, metric_mode="per90"):
     player = get_player_by_name(selected_name)
     if player is None:
         player = get_player_by_name(DEFAULT_PLAYER)
@@ -225,7 +236,7 @@ def update_player_profile(selected_name):
                         ),
                         dmc.Group(
                             [
-                                dmc.Text(f"Club: {club}", size="sm", fw=600, c="dimmed"),
+                                dmc.Text(f"Club: {club} ({player.get('Comp_Clean', 'Big 5')})", size="sm", fw=600, c="dimmed"),
                                 dmc.Text("•", c="dimmed"),
                                 dmc.Text(f"Nation: {player.get('Nation_Display', nation)}", size="sm", c="dimmed"),
                                 dmc.Text("•", c="dimmed"),
@@ -354,33 +365,52 @@ def update_player_profile(selected_name):
     ])
 
     # 5. Production Statistics Grid
-    gls = int(player.get("Gls", 0))
-    ast = int(player.get("Ast", 0))
-    xg = float(player.get("xG", 0.0))
-    xa = float(player.get("xA", 0.0))
-    sh = int(player.get("Sh", 0))
-    sot = int(player.get("SoT", 0))
-    kp = int(player.get("KP", 0))
-    sca = int(player.get("SCA", 0))
     cmp_pct = float(player.get("Cmp%", 0.0))
-    prgp = int(player.get("PrgP", 0))
-    prgc = int(player.get("PrgC", 0))
-    tkl_int = int(player.get("Tkl", 0) + player.get("Int", 0))
+    won_pct = float(player.get("Won%", 0.0))
 
-    stat_items = [
-        ("Goals", gls, "Direct goals scored"),
-        ("Assists", ast, "Direct goal assists"),
-        ("Expected Goals (xG)", f"{xg:.2f}", "Chance quality metric"),
-        ("Expected Assists (xA)", f"{xa:.2f}", "Assisting quality metric"),
-        ("Shots (on Target)", f"{sh} ({sot})", "Shooting frequency"),
-        ("Key Passes", kp, "Shot-generating passes"),
-        ("Shot-Creating Actions", sca, "Offensive creation volume"),
-        ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy"),
-        ("Progressive Passes", prgp, "Passes moving ≥10 yards closer"),
-        ("Progressive Carries", prgc, "Carries moving ≥10 yards closer"),
-        ("Tackles + Interceptions", tkl_int, "Defensive interventions"),
-        ("Minutes Played", f"{minutes:,}", "Sample size benchmark"),
-    ]
+    if metric_mode == "per90":
+        stat_items = [
+            ("Goals / 90", f"{player.get('Gls_per90', 0.0):.2f}", "Goals scored per 90 min"),
+            ("Assists / 90", f"{player.get('Ast_per90', 0.0):.2f}", "Goal assists per 90 min"),
+            ("Expected Goals (xG) / 90", f"{player.get('xG_per90', 0.0):.2f}", "Shot quality generated / 90"),
+            ("Expected Assists (xA) / 90", f"{player.get('xA_per90', 0.0):.2f}", "Assisting chance quality / 90"),
+            ("Shots (on Target) / 90", f"{player.get('Sh_per90', 0.0):.2f} ({player.get('SoT_per90', 0.0):.2f})", "Shot volume / 90"),
+            ("Key Passes / 90", f"{player.get('KP_per90', 0.0):.2f}", "Shot-creating passes / 90"),
+            ("SCA / 90", f"{player.get('SCA_per90', 0.0):.2f}", "Shot-creating actions / 90"),
+            ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy rate"),
+            ("Prog. Passes / 90", f"{player.get('PrgP_per90', 0.0):.1f}", "Passes moving ≥10 yds closer"),
+            ("Prog. Carries / 90", f"{player.get('PrgC_per90', 0.0):.1f}", "Carries moving ≥10 yds closer"),
+            ("Tackles + Int / 90", f"{player.get('Tkl_per90', 0.0) + player.get('Int_per90', 0.0):.2f}", "Defensive actions / 90"),
+            ("Aerials Won / 90", f"{player.get('Won_per90', 0.0):.2f}", f"Duel win rate: {won_pct:.1f}%"),
+        ]
+    else:
+        gls = int(player.get("Gls", 0))
+        ast = int(player.get("Ast", 0))
+        xg = float(player.get("xG", 0.0))
+        xa = float(player.get("xA", 0.0))
+        sh = int(player.get("Sh", 0))
+        sot = int(player.get("SoT", 0))
+        kp = int(player.get("KP", 0))
+        sca = int(player.get("SCA", 0))
+        prgp = int(player.get("PrgP", 0))
+        prgc = int(player.get("PrgC", 0))
+        tkl_int = int(player.get("Tkl", 0) + player.get("Int", 0))
+        won = int(player.get("Won", 0))
+
+        stat_items = [
+            ("Goals", str(gls), "Season total goals"),
+            ("Assists", str(ast), "Season total assists"),
+            ("Expected Goals (xG)", f"{xg:.2f}", "Season total expected goals"),
+            ("Expected Assists (xA)", f"{xa:.2f}", "Season total expected assists"),
+            ("Shots (on Target)", f"{sh} ({sot})", "Season total shooting frequency"),
+            ("Key Passes", str(kp), "Season total key passes"),
+            ("Shot-Creating Actions", str(sca), "Season total creation actions"),
+            ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy rate"),
+            ("Progressive Passes", str(prgp), "Season total prog passes"),
+            ("Progressive Carries", str(prgc), "Season total prog carries"),
+            ("Tackles + Interceptions", str(tkl_int), "Season total defensive actions"),
+            ("Aerial Duels Won", str(won), f"Season won ({won_pct:.1f}% win rate)"),
+        ]
 
     stat_cols = [
         dmc.GridCol(

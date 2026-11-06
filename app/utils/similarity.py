@@ -43,7 +43,7 @@ def _init_similarity_cache():
     }
 
 
-def find_similar_players(player_name, position_filter=None, club_filter=None, top_n=10):
+def find_similar_players(player_name, position_filter=None, club_filter=None, comp_filter=None, max_age=None, top_n=10):
     """
     Finds the most statistically similar players to a reference player
     using cosine similarity on standardized attribute features.
@@ -52,6 +52,8 @@ def find_similar_players(player_name, position_filter=None, club_filter=None, to
         player_name (str): The unique or standard player name.
         position_filter (str): "SAME", "ALL", "DF", "MF", or "FW".
         club_filter (str): Optional club name to filter candidates.
+        comp_filter (str): Optional league name (e.g. "Premier League") to filter candidates.
+        max_age (int/str): Optional max age threshold for youth/succession planning.
         top_n (int): Number of similar players to retrieve.
 
     Returns:
@@ -102,6 +104,18 @@ def find_similar_players(player_name, position_filter=None, club_filter=None, to
     # Optional club filter (supports multi-club transfer records)
     if club_filter and str(club_filter).strip() and club_filter != "ALL":
         candidates = candidates[candidates["Squad"].apply(lambda s: club_filter in [c.strip() for c in str(s).split(",")])]
+
+    # Optional competition / league filter
+    if comp_filter and str(comp_filter).strip() and comp_filter != "ALL":
+        candidates = candidates[candidates["Comp_Clean"].apply(lambda c: comp_filter in [x.strip() for x in str(c).split(",")])]
+
+    # Optional max age filter (succession recruitment)
+    if max_age and str(max_age).strip() and max_age != "ALL":
+        try:
+            m_age = int(max_age)
+            candidates = candidates[(candidates["Age"] > 0) & (candidates["Age"] <= m_age)]
+        except (ValueError, TypeError):
+            pass
 
     if candidates.empty:
         return pd.DataFrame()

@@ -37,6 +37,24 @@ COUNTRY_FLAGS = {
     "MNE": "🇲🇪", "MKD": "🇲🇰", "NIR": "🇬🇧", "ISL": "🇮🇸", "FIN": "🇫🇮", "ISR": "🇮🇱",
 }
 
+# Standard European Top 5 League mappings
+COMPETITION_NAMES = {
+    "eng Premier League": "Premier League",
+    "es La Liga": "La Liga",
+    "it Serie A": "Serie A",
+    "de Bundesliga": "Bundesliga",
+    "fr Ligue 1": "Ligue 1",
+}
+
+def clean_competition_name(comp_raw):
+    """
+    Translates raw competition string into clean league name(s).
+    """
+    if not comp_raw or pd.isna(comp_raw):
+        return "N/A"
+    parts = [COMPETITION_NAMES.get(p.strip(), p.strip()) for p in str(comp_raw).split(",")]
+    return ", ".join(parts)
+
 def format_nation_flag(nation_code):
     """
     Returns country code with its corresponding national flag emoji.
@@ -84,8 +102,12 @@ def load_data():
         axis=1,
     )
 
+    # Clean competition / league names
+    comp_clean = df["Comp"].apply(clean_competition_name)
+
     # Batch assign to avoid DataFrame fragmentation warning
     df = df.assign(
+        Comp_Clean=comp_clean,
         Nation_Clean=nation_clean,
         Nation_Display=nation_display,
         Player_Unique=player_unique,
@@ -151,6 +173,13 @@ def get_unique_squads():
             if clean_club:
                 squads.add(clean_club)
     return sorted(list(squads))
+
+
+def get_unique_competitions():
+    """
+    Returns sorted list of distinct European league names.
+    """
+    return ["Bundesliga", "La Liga", "Ligue 1", "Premier League", "Serie A"]
 
 
 def get_unique_nations():

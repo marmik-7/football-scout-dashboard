@@ -8,6 +8,7 @@ from app.utils.data_loader import (
     load_data,
     get_unique_squads,
     get_unique_nations,
+    get_unique_competitions,
 )
 from app.utils.styling import (
     PANEL,
@@ -29,6 +30,7 @@ dash.register_page(__name__, path="/player-rankings", name="Rankings", order=7)
 df = load_data()
 unique_squads = get_unique_squads()
 unique_nations = get_unique_nations()
+unique_competitions = get_unique_competitions()
 
 
 # --------------------------------------------------
@@ -60,12 +62,12 @@ layout = dmc.Container(
                             value="FW",
                             allowDeselect=False,
                         ),
-                        span={"base": 12, "sm": 6, "md": 3},
+                        span={"base": 12, "sm": 6, "md": 2},
                     ),
                     dmc.GridCol(
                         dmc.Select(
                             id="rankings-attr",
-                            label="Target Scouting Attribute",
+                            label="Target Attribute",
                             data=[
                                 {"label": name, "value": name}
                                 for name in ATTRIBUTE_COLUMNS
@@ -73,7 +75,35 @@ layout = dmc.Container(
                             value="Finishing",
                             allowDeselect=False,
                         ),
-                        span={"base": 12, "sm": 6, "md": 3},
+                        span={"base": 12, "sm": 6, "md": 2},
+                    ),
+                    dmc.GridCol(
+                        dmc.Select(
+                            id="rankings-comp",
+                            label="League / Competition",
+                            data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
+                                {"label": c, "value": c} for c in unique_competitions
+                            ],
+                            value="ALL",
+                            allowDeselect=False,
+                        ),
+                        span={"base": 12, "sm": 6, "md": 2},
+                    ),
+                    dmc.GridCol(
+                        dmc.Select(
+                            id="rankings-age-group",
+                            label="Age Bracket",
+                            data=[
+                                {"label": "All Ages", "value": "ALL"},
+                                {"label": "U-21 Prospects (≤21)", "value": "U21"},
+                                {"label": "U-23 Emerging (≤23)", "value": "U23"},
+                                {"label": "Peak Prime (24–29)", "value": "PRIME"},
+                                {"label": "Experienced (30+)", "value": "30PLUS"},
+                            ],
+                            value="ALL",
+                            allowDeselect=False,
+                        ),
+                        span={"base": 12, "sm": 6, "md": 2},
                     ),
                     dmc.GridCol(
                         dmc.Select(
@@ -88,20 +118,20 @@ layout = dmc.Container(
                             value=10,
                             allowDeselect=False,
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
+                        span={"base": 6, "sm": 6, "md": 1},
                     ),
                     dmc.GridCol(
                         dmc.Select(
                             id="rankings-order",
                             label="Sort Direction",
                             data=[
-                                {"label": "Highest First (Desc)", "value": "desc"},
-                                {"label": "Lowest First (Asc)", "value": "asc"},
+                                {"label": "Highest First", "value": "desc"},
+                                {"label": "Lowest First", "value": "asc"},
                             ],
                             value="desc",
                             allowDeselect=False,
                         ),
-                        span={"base": 12, "sm": 6, "md": 2},
+                        span={"base": 6, "sm": 6, "md": 1},
                     ),
                     dmc.GridCol(
                         dmc.Select(
@@ -165,11 +195,13 @@ layout = dmc.Container(
     Output("rankings-table-container", "children"),
     Input("rankings-pos", "value"),
     Input("rankings-attr", "value"),
+    Input("rankings-comp", "value"),
+    Input("rankings-age-group", "value"),
     Input("rankings-depth", "value"),
     Input("rankings-order", "value"),
     Input("rankings-squad", "value"),
 )
-def update_rankings(pos, attr, depth, order, squad):
+def update_rankings(pos, attr, comp, age_group, depth, order, squad):
     if not attr or attr not in ATTRIBUTE_COLUMNS:
         attr = "Finishing"
     if not pos or pos not in ["FW", "MF", "DF", "ALL"]:
@@ -211,6 +243,21 @@ def update_rankings(pos, attr, depth, order, squad):
     if pos != "ALL":
         filtered = filtered[filtered["Pos"] == pos]
 
+    # League / Competition filter
+    if comp and comp != "ALL":
+        filtered = filtered[filtered["Comp_Clean"].apply(lambda c: comp in [x.strip() for x in str(c).split(",")])]
+
+    # Age Bracket filter
+    if age_group and age_group != "ALL":
+        if age_group == "U21":
+            filtered = filtered[(filtered["Age"] > 0) & (filtered["Age"] <= 21)]
+        elif age_group == "U23":
+            filtered = filtered[(filtered["Age"] > 0) & (filtered["Age"] <= 23)]
+        elif age_group == "PRIME":
+            filtered = filtered[(filtered["Age"] >= 24) & (filtered["Age"] <= 29)]
+        elif age_group == "30PLUS":
+            filtered = filtered[filtered["Age"] >= 30]
+
     if squad and squad != "ALL":
         filtered = filtered[filtered["Squad"].apply(lambda s: squad in [c.strip() for c in str(s).split(",")])]
 
@@ -238,7 +285,9 @@ def update_rankings(pos, attr, depth, order, squad):
 
     # 4. Ranked Bar Chart
     chart_height = max(420, min(850, len(chart_candidates) * 28 + 120))
-    chart_title = f"Top {len(chart_candidates)} {pos_display} — {attr}"
+    comp_title = f" ({comp})" if comp and comp != "ALL" else ""
+    age_title = f" [{age_group}]" if age_group and age_group != "ALL" else ""
+    chart_title = f"Top {len(chart_candidates)} {pos_display}{comp_title}{age_title} — {attr}"
 
     nat_col = "Nation_Display" if "Nation_Display" in chart_candidates.columns else "Nation_Clean"
 
@@ -314,8 +363,14 @@ def update_rankings(pos, attr, depth, order, squad):
         rows.append(
             dmc.TableTr([
                 dmc.TableTd(dmc.Badge(f"#{rank}", color="gray", variant="light", size="sm")),
-                dmc.TableTd(dmc.Text(r["Player"], fw=600, c="white")),
-                dmc.TableTd(dmc.Text(r["Squad"], size="xs", c="dimmed")),
+                dmc.TableTd([
+                    dmc.Text(r["Player"], fw=600, c="white"),
+                    dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="dimmed"),
+                ]),
+                dmc.TableTd([
+                    dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
+                    dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
+                ]),
                 dmc.TableTd(dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs")),
                 dmc.TableTd(dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="xs", c="dimmed")),
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed")),

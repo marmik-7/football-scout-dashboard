@@ -117,6 +117,16 @@ def layout(player1=None, player2=None, **kwargs):
                 html.Div(id="compare-stats-table-container", style={"overflowX": "auto"}),
                 title="Statistical Comparison Matrix",
                 subtitle="Direct side-by-side benchmarking of percentiles, production volume, and playing styles",
+                extra_header=dmc.SegmentedControl(
+                    id="compare-metric-mode",
+                    data=[
+                        {"label": "Standard Per-90 Rates", "value": "per90"},
+                        {"label": "Season Total Counts", "value": "total"},
+                    ],
+                    value="per90",
+                    size="xs",
+                    color="lime",
+                ),
             ),
 
             dmc.Space(h=25),
@@ -144,8 +154,9 @@ def layout(player1=None, player2=None, **kwargs):
     Output("compare-stats-table-container", "children"),
     Output("compare-profiles-container", "children"),
     Input("compare-players-select", "value"),
+    Input("compare-metric-mode", "value"),
 )
-def update_comparison_views(selected_names):
+def update_comparison_views(selected_names, metric_mode="per90"):
     if not selected_names or len(selected_names) < 2:
         warning_msg = dmc.Alert(
             "Please select at least 2 players (up to 4) to generate the comparison matrix.",
@@ -233,6 +244,7 @@ def update_comparison_views(selected_names):
     rows = [
         # Metadata
         make_row("Club / Squad", lambda p: p["Squad"]),
+        make_row("Competition / League", lambda p: p.get("Comp_Clean", "N/A")),
         make_row("Position Group", lambda p: p["Pos"]),
         make_row("Nationality", lambda p: p.get("Nation_Display", p["Nation_Clean"])),
         make_row("Age (Born)", lambda p: f"{p['Age']} ({p['Born']})"),
@@ -247,16 +259,37 @@ def update_comparison_views(selected_names):
         make_row("Defending Score", lambda p: p["Defending_Score"], is_percentile=True),
         make_row("Ball Security Score", lambda p: p["BallSecurity_Score"], is_percentile=True),
         make_row("Aerial Score", lambda p: p["Aerial_Score"], is_percentile=True),
-
-        # Volume Metrics
-        make_row("Goals + Assists (G+A)", lambda p: int(p.get("Gls", 0) + p.get("Ast", 0))),
-        make_row("Expected Goals (xG)", lambda p: f"{p.get('xG', 0.0):.2f}"),
-        make_row("Expected Assists (xA)", lambda p: f"{p.get('xA', 0.0):.2f}"),
-        make_row("Pass Completion %", lambda p: f"{p.get('Cmp%', 0.0):.1f}%"),
-        make_row("Progressive Passes", lambda p: int(p.get("PrgP", 0))),
-        make_row("Progressive Carries", lambda p: int(p.get("PrgC", 0))),
-        make_row("Tackles + Interceptions", lambda p: int(p.get("Tkl", 0) + p.get("Int", 0))),
     ]
+
+    # Production / Match Stats based on Metric Mode
+    if metric_mode == "per90":
+        rows.extend([
+            make_row("Standard Per-90 Rates", lambda p: "---", is_header=True),
+            make_row("Goals / 90", lambda p: f"{p.get('Gls_per90', 0.0):.2f}"),
+            make_row("Assists / 90", lambda p: f"{p.get('Ast_per90', 0.0):.2f}"),
+            make_row("Expected Goals (xG) / 90", lambda p: f"{p.get('xG_per90', 0.0):.2f}"),
+            make_row("Expected Assists (xA) / 90", lambda p: f"{p.get('xA_per90', 0.0):.2f}"),
+            make_row("Shots (on Target) / 90", lambda p: f"{p.get('Sh_per90', 0.0):.2f} ({p.get('SoT_per90', 0.0):.2f})"),
+            make_row("Pass Completion %", lambda p: f"{p.get('Cmp%', 0.0):.1f}%"),
+            make_row("Prog. Passes / 90", lambda p: f"{p.get('PrgP_per90', 0.0):.1f}"),
+            make_row("Prog. Carries / 90", lambda p: f"{p.get('PrgC_per90', 0.0):.1f}"),
+            make_row("Tackles + Int / 90", lambda p: f"{p.get('Tkl_per90', 0.0) + p.get('Int_per90', 0.0):.2f}"),
+            make_row("Aerials Won / 90", lambda p: f"{p.get('Won_per90', 0.0):.2f} ({p.get('Won%', 0.0):.1f}%)"),
+        ])
+    else:
+        rows.extend([
+            make_row("Season Total Counts", lambda p: "---", is_header=True),
+            make_row("Goals (Season Total)", lambda p: int(p.get("Gls", 0))),
+            make_row("Assists (Season Total)", lambda p: int(p.get("Ast", 0))),
+            make_row("Expected Goals (xG)", lambda p: f"{p.get('xG', 0.0):.2f}"),
+            make_row("Expected Assists (xA)", lambda p: f"{p.get('xA', 0.0):.2f}"),
+            make_row("Shots (on Target)", lambda p: f"{int(p.get('Sh', 0))} ({int(p.get('SoT', 0))})"),
+            make_row("Pass Completion %", lambda p: f"{p.get('Cmp%', 0.0):.1f}%"),
+            make_row("Progressive Passes", lambda p: int(p.get("PrgP", 0))),
+            make_row("Progressive Carries", lambda p: int(p.get("PrgC", 0))),
+            make_row("Tackles + Interceptions", lambda p: int(p.get("Tkl", 0) + p.get("Int", 0))),
+            make_row("Aerial Duels Won", lambda p: f"{int(p.get('Won', 0))} ({p.get('Won%', 0.0):.1f}%)"),
+        ])
 
     tbody = dmc.TableTbody(rows)
     stats_table = dmc.Table(
