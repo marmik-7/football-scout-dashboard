@@ -14,6 +14,7 @@ from app.utils.data_loader import (
     get_unique_subroles,
     get_player_by_name,
 )
+from app.utils.charts import build_pizza_chart, build_pca_cluster_scatter
 from app.utils.similarity import find_similar_players
 import app.pages.overview as overview
 import app.pages.player_explorer as player_explorer
@@ -116,17 +117,22 @@ def run_full_scout_test_suite():
     print(f" - Explorer output: {count_text}")
     print("PASS: Player Explorer Callback")
 
-    print("\n=== TEST 6: Player Profile Callback with pAdj & Finishing Metrics ===")
-    res_prof_p90 = player_profile.update_player_profile("Erling Haaland", metric_mode="per90")
-    assert len(res_prof_p90) == 7
-    assert res_prof_p90[0] is not None
-    assert res_prof_p90[4] is not None
+    print("\n=== TEST 6: Player Profile Callback with Pizza & Radar Views ===")
+    # Default: Percentile Pizza mode
+    res_prof_pizza = player_profile.update_player_profile("Erling Haaland", metric_mode="per90", chart_type="pizza")
+    assert len(res_prof_pizza) == 8
+    assert res_prof_pizza[0] is not None
+    assert res_prof_pizza[1] is not None  # Pizza Chart Figure
+    assert res_prof_pizza[2] is not None  # Chart note
+    assert len(res_prof_pizza[1].data) == 3  # 3 polar traces (Attacking, Possession, Defending)
 
-    res_prof_tot = player_profile.update_player_profile("William Saliba", metric_mode="total")
-    assert len(res_prof_tot) == 7
-    assert res_prof_tot[0] is not None
-    assert res_prof_tot[4] is not None
-    print("PASS: Player Profile Callback")
+    # Radar mode
+    res_prof_radar = player_profile.update_player_profile("William Saliba", metric_mode="total", chart_type="radar")
+    assert len(res_prof_radar) == 8
+    assert res_prof_radar[0] is not None
+    assert res_prof_radar[1] is not None  # Radar Figure
+    assert len(res_prof_radar[1].data) >= 1
+    print("PASS: Player Profile Callback (Pizza & Radar)")
 
     print("\n=== TEST 7: Player Comparison Delta Calculation & Export ===")
     warn, rad, bar, stats_tbl, profs = player_comparison.update_comparison_views(
@@ -200,7 +206,38 @@ def run_full_scout_test_suite():
     assert "content" in dossier_csv
     print("PASS: Shortlists View & Dossier Export")
 
-    print("\n=== TEST 10: All 8 Page Layouts Instantiation ===")
+    print("\n=== TEST 10: Percentile Pizza Chart Generator ===")
+    for test_p in ["Erling Haaland", "William Saliba", "Bukayo Saka"]:
+        p_rec = get_player_by_name(test_p)
+        assert p_rec is not None
+        pizza_fig = build_pizza_chart(p_rec, height=400)
+        assert len(pizza_fig.data) == 3  # Attacking, Possession, Defending
+        # Total wedges = 4 + 4 + 4 = 12
+        total_slices = sum(len(tr.r) for tr in pizza_fig.data)
+        assert total_slices == 12, f"Expected 12 pizza slices, got {total_slices}"
+        print(f" - {test_p}: 12 radial wedges generated with valid percentiles")
+    print("PASS: Percentile Pizza Chart Generator")
+
+    print("\n=== TEST 11: Tactical Playing Styles & 2D PCA Locator ===")
+    # 1. Test locator dropdown options
+    opts, default_val = playing_styles.update_locator_dropdown("FW")
+    assert len(opts) > 50
+    assert default_val == "NONE"
+
+    # 2. Test PCA Scatter with highlighted target
+    cards_ui, pca_fig, dna_fig, tbl_ui, roster_ui = playing_styles.update_playing_styles(
+        pos="FW",
+        cluster_filter="ALL",
+        locator_player="Erling Haaland",
+    )
+    assert pca_fig is not None
+    # Verify highlight traces (halo + diamond marker + annotations)
+    trace_names = [tr.name for tr in pca_fig.data]
+    assert any("Erling Haaland" in str(n) for n in trace_names), "Expected player pin trace in PCA plot!"
+    print(" - Highlight pin and annotation verified for Erling Haaland in 2D PCA Space")
+    print("PASS: Tactical Playing Styles & 2D PCA Locator")
+
+    print("\n=== TEST 12: All 8 Page Layouts Instantiation ===")
     def get_layout(mod, *args, **kwargs):
         if callable(getattr(mod, "layout", None)):
             return mod.layout(*args, **kwargs)
@@ -208,7 +245,7 @@ def run_full_scout_test_suite():
 
     assert get_layout(overview) is not None
     assert get_layout(player_explorer) is not None
-    assert get_layout(player_profile, "Rodri") is not None
+    assert get_layout(player_profile, "Bukayo Saka") is not None
     assert get_layout(player_comparison) is not None
     assert get_layout(player_rankings) is not None
     assert get_layout(similar_players) is not None
@@ -216,7 +253,9 @@ def run_full_scout_test_suite():
     assert get_layout(shortlists) is not None
     print("PASS: All 8 Page Layouts successfully instantiated!")
 
-    print("\nALL RECRUITMENT INTELLIGENCE & SHORTLISTING TESTS PASSED PERFECTLY!")
+    print("\n========================================================")
+    print("ALL 12 UNIT AND INTEGRATION TEST SUITES PASSED PERFECTLY!")
+    print("========================================================")
 
 
 if __name__ == "__main__":

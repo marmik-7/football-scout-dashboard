@@ -54,7 +54,7 @@ layout = dmc.Container(
                             value="FW",
                             allowDeselect=False,
                         ),
-                        span={"base": 12, "sm": 6},
+                        span={"base": 12, "sm": 6, "md": 4},
                     ),
                     dmc.GridCol(
                         dmc.Select(
@@ -70,13 +70,28 @@ layout = dmc.Container(
                             value="ALL",
                             allowDeselect=False,
                         ),
-                        span={"base": 12, "sm": 6},
+                        span={"base": 12, "sm": 6, "md": 4},
+                    ),
+                    dmc.GridCol(
+                        dmc.Select(
+                            id="styles-player-locator",
+                            label="📍 Pinpoint Candidate in Tactical Space",
+                            placeholder="Search candidate to plot pin...",
+                            data=[{"label": "None (View All)", "value": "NONE"}] + [
+                                {"label": name, "value": name}
+                                for name in sorted(df[df["Pos"] == "FW"]["Player"].unique())
+                            ],
+                            value="NONE",
+                            searchable=True,
+                            clearable=True,
+                        ),
+                        span={"base": 12, "md": 4},
                     ),
                 ],
                 gap="md",
             ),
             title="Tactical Scope",
-            subtitle="Select position peer group and target playing style cluster",
+            subtitle="Select position peer group, target playing style cluster, and locate specific players",
         ),
 
         dmc.Space(h=20),
@@ -145,6 +160,20 @@ layout = dmc.Container(
 # --------------------------------------------------
 
 @callback(
+    Output("styles-player-locator", "data"),
+    Output("styles-player-locator", "value"),
+    Input("styles-pos-select", "value"),
+)
+def update_locator_dropdown(pos):
+    pos = pos or "FW"
+    pos_players = sorted(df[df["Pos"] == pos]["Player"].unique())
+    options = [{"label": "None (View All)", "value": "NONE"}] + [
+        {"label": name, "value": name} for name in pos_players
+    ]
+    return options, "NONE"
+
+
+@callback(
     Output("styles-cards-container", "children"),
     Output("styles-pca-scatter", "figure"),
     Output("styles-dna-radar", "figure"),
@@ -152,8 +181,9 @@ layout = dmc.Container(
     Output("styles-roster-table-container", "children"),
     Input("styles-pos-select", "value"),
     Input("styles-cluster-select", "value"),
+    Input("styles-player-locator", "value"),
 )
-def update_playing_styles(pos, cluster_filter):
+def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
     if not pos:
         pos = "FW"
 
@@ -210,8 +240,14 @@ def update_playing_styles(pos, cluster_filter):
         )
     cards_container = dmc.Grid(cards, gap="md")
 
-    # 2. PCA Scatter Plot
-    pca_fig = build_pca_cluster_scatter(df, pos=pos, selected_cluster=cluster_filter, height=450)
+    # 2. PCA Scatter Plot with Optional Candidate Highlight Pin
+    pca_fig = build_pca_cluster_scatter(
+        df,
+        pos=pos,
+        selected_cluster=cluster_filter,
+        highlight_player=locator_player,
+        height=450,
+    )
 
     # 3. Cluster DNA Radar
     radar_fig = build_cluster_dna_radar(summary_df, pos=pos, height=420)

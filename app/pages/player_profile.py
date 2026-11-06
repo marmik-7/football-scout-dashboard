@@ -24,7 +24,7 @@ from app.utils.styling import (
     position_percentile_warning,
     get_percentile_tier,
 )
-from app.utils.charts import build_radar_chart
+from app.utils.charts import build_radar_chart, build_pizza_chart
 from app.utils.player_analysis import (
     get_player_strengths_and_weaknesses,
     generate_scouting_report,
@@ -149,7 +149,7 @@ def layout(player=None, **kwargs):
             # MAIN PROFILE GRID: RADAR + ATTRIBUTE BREAKDOWN
             dmc.Grid(
                 [
-                    # LEFT: 7D RADAR CHART
+                    # LEFT: 7D RADAR CHART OR 12-SLICE PIZZA CHART
                     dmc.GridCol(
                         create_section_card(
                             [
@@ -159,15 +159,24 @@ def layout(player=None, **kwargs):
                                     responsive=True,
                                 ),
                                 dmc.Space(h=10),
-                                dmc.Text(
-                                    "Dashed grey line indicates position peer group average (50.0 baseline).",
-                                    size="xs",
-                                    c="dimmed",
+                                html.Div(
+                                    id="profile-chart-note",
                                     style={"textAlign": "center"},
                                 ),
                             ],
-                            title="7-Dimensional Scouting Radar",
-                            subtitle="Position-relative percentiles benchmarked against positional peers",
+                            title="Visual Scouting Footprint",
+                            subtitle="Benchmark player profile against positional peers",
+                            extra_header=dmc.SegmentedControl(
+                                id="profile-chart-type-toggle",
+                                data=[
+                                    {"label": "🍕 Percentile Pizza", "value": "pizza"},
+                                    {"label": "🕸️ 7D Radar", "value": "radar"},
+                                ],
+                                value="pizza",
+                                size="xs",
+                                radius="sm",
+                                color="lime",
+                            ),
                         ),
                         span={"base": 12, "lg": 6},
                     ),
@@ -235,6 +244,7 @@ def layout(player=None, **kwargs):
 @callback(
     Output("profile-header-banner", "children"),
     Output("profile-radar-chart", "figure"),
+    Output("profile-chart-note", "children"),
     Output("profile-attributes-breakdown", "children"),
     Output("profile-scouting-summary", "children"),
     Output("profile-stats-grid", "children"),
@@ -242,8 +252,9 @@ def layout(player=None, **kwargs):
     Output("profile-similar-btn", "href"),
     Input("profile-player-select", "value"),
     Input("profile-metric-mode", "value"),
+    Input("profile-chart-type-toggle", "value"),
 )
-def update_player_profile(selected_name, metric_mode="per90"):
+def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"):
     player = get_player_by_name(selected_name)
     if player is None:
         player = get_player_by_name(DEFAULT_PLAYER)
@@ -317,14 +328,27 @@ def update_player_profile(selected_name, metric_mode="per90"):
         style={"backgroundColor": PANEL, "borderColor": BORDER, "boxShadow": "0 4px 20px -2px rgba(0,0,0,0.4)"},
     )
 
-    # 2. Radar Chart
-    pos_avgs = get_position_averages(pos)
-    radar_fig = build_radar_chart(
-        players=[player],
-        include_position_avg=True,
-        position_avg_scores=pos_avgs,
-        height=380,
-    )
+    # 2. Visual Scouting Footprint (Pizza Chart vs Radar)
+    if chart_type == "radar":
+        pos_avgs = get_position_averages(pos)
+        chart_fig = build_radar_chart(
+            players=[player],
+            include_position_avg=True,
+            position_avg_scores=pos_avgs,
+            height=380,
+        )
+        chart_note = dmc.Text(
+            "7-Dimensional Scouting Radar: Dashed grey line indicates position peer group average (50.0 baseline).",
+            size="xs",
+            c="dimmed",
+        )
+    else:
+        chart_fig = build_pizza_chart(player, height=400)
+        chart_note = dmc.Text(
+            "12-Slice Percentile Pizza: Uniform angular wedges grouped by Attacking, Possession, and Defending (eliminates polygon area distortion).",
+            size="xs",
+            c="dimmed",
+        )
 
     # 3. Attribute Breakdown Progress Bars
     comparisons = get_player_attribute_comparison(player)
@@ -498,7 +522,7 @@ def update_player_profile(selected_name, metric_mode="per90"):
     compare_url = f"/player-comparison?player1={selected_name}"
     similar_url = f"/similar-players?player={selected_name}"
 
-    return header, radar_fig, attributes_breakdown, scouting_summary, stats_grid, compare_url, similar_url
+    return header, chart_fig, chart_note, attributes_breakdown, scouting_summary, stats_grid, compare_url, similar_url
 
 
 # Toggle Profile Shortlist Modal
