@@ -1,6 +1,6 @@
 /* ==========================================================================
    SCOUT — FOOTBALL RECRUITMENT INTELLIGENCE
-   DESIGN SYSTEM: PITCH BLACK / STATSBOMB × LINEAR AESTHETIC
+   DESIGN SYSTEM: SCOUT PITCH BLACK (LINEAR × STATSBOMB AESTHETIC)
    ========================================================================== */
 
 :root {
@@ -20,10 +20,10 @@
     
     --accent-emerald: #10B981;
     --accent-emerald-light: #34D399;
-    --accent-emerald-dim: rgba(16, 185, 129, 0.12);
+    --accent-emerald-dim: rgba(16, 185, 129, 0.10);
     --accent-sky: #38BDF8;
     --accent-amber: #F59E0B;
-    --accent-crimson: #F43F5E;
+    --accent-crimson: #EF4444;
 }
 
 /* Global Reset & Base */
@@ -62,7 +62,7 @@ p, span, div {
 .mantine-AppShell-header {
     background-color: var(--bg-sidebar) !important;
     border-bottom: 1px solid var(--border-hairline) !important;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
     z-index: 100;
 }
 
@@ -77,46 +77,83 @@ p, span, div {
     min-height: 100vh;
 }
 
-/* Sleek Minimalist Sidebar Navigation */
+/* Sleek Minimalist Sidebar Navigation (Linear / Raycast Style) */
 .mantine-NavLink-root {
     color: var(--text-secondary) !important;
-    border-radius: 6px !important;
-    margin-bottom: 3px !important;
+    border-radius: 5px !important;
+    margin-bottom: 2px !important;
     padding: 8px 12px !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     letter-spacing: -0.01em !important;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
     border-left: 2px solid transparent !important;
 }
 
 .mantine-NavLink-root:hover {
-    background-color: var(--bg-surface-hover) !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
     color: #FFFFFF !important;
+    transform: translateX(2px);
 }
 
 .mantine-NavLink-root[data-active="true"] {
     background-color: var(--accent-emerald-dim) !important;
-    color: var(--accent-emerald-light) !important;
+    color: #FFFFFF !important;
     font-weight: 600 !important;
     border-left: 2px solid var(--accent-emerald) !important;
+}
+
+.mantine-NavLink-root[data-active="true"] .mantine-NavLink-label {
+    color: #FFFFFF !important;
 }
 
 .mantine-NavLink-label {
     font-size: 13px !important;
 }
 
+/* Pulse Status Dot */
+@keyframes scout-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.scout-live-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent-emerald);
+    border-radius: 50%;
+    display: inline-block;
+    animation: scout-pulse 2s infinite ease-in-out;
+}
+
 /* Flat Architectural Cards */
 .mantine-Card-root {
     background-color: var(--bg-surface) !important;
     border: 1px solid var(--border-hairline) !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
 }
 
 .mantine-Card-root:hover {
-    border-color: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Buttons Micro-Interactions */
+.mantine-Button-root {
+    font-family: inherit !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.mantine-Button-root:hover {
+    transform: translateY(-1px);
+}
+
+.mantine-Button-root:active {
+    transform: translateY(0);
 }
 
 /* Input Fields (Linear / Raycast Style) */
@@ -127,13 +164,21 @@ p, span, div {
     background-color: #090D14 !important;
     border: 1px solid var(--border-hairline) !important;
     color: var(--text-primary) !important;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
     font-size: 12.5px !important;
     font-family: inherit !important;
     height: 34px !important;
     min-height: 34px !important;
     padding: 0 10px !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.mantine-Select-input::placeholder,
+.mantine-TextInput-input::placeholder,
+.mantine-MultiSelect-input::placeholder,
+.mantine-Textarea-input::placeholder {
+    color: #64748B !important;
+    font-size: 12px !important;
 }
 
 .mantine-Textarea-input {
@@ -147,7 +192,7 @@ p, span, div {
 .mantine-MultiSelect-input:focus,
 .mantine-Textarea-input:focus {
     border-color: var(--accent-emerald) !important;
-    box-shadow: 0 0 0 1px var(--accent-emerald) !important;
+    box-shadow: 0 0 0 1px var(--accent-emerald), 0 0 12px rgba(16, 185, 129, 0.12) !important;
     outline: none !important;
 }
 
@@ -157,42 +202,43 @@ p, span, div {
 .mantine-MultiSelect-label,
 .mantine-Textarea-label {
     color: var(--text-secondary) !important;
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
     margin-bottom: 4px !important;
 }
 
-/* Dropdown Menus */
+/* Dropdown Menus with Backdrop Blur */
 .mantine-Select-dropdown,
 .mantine-MultiSelect-dropdown {
-    background-color: #0F172A !important;
+    background-color: rgba(15, 23, 42, 0.96) !important;
+    backdrop-filter: blur(16px) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 6px !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
     padding: 4px !important;
 }
 
 .mantine-Select-option,
 .mantine-MultiSelect-option {
     color: var(--text-primary) !important;
-    font-size: 12.5px !important;
+    font-size: 12px !important;
     border-radius: 4px !important;
     padding: 6px 10px !important;
-    transition: background-color 0.1s ease !important;
+    transition: all 0.1s ease !important;
 }
 
 .mantine-Select-option:hover,
 .mantine-MultiSelect-option:hover {
-    background-color: var(--bg-surface-elevated) !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
     color: #FFFFFF !important;
 }
 
 .mantine-Select-option[data-checked="true"],
 .mantine-MultiSelect-option[data-checked="true"] {
-    background-color: var(--accent-emerald-dim) !important;
-    color: var(--accent-emerald-light) !important;
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    color: #34D399 !important;
     font-weight: 600 !important;
 }
 
@@ -201,7 +247,7 @@ p, span, div {
     background-color: #1E293B !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     color: var(--text-primary) !important;
-    font-size: 11.5px !important;
+    font-size: 11px !important;
     height: 22px !important;
     border-radius: 4px !important;
 }
@@ -218,9 +264,10 @@ thead th {
     position: sticky !important;
     top: 0 !important;
     z-index: 10 !important;
-    background-color: var(--bg-surface) !important;
+    background-color: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
     font-weight: 600 !important;
-    font-size: 10.5px !important;
+    font-size: 10px !important;
     text-transform: uppercase !important;
     letter-spacing: 0.6px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -239,10 +286,11 @@ td {
     font-size: 12.5px !important;
     padding: 9px 12px !important;
     color: var(--text-primary) !important;
+    transition: background-color 0.1s ease !important;
 }
 
 tr:hover td {
-    background-color: var(--bg-surface-hover) !important;
+    background-color: rgba(255, 255, 255, 0.025) !important;
 }
 
 /* Segmented Control (Pill Switcher) */
@@ -250,7 +298,7 @@ tr:hover td {
     background-color: #090D14 !important;
     border: 1px solid var(--border-hairline) !important;
     padding: 2px !important;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
 }
 
 .mantine-SegmentedControl-indicator {
@@ -260,7 +308,7 @@ tr:hover td {
 }
 
 .mantine-SegmentedControl-label {
-    font-size: 11.5px !important;
+    font-size: 11px !important;
     font-weight: 600 !important;
     color: var(--text-secondary) !important;
     padding: 4px 10px !important;
@@ -276,6 +324,7 @@ tr:hover td {
     text-transform: uppercase !important;
     font-weight: 700 !important;
     letter-spacing: 0.4px !important;
+    font-size: 9.5px !important;
 }
 
 /* Pagination */
@@ -314,6 +363,25 @@ tr:hover td {
     border-color: var(--accent-emerald) !important;
     background-color: #FFFFFF !important;
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.mantine-Slider-thumb:hover {
+    transform: scale(1.15) !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Modals with Blur */
+.mantine-Modal-overlay {
+    backdrop-filter: blur(8px) !important;
+    background-color: rgba(0, 0, 0, 0.65) !important;
+}
+
+.mantine-Modal-content {
+    background-color: #0D131F !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.9) !important;
+    border-radius: 8px !important;
 }
 
 /* Alerts */
@@ -335,10 +403,10 @@ tr:hover td {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #1E293B;
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-tertiary);
+    background: rgba(255, 255, 255, 0.22);
 }

@@ -448,21 +448,21 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
     # Build High-Density Table
     thead = dmc.TableThead(
         dmc.TableTr([
-            dmc.TableTh("Player", style={"color": TEXT}),
-            dmc.TableTh("Club / League", style={"color": TEXT}),
-            dmc.TableTh("Role", style={"color": TEXT}),
-            dmc.TableTh("Nation", style={"color": TEXT}),
-            dmc.TableTh("Age", style={"color": TEXT}),
-            dmc.TableTh("Min", style={"color": TEXT}),
-            dmc.TableTh("G+A", style={"color": TEXT}),
-            dmc.TableTh("Finishing", style={"color": TEXT}),
-            dmc.TableTh("Creativity", style={"color": TEXT}),
-            dmc.TableTh("Passing", style={"color": TEXT}),
-            dmc.TableTh("Progression", style={"color": TEXT}),
-            dmc.TableTh("Defending (pAdj)", style={"color": TEXT}),
-            dmc.TableTh("Security", style={"color": TEXT}),
-            dmc.TableTh("Aerial", style={"color": TEXT}),
-            dmc.TableTh("Action", style={"color": TEXT, "textAlign": "center"}),
+            dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("AGE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("G+A", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("ACTION", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
         ])
     )
 
@@ -480,11 +480,13 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
 
         def render_score(score_val):
             tier_info = get_percentile_tier(score_val)
-            return dmc.Text(
-                f"{score_val:.1f}",
-                size="xs",
-                fw=700,
-                style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"},
+            return dmc.TableTd(
+                dmc.Text(
+                    f"{score_val:.1f}",
+                    size="xs",
+                    fw=600,
+                    style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"},
+                )
             )
 
         rows.append(

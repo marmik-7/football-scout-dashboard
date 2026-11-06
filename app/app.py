@@ -112,6 +112,7 @@ app.layout = dmc.MantineProvider(
                                 w={"base": 200, "sm": 300, "md": 380},
                                 size="xs",
                                 clearable=True,
+                                leftSection=html.Span("🔍", style={"fontSize": "11px", "opacity": 0.5}),
                             ),
 
                             dmc.Group(
@@ -123,13 +124,13 @@ app.layout = dmc.MantineProvider(
                                             color="teal",
                                             variant="light",
                                             size="sm",
-                                            style={"cursor": "pointer"}
+                                            style={"cursor": "pointer", "fontSize": "10.5px", "fontWeight": 600}
                                         ),
                                         href="/shortlists",
                                         style={"textDecoration": "none"},
                                     ),
-                                    dmc.Badge("Big 5 Leagues", color="gray", variant="outline", size="xs", visibleFrom="md"),
-                                    dmc.Badge("2024–25", color="gray", variant="outline", size="xs"),
+                                    dmc.Badge("Big 5 Leagues", color="gray", variant="outline", size="xs", visibleFrom="md", style={"borderColor": "rgba(255, 255, 255, 0.12)", "color": "#94A3B8"}),
+                                    dmc.Badge("2024–25 Season", color="gray", variant="outline", size="xs", style={"borderColor": "rgba(255, 255, 255, 0.12)", "color": "#94A3B8"}),
                                 ],
                                 gap="xs",
                             ),
@@ -192,10 +193,10 @@ app.layout = dmc.MantineProvider(
                         dmc.Box(
                             [
                                 dmc.Group([
-                                    dmc.Badge("●", color="teal", variant="transparent", size="xs", p=0),
+                                    html.Span(className="scout-live-dot"),
                                     dmc.Text("Live Intelligence Cohort", size="11px", fw=600, c="#F8FAFC"),
-                                ], gap=6),
-                                dmc.Text("1,692 qualified players (≥600m)", size="10px", c="#64748B", mt=2),
+                                ], gap=8, align="center"),
+                                dmc.Text("1,692 qualified players (≥600m)", size="10px", c="#64748B", mt=3),
                                 dmc.Text("Engine: pAdj • 7 Sub-Roles • K-Means", size="9px", c="#64748B", mt=1),
                             ],
                             style={

@@ -227,7 +227,7 @@ def create_section_card(children, title=None, subtitle=None, extra_header=None, 
     return dmc.Card(
         card_children,
         withBorder=True,
-        radius="md",
+        radius="sm",
         p="md",
         style=base_style,
     )

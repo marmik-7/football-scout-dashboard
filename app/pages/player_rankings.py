@@ -378,20 +378,20 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad):
     # 5. Leaderboard Table
     thead = dmc.TableThead(
         dmc.TableTr([
-            dmc.TableTh("Rank", style={"color": TEXT}),
-            dmc.TableTh("Player", style={"color": TEXT}),
-            dmc.TableTh("Club", style={"color": TEXT}),
-            dmc.TableTh("Pos", style={"color": TEXT}),
-            dmc.TableTh("Nat", style={"color": TEXT}),
-            dmc.TableTh("Min", style={"color": TEXT}),
-            dmc.TableTh(f"{attr} Score", style={"color": "#10B981", "fontWeight": "700"}),
-            dmc.TableTh("Style DNA", style={"color": TEXT}),
-            dmc.TableTh("Finishing", style={"color": TEXT}),
-            dmc.TableTh("Creativity", style={"color": TEXT}),
-            dmc.TableTh("Passing", style={"color": TEXT}),
-            dmc.TableTh("Progression", style={"color": TEXT}),
-            dmc.TableTh("Defending", style={"color": TEXT}),
-            dmc.TableTh("Action", style={"color": TEXT, "textAlign": "center"}),
+            dmc.TableTh("RANK", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "width": "50px"}),
+            dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh(f"{attr.upper()} SCORE", style={"color": "#10B981", "fontWeight": "700", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("TACTICAL DNA", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
         ])
     )
 
