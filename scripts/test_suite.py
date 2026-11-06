@@ -183,12 +183,22 @@ def run_full_scout_test_suite():
 
     print("\n=== TEST 7: Player Comparison Delta Calculation & Export ===")
     warn, rad, bar, stats_tbl, profs = player_comparison.update_comparison_views(
-        ["William Saliba", "Virgil van Dijk"], metric_mode="per90", show_deltas=True
+        ["William Saliba", "Virgil van Dijk"], metric_mode="per90", show_deltas=True, scout_analyst_mode="scout"
     )
     assert stats_tbl is not None
     assert rad is not None
     assert bar is not None
     assert profs is not None
+    stats_tbl_str = str(stats_tbl)
+    assert "EXECUTIVE HEAD-TO-HEAD RECRUITMENT VERDICT" in stats_tbl_str
+    assert "Baseline Starter Advantage" in stats_tbl_str
+    assert "Target Alternative Advantage" in stats_tbl_str
+
+    # Analyst mode check
+    warn_a, rad_a, bar_a, stats_tbl_a, profs_a = player_comparison.update_comparison_views(
+        ["William Saliba", "Virgil van Dijk"], metric_mode="total", show_deltas=True, scout_analyst_mode="analyst"
+    )
+    assert "ANALYST VIEW" in str(stats_tbl_a)
 
     # Verify comparison export CSV
     csv_dict = player_comparison.export_comparison_csv(
@@ -200,7 +210,7 @@ def run_full_scout_test_suite():
     assert "filename" in csv_dict
     assert "scout_comparison_William_Saliba_matrix.csv" in csv_dict["filename"]
     assert "content" in csv_dict
-    print("PASS: Player Comparison Delta Matrix & CSV Export")
+    print("PASS: Player Comparison Delta Matrix, Executive Verdict & CSV Export")
 
     print("\n=== TEST 8: Player Profile Shortlist Bookmarking ===")
     mock_store = []

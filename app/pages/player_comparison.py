@@ -19,6 +19,12 @@ from app.utils.styling import (
 )
 from app.utils.charts import build_radar_chart, build_comparison_bars, PLAYER_COMPARE_COLORS
 from app.utils.player_analysis import get_player_strengths_and_weaknesses
+from app.utils.metric_definitions import (
+    get_metric_label,
+    get_metric_tooltip,
+    get_sample_size_badge,
+    SAMPLE_SIZE_THRESHOLD,
+)
 
 dash.register_page(__name__, path="/player-comparison", name="Player Comparison", order=4)
 
@@ -174,8 +180,10 @@ def layout(player1=None, player2=None, **kwargs):
     Input("compare-players-select", "value"),
     Input("compare-metric-mode", "value"),
     Input("compare-delta-toggle", "checked"),
+    Input("scout-analyst-mode", "data"),
 )
-def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True):
+def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True, scout_analyst_mode="scout"):
+    scout_analyst_mode = scout_analyst_mode or "scout"
     if not selected_names or len(selected_names) < 2:
         warning_msg = dmc.Alert(
             "Please select at least 2 players (up to 4) to generate the comparison matrix.",
@@ -200,6 +208,96 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
     players = [get_player_by_name(name) for name in selected_names if get_player_by_name(name) is not None]
     if len(players) < 2:
         return html.Div(), go.Figure(), go.Figure(), html.Div(), html.Div()
+
+    # 1. Executive Head-to-Head Recruitment Verdict
+    p1 = players[0]
+    p2 = players[1]
+    p1_edges = []
+    p2_edges = []
+    for attr, col in ATTRIBUTE_COLUMNS.items():
+        v1 = float(p1.get(col, 50.0))
+        v2 = float(p2.get(col, 50.0))
+        diff = v2 - v1
+        if diff >= 6.0:
+            p2_edges.append((attr, diff, v2, v1))
+        elif diff <= -6.0:
+            p1_edges.append((attr, abs(diff), v1, v2))
+
+    p1_edges.sort(key=lambda x: x[1], reverse=True)
+    p2_edges.sort(key=lambda x: x[1], reverse=True)
+
+    m1 = float(p1.get("Min", 0))
+    m2 = float(p2.get("Min", 0))
+
+    p1_edge_str = ", ".join([f"{e[0]} (+{e[1]:.1f})" for e in p1_edges[:3]]) if p1_edges else "Balanced output across baseline traits"
+    p2_edge_str = ", ".join([f"{e[0]} (+{e[1]:.1f})" for e in p2_edges[:3]]) if p2_edges else "Balanced output across candidate traits"
+
+    sample_warning_items = []
+    if m1 < SAMPLE_SIZE_THRESHOLD:
+        sample_warning_items.append(f"{p1['Player']} has limited minutes ({int(m1)}m < 900m)")
+    if m2 < SAMPLE_SIZE_THRESHOLD:
+        sample_warning_items.append(f"{p2['Player']} has limited minutes ({int(m2)}m < 900m)")
+
+    sample_badge_ui = dmc.Badge(
+        "Limited Sample Notice: " + " • ".join(sample_warning_items),
+        color="orange",
+        variant="light",
+        size="xs",
+    ) if sample_warning_items else None
+
+    primary_tradeoff = f"{p1_edges[0][0]} ({p1['Player']})" if p1_edges else "Baseline profile"
+    alt_tradeoff = f"{p2_edges[0][0]} ({p2['Player']})" if p2_edges else "Candidate profile"
+
+    executive_verdict = dmc.Box(
+        [
+            dmc.Group([
+                dmc.Group([
+                    dmc.Text("EXECUTIVE HEAD-TO-HEAD RECRUITMENT VERDICT", size="10.5px", fw=800, c="teal", style={"letterSpacing": "0.8px"}),
+                    dmc.Badge(
+                        "👤 SCOUT VIEW" if scout_analyst_mode == "scout" else "🔬 ANALYST VIEW",
+                        color="teal" if scout_analyst_mode == "scout" else "indigo",
+                        variant="filled",
+                        size="xs",
+                    ),
+                ], gap="xs"),
+                *([sample_badge_ui] if sample_badge_ui else []),
+            ], justify="space-between", align="center", mb="xs"),
+
+            dmc.Grid([
+                dmc.GridCol([
+                    dmc.Group([
+                        html.Span("●", style={"color": PLAYER_COMPARE_COLORS[0], "fontSize": "13px"}),
+                        dmc.Text(f"Baseline Starter Advantage: {p1['Player']}", size="xs", fw=700, c="white"),
+                    ], gap="xs"),
+                    dmc.Text(f"Superior production in: {p1_edge_str}.", size="11px", c="#CBD5E1", mt=2),
+                ], span={"base": 12, "md": 6}),
+                dmc.GridCol([
+                    dmc.Group([
+                        html.Span("●", style={"color": PLAYER_COMPARE_COLORS[1], "fontSize": "13px"}),
+                        dmc.Text(f"Target Alternative Advantage: {p2['Player']}", size="xs", fw=700, c="#38BDF8"),
+                    ], gap="xs"),
+                    dmc.Text(f"Superior production in: {p2_edge_str}.", size="11px", c="#CBD5E1", mt=2),
+                ], span={"base": 12, "md": 6}),
+            ], gap="sm"),
+
+            dmc.Divider(my="xs", color=BORDER),
+            dmc.Text(
+                f"Recruitment Trade-off: Selecting {p2['Player']} over {p1['Player']} represents a strategic choice between {alt_tradeoff} vs {primary_tradeoff}. "
+                "Review match video to confirm whether the stylistic profile aligns with squad tactical requirements.",
+                size="11px",
+                c="#94A3B8",
+                style={"fontStyle": "italic", "lineHeight": 1.4},
+            ),
+        ],
+        style={
+            "backgroundColor": "#090D14",
+            "border": f"1px solid {BORDER}",
+            "borderLeft": "3px solid #10B981",
+            "borderRadius": "5px",
+            "padding": "12px 16px",
+            "marginBottom": "14px",
+        },
+    )
 
     # 1. Cross-Position Warning
     positions = set(p["Pos"] for p in players)
@@ -359,6 +457,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         withTableBorder=True,
         style={"backgroundColor": PANEL, "fontSize": "12px", "borderColor": BORDER},
     )
+    stats_matrix_ui = html.Div([executive_verdict, stats_table])
 
     # 4. Tactical Profiles Cards Grid
     profile_cards = []
@@ -402,7 +501,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
 
     profiles_container = dmc.Grid(profile_cards, gap="md")
 
-    return cross_pos_warning, radar_fig, bar_fig, stats_table, profiles_container
+    return cross_pos_warning, radar_fig, bar_fig, stats_matrix_ui, profiles_container
 
 
 # Export Comparison Matrix to CSV
