@@ -22,8 +22,10 @@ import app.pages.player_comparison as player_comparison
 import app.pages.player_rankings as player_rankings
 import app.pages.similar_players as similar_players
 import app.pages.playing_styles as playing_styles
+import app.pages.shortlists as shortlists
 
-def test_phase3():
+
+def run_full_scout_test_suite():
     print("=== TEST 1: Data Loader & Advanced Analytics Columns ===")
     df = load_data()
     expected_cols = ["SubRole", "pAdj_Factor", "Tkl_pAdj", "Int_pAdj", "G-xG", "npxG/Sh"]
@@ -47,14 +49,12 @@ def test_phase3():
     print("PASS: Data Loader & Advanced Analytics Columns")
 
     print("\n=== TEST 2: Tactical Sub-Role Similarity Modeling ===")
-    # Find similar Center-Backs to William Saliba
     saliba_sim = find_similar_players("William Saliba", subrole_filter="Center-Back", top_n=5)
     assert not saliba_sim.empty, "Similar CBs query returned empty!"
     for _, r in saliba_sim.iterrows():
         assert r["SubRole"] == "Center-Back", f"Player {r['Player']} has unexpected subrole {r['SubRole']}"
         print(f" - {r['Player']} ({r['Squad']}, {r['SubRole']}): {r['Similarity_Pct']:.1f}%")
 
-    # Find similar Wingers to Bukayo Saka under age 24
     saka_sim = find_similar_players("Bukayo Saka", subrole_filter="Winger", max_age=23, top_n=5)
     assert not saka_sim.empty, "Similar Wingers query returned empty!"
     for _, r in saka_sim.iterrows():
@@ -128,15 +128,79 @@ def test_phase3():
     assert res_prof_tot[4] is not None
     print("PASS: Player Profile Callback")
 
-    print("\n=== TEST 7: Player Comparison Callback with Advanced Metrics ===")
+    print("\n=== TEST 7: Player Comparison Delta Calculation & Export ===")
     warn, rad, bar, stats_tbl, profs = player_comparison.update_comparison_views(
-        ["William Saliba", "Virgil van Dijk"], metric_mode="per90"
+        ["William Saliba", "Virgil van Dijk"], metric_mode="per90", show_deltas=True
     )
     assert stats_tbl is not None
     assert rad is not None
-    print("PASS: Player Comparison Callback")
+    assert bar is not None
+    assert profs is not None
 
-    print("\n=== TEST 8: All 7 Page Layouts Instantiation ===")
+    # Verify comparison export CSV
+    csv_dict = player_comparison.export_comparison_csv(
+        n_clicks=1,
+        selected_names=["William Saliba", "Virgil van Dijk"],
+        metric_mode="per90",
+    )
+    assert csv_dict is not None
+    assert "filename" in csv_dict
+    assert "scout_comparison_William_Saliba_matrix.csv" in csv_dict["filename"]
+    assert "content" in csv_dict
+    print("PASS: Player Comparison Delta Matrix & CSV Export")
+
+    print("\n=== TEST 8: Player Profile Shortlist Bookmarking ===")
+    mock_store = []
+    updated_store, feedback = player_profile.save_profile_to_shortlist(
+        n_clicks=1,
+        player_name="Martin Ødegaard",
+        tier="A-List Target",
+        notes="Elite creative playmaker for possession-dominant setup.",
+        current_data=mock_store,
+    )
+    assert len(updated_store) == 1
+    assert updated_store[0]["player"] == "Martin Ødegaard"
+    assert updated_store[0]["tier"] == "A-List Target"
+    assert feedback is not None
+    print("PASS: Player Profile Shortlist Bookmarking")
+
+    print("\n=== TEST 9: Recruitment Shortlists View & Dossier Export ===")
+    test_shortlist = [
+        {"player": "Martin Ødegaard", "tier": "A-List Target", "notes": "Primary playmaker target"},
+        {"player": "Moisés Caicedo", "tier": "Primary Alternative", "notes": "Elite ball winner"},
+        {"player": "William Saliba", "tier": "Monitor / Development", "notes": "Top tier CB"},
+    ]
+    # Filter: ALL
+    metrics_ui, table_ui = shortlists.update_shortlist_view(
+        shortlist_data=test_shortlist,
+        search="",
+        filter_tier="ALL",
+        filter_pos="ALL",
+        filter_subrole="ALL",
+    )
+    assert metrics_ui is not None
+    assert table_ui is not None
+
+    # Filter: Tier = A-List Target
+    metrics_ui_a, table_ui_a = shortlists.update_shortlist_view(
+        shortlist_data=test_shortlist,
+        search="",
+        filter_tier="A-List Target",
+        filter_pos="ALL",
+        filter_subrole="ALL",
+    )
+    assert metrics_ui_a is not None
+    assert table_ui_a is not None
+
+    # Export Dossier CSV
+    dossier_csv = shortlists.export_shortlist_dossier(n_clicks=1, shortlist_data=test_shortlist)
+    assert dossier_csv is not None
+    assert "filename" in dossier_csv
+    assert "scout_recruitment_dossier_2024_25.csv" in dossier_csv["filename"]
+    assert "content" in dossier_csv
+    print("PASS: Shortlists View & Dossier Export")
+
+    print("\n=== TEST 10: All 8 Page Layouts Instantiation ===")
     def get_layout(mod, *args, **kwargs):
         if callable(getattr(mod, "layout", None)):
             return mod.layout(*args, **kwargs)
@@ -149,9 +213,11 @@ def test_phase3():
     assert get_layout(player_rankings) is not None
     assert get_layout(similar_players) is not None
     assert get_layout(playing_styles) is not None
-    print("PASS: All 7 Page Layouts successfully instantiated!")
+    assert get_layout(shortlists) is not None
+    print("PASS: All 8 Page Layouts successfully instantiated!")
 
-    print("\nALL PHASE 3 UNIT AND INTEGRATION TESTS PASSED PERFECTLY!")
+    print("\nALL RECRUITMENT INTELLIGENCE & SHORTLISTING TESTS PASSED PERFECTLY!")
+
 
 if __name__ == "__main__":
-    test_phase3()
+    run_full_scout_test_suite()

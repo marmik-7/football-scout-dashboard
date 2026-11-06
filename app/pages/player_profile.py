@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, State, callback
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import pandas as pd
@@ -69,6 +69,13 @@ def layout(player=None, **kwargs):
                         dmc.GridCol(
                             dmc.Group(
                                 [
+                                    dmc.Button(
+                                        "⭐ Save to Shortlist",
+                                        id="profile-open-shortlist-btn",
+                                        variant="filled",
+                                        color="orange",
+                                        size="sm",
+                                    ),
                                     dmc.Anchor(
                                         dmc.Button("Compare This Player →", variant="outline", color="lime", size="sm"),
                                         id="profile-compare-btn",
@@ -89,6 +96,49 @@ def layout(player=None, **kwargs):
                     align="center",
                 ),
                 style={"marginBottom": "20px"},
+            ),
+
+            # BOOKMARK TO SHORTLIST MODAL
+            dmc.Modal(
+                id="profile-shortlist-modal",
+                title=dmc.Group([
+                    dmc.Text("⭐", size="md"),
+                    dmc.Title("Save Candidate to Recruitment Pipeline", order=4, c="white"),
+                ], gap="xs"),
+                opened=False,
+                centered=True,
+                radius="md",
+                styles={"content": {"backgroundColor": PANEL, "borderColor": BORDER}},
+                children=[
+                    dmc.Box([
+                        dmc.Text(id="profile-modal-player-title", fw=700, size="sm", c="white", mb="xs"),
+                        dmc.Select(
+                            id="profile-modal-tier",
+                            label="Recruitment Priority Tier",
+                            data=[
+                                {"label": "★ A-List Target (Priority 1)", "value": "A-List Target"},
+                                {"label": "◆ Primary Alternative (Priority 2)", "value": "Primary Alternative"},
+                                {"label": "● Monitor / Development (Priority 3)", "value": "Monitor / Development"},
+                            ],
+                            value="A-List Target",
+                            allowDeselect=False,
+                            mb="sm",
+                        ),
+                        dmc.Textarea(
+                            id="profile-modal-notes",
+                            label="Scout Intelligence Notes",
+                            placeholder="Add tactical observations, scouting context, estimated valuation, or contract situation...",
+                            minRows=3,
+                            autosize=True,
+                            mb="md",
+                        ),
+                        html.Div(id="profile-shortlist-feedback"),
+                        dmc.Group([
+                            dmc.Button("Cancel", id="profile-modal-cancel", variant="subtle", color="gray"),
+                            dmc.Button("Save Target", id="profile-modal-submit", variant="filled", color="lime"),
+                        ], justify="flex-end"),
+                    ]),
+                ],
             ),
 
             # DYNAMIC PLAYER HEADER BANNER
@@ -449,4 +499,52 @@ def update_player_profile(selected_name, metric_mode="per90"):
     similar_url = f"/similar-players?player={selected_name}"
 
     return header, radar_fig, attributes_breakdown, scouting_summary, stats_grid, compare_url, similar_url
+
+
+# Toggle Profile Shortlist Modal
+@callback(
+    Output("profile-shortlist-modal", "opened"),
+    Output("profile-modal-player-title", "children"),
+    Input("profile-open-shortlist-btn", "n_clicks"),
+    Input("profile-modal-cancel", "n_clicks"),
+    Input("profile-modal-submit", "n_clicks"),
+    State("profile-player-select", "value"),
+    State("profile-shortlist-modal", "opened"),
+    prevent_initial_call=True,
+)
+def toggle_profile_shortlist_modal(n_open, n_cancel, n_submit, player_name, is_open):
+    title_text = f"Candidate: {player_name}" if player_name else "Candidate"
+    return not is_open, title_text
+
+
+# Save Profile Target to Global Shortlist Store
+@callback(
+    Output("scout-shortlists", "data", allow_duplicate=True),
+    Output("profile-shortlist-feedback", "children"),
+    Input("profile-modal-submit", "n_clicks"),
+    State("profile-player-select", "value"),
+    State("profile-modal-tier", "value"),
+    State("profile-modal-notes", "value"),
+    State("scout-shortlists", "data"),
+    prevent_initial_call=True,
+)
+def save_profile_to_shortlist(n_clicks, player_name, tier, notes, current_data):
+    if not player_name:
+        return dash.no_update, dash.no_update
+    current_data = current_data or []
+    updated = [item for item in current_data if item.get("player") != player_name]
+    updated.append({
+        "player": player_name,
+        "tier": tier or "A-List Target",
+        "notes": notes or "Target scouted directly from Player Profile view.",
+        "added_at": "2024-25 Season",
+    })
+    feedback = dmc.Alert(
+        f"✓ Successfully bookmarked {player_name} to {tier}!",
+        color="lime",
+        variant="light",
+        p="xs",
+        mb="xs",
+    )
+    return updated, feedback
 

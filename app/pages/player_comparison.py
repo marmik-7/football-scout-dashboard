@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, State, callback
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import pandas as pd
@@ -116,17 +116,34 @@ def layout(player1=None, player2=None, **kwargs):
             create_section_card(
                 html.Div(id="compare-stats-table-container", style={"overflowX": "auto"}),
                 title="Statistical Comparison Matrix",
-                subtitle="Direct side-by-side benchmarking of percentiles, production volume, and playing styles",
-                extra_header=dmc.SegmentedControl(
-                    id="compare-metric-mode",
-                    data=[
-                        {"label": "Standard Per-90 Rates", "value": "per90"},
-                        {"label": "Season Total Counts", "value": "total"},
-                    ],
-                    value="per90",
-                    size="xs",
-                    color="lime",
-                ),
+                subtitle="Benchmark target candidates directly against the baseline player with +/- deltas and per-90 rates",
+                extra_header=dmc.Group([
+                    dmc.Switch(
+                        id="compare-delta-toggle",
+                        label="Show Deltas (Δ vs Baseline)",
+                        checked=True,
+                        size="xs",
+                        color="lime",
+                    ),
+                    dmc.SegmentedControl(
+                        id="compare-metric-mode",
+                        data=[
+                            {"label": "Standard Per-90 Rates", "value": "per90"},
+                            {"label": "Season Total Counts", "value": "total"},
+                        ],
+                        value="per90",
+                        size="xs",
+                        color="lime",
+                    ),
+                    dmc.Button(
+                        "📥 Export CSV",
+                        id="compare-export-btn",
+                        size="xs",
+                        variant="light",
+                        color="cyan",
+                    ),
+                    dcc.Download(id="compare-download-csv"),
+                ], gap="sm", align="center", wrap="wrap"),
             ),
 
             dmc.Space(h=25),
@@ -155,8 +172,9 @@ def layout(player1=None, player2=None, **kwargs):
     Output("compare-profiles-container", "children"),
     Input("compare-players-select", "value"),
     Input("compare-metric-mode", "value"),
+    Input("compare-delta-toggle", "checked"),
 )
-def update_comparison_views(selected_names, metric_mode="per90"):
+def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True):
     if not selected_names or len(selected_names) < 2:
         warning_msg = dmc.Alert(
             "Please select at least 2 players (up to 4) to generate the comparison matrix.",
@@ -217,28 +235,62 @@ def update_comparison_views(selected_names, metric_mode="per90"):
     table_headers = [dmc.TableTh("Metric / Dimension", style={"color": TEXT, "width": "220px"})]
     for i, p in enumerate(players):
         color = PLAYER_COMPARE_COLORS[i % len(PLAYER_COMPARE_COLORS)]
+        role_badge = dmc.Badge("BASELINE", color="lime", variant="filled", size="xs") if i == 0 else dmc.Badge(f"TARGET #{i}", color="blue", variant="light", size="xs")
         table_headers.append(
             dmc.TableTh(
-                dmc.Group([
-                    dmc.Badge("●", color=color, variant="transparent", size="xs", p=0),
-                    dmc.Text(p["Player"], fw=700, c="white"),
-                ], gap="xs"),
+                dmc.Box([
+                    dmc.Group([
+                        dmc.Badge("●", color=color, variant="transparent", size="xs", p=0),
+                        dmc.Text(p["Player"], fw=700, c="white"),
+                    ], gap="xs"),
+                    dmc.Group([
+                        role_badge,
+                        dmc.Text(f"{p['Squad']} • {p.get('SubRole', p['Pos'])}", size="10px", c="dimmed"),
+                    ], gap="xs", mt=4),
+                ]),
                 style={"color": TEXT},
             )
         )
     thead = dmc.TableThead(dmc.TableTr(table_headers))
 
-    # Metric Rows Definition
-    def make_row(label, values_fn, is_header=False, is_percentile=False):
+    # Metric Rows Definition with Delta Support
+    def make_row(label, values_fn, is_header=False, is_percentile=False, is_numeric=False, precision=1):
         cells = [dmc.TableTd(dmc.Text(label, fw=700 if is_header else 500, c="dimmed" if not is_header else "lime"))]
-        for p in players:
-            val = values_fn(p)
-            if is_percentile:
-                num = float(val)
-                tier_info = get_percentile_tier(num)
-                cells.append(dmc.TableTd(dmc.Text(f"{num:.1f}", fw=700, style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"})))
+        baseline_num = None
+        for i, p in enumerate(players):
+            raw_val = values_fn(p)
+            if is_header:
+                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})))
+            elif is_percentile or is_numeric:
+                try:
+                    num = float(raw_val)
+                    delta_badge = None
+                    if i == 0:
+                        baseline_num = num
+                        if show_deltas:
+                            delta_badge = dmc.Badge("REF", size="xs", variant="outline", color="gray")
+                    else:
+                        if baseline_num is not None and show_deltas:
+                            delta = num - baseline_num
+                            if abs(delta) < 0.001:
+                                delta_badge = dmc.Badge("0.0", size="xs", variant="light", color="gray")
+                            elif delta > 0:
+                                delta_badge = dmc.Badge(f"+{delta:.{precision}f}", size="xs", variant="light", color="lime")
+                            else:
+                                delta_badge = dmc.Badge(f"{delta:.{precision}f}", size="xs", variant="light", color="red")
+
+                    if is_percentile:
+                        tier_info = get_percentile_tier(num)
+                        val_span = dmc.Text(f"{num:.1f}", fw=700, style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"})
+                    else:
+                        val_span = dmc.Text(f"{num:.{precision}f}" if precision > 0 else f"{int(round(num))}", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})
+
+                    content = dmc.Group([val_span, delta_badge] if delta_badge else [val_span], gap="xs", align="center")
+                    cells.append(dmc.TableTd(content))
+                except (ValueError, TypeError):
+                    cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, c="white")))
             else:
-                cells.append(dmc.TableTd(dmc.Text(str(val), fw=600 if is_header else 400, c="white", style={"fontVariantNumeric": "tabular-nums"})))
+                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, c="white")))
         return dmc.TableTr(cells)
 
     rows = [
@@ -266,36 +318,36 @@ def update_comparison_views(selected_names, metric_mode="per90"):
     if metric_mode == "per90":
         rows.extend([
             make_row("Standard Per-90 Rates", lambda p: "---", is_header=True),
-            make_row("Goals / 90", lambda p: f"{p.get('Gls_per90', 0.0):.2f}"),
-            make_row("Expected Goals (xG) / 90", lambda p: f"{p.get('xG_per90', 0.0):.2f}"),
-            make_row("Finishing Diff (G - xG)", lambda p: f"{p.get('G-xG', 0.0):+.2f}"),
-            make_row("Shot Quality (npxG/Sh)", lambda p: f"{p.get('npxG/Sh', 0.0):.2f}"),
-            make_row("Assists / 90", lambda p: f"{p.get('Ast_per90', 0.0):.2f}"),
-            make_row("Expected Assists (xA) / 90", lambda p: f"{p.get('xA_per90', 0.0):.2f}"),
+            make_row("Goals / 90", lambda p: p.get('Gls_per90', 0.0), is_numeric=True, precision=2),
+            make_row("Expected Goals (xG) / 90", lambda p: p.get('xG_per90', 0.0), is_numeric=True, precision=2),
+            make_row("Finishing Diff (G - xG)", lambda p: p.get('G-xG', 0.0), is_numeric=True, precision=2),
+            make_row("Shot Quality (npxG/Sh)", lambda p: p.get('npxG/Sh', 0.0), is_numeric=True, precision=2),
+            make_row("Assists / 90", lambda p: p.get('Ast_per90', 0.0), is_numeric=True, precision=2),
+            make_row("Expected Assists (xA) / 90", lambda p: p.get('xA_per90', 0.0), is_numeric=True, precision=2),
             make_row("Shots (on Target) / 90", lambda p: f"{p.get('Sh_per90', 0.0):.2f} ({p.get('SoT_per90', 0.0):.2f})"),
-            make_row("Pass Completion %", lambda p: f"{p.get('Cmp%', 0.0):.1f}%"),
-            make_row("Prog. Passes / 90", lambda p: f"{p.get('PrgP_per90', 0.0):.1f}"),
-            make_row("Prog. Carries / 90", lambda p: f"{p.get('PrgC_per90', 0.0):.1f}"),
-            make_row("pAdj Defending Actions / 90", lambda p: f"{p.get('Tkl_pAdj_per90', 0.0) + p.get('Int_pAdj_per90', 0.0):.2f}"),
-            make_row("Raw Tackles + Int / 90", lambda p: f"{p.get('Tkl_per90', 0.0) + p.get('Int_per90', 0.0):.2f}"),
-            make_row("Aerials Won / 90", lambda p: f"{p.get('Won_per90', 0.0):.2f} ({p.get('Won%', 0.0):.1f}%)"),
+            make_row("Pass Completion %", lambda p: p.get('Cmp%', 0.0), is_numeric=True, precision=1),
+            make_row("Prog. Passes / 90", lambda p: p.get('PrgP_per90', 0.0), is_numeric=True, precision=1),
+            make_row("Prog. Carries / 90", lambda p: p.get('PrgC_per90', 0.0), is_numeric=True, precision=1),
+            make_row("pAdj Defending Actions / 90", lambda p: p.get('Tkl_pAdj_per90', 0.0) + p.get('Int_pAdj_per90', 0.0), is_numeric=True, precision=2),
+            make_row("Raw Tackles + Int / 90", lambda p: p.get('Tkl_per90', 0.0) + p.get('Int_per90', 0.0), is_numeric=True, precision=2),
+            make_row("Aerials Won / 90", lambda p: p.get('Won_per90', 0.0), is_numeric=True, precision=2),
         ])
     else:
         rows.extend([
             make_row("Season Total Counts", lambda p: "---", is_header=True),
-            make_row("Goals (Season Total)", lambda p: int(p.get("Gls", 0))),
-            make_row("Expected Goals (xG)", lambda p: f"{p.get('xG', 0.0):.2f}"),
-            make_row("Finishing Diff (G - xG)", lambda p: f"{p.get('G-xG', 0.0):+.2f}"),
-            make_row("Shot Quality (npxG/Sh)", lambda p: f"{p.get('npxG/Sh', 0.0):.2f}"),
-            make_row("Assists (Season Total)", lambda p: int(p.get("Ast", 0))),
-            make_row("Expected Assists (xA)", lambda p: f"{p.get('xA', 0.0):.2f}"),
+            make_row("Goals (Season Total)", lambda p: p.get('Gls', 0), is_numeric=True, precision=0),
+            make_row("Expected Goals (xG)", lambda p: p.get('xG', 0.0), is_numeric=True, precision=2),
+            make_row("Finishing Diff (G - xG)", lambda p: p.get('G-xG', 0.0), is_numeric=True, precision=2),
+            make_row("Shot Quality (npxG/Sh)", lambda p: p.get('npxG/Sh', 0.0), is_numeric=True, precision=2),
+            make_row("Assists (Season Total)", lambda p: p.get('Ast', 0), is_numeric=True, precision=0),
+            make_row("Expected Assists (xA)", lambda p: p.get('xA', 0.0), is_numeric=True, precision=2),
             make_row("Shots (on Target)", lambda p: f"{int(p.get('Sh', 0))} ({int(p.get('SoT', 0))})"),
-            make_row("Pass Completion %", lambda p: f"{p.get('Cmp%', 0.0):.1f}%"),
-            make_row("Progressive Passes", lambda p: int(p.get("PrgP", 0))),
-            make_row("Progressive Carries", lambda p: int(p.get("PrgC", 0))),
-            make_row("pAdj Defending Actions", lambda p: int(p.get('Tkl_pAdj', 0) + p.get('Int_pAdj', 0))),
-            make_row("Raw Tackles + Interceptions", lambda p: int(p.get("Tkl", 0) + p.get("Int", 0))),
-            make_row("Aerial Duels Won", lambda p: f"{int(p.get('Won', 0))} ({p.get('Won%', 0.0):.1f}%)"),
+            make_row("Pass Completion %", lambda p: p.get('Cmp%', 0.0), is_numeric=True, precision=1),
+            make_row("Progressive Passes", lambda p: p.get('PrgP', 0), is_numeric=True, precision=0),
+            make_row("Progressive Carries", lambda p: p.get('PrgC', 0), is_numeric=True, precision=0),
+            make_row("pAdj Defending Actions", lambda p: p.get('Tkl_pAdj', 0) + p.get('Int_pAdj', 0), is_numeric=True, precision=0),
+            make_row("Raw Tackles + Interceptions", lambda p: p.get('Tkl', 0) + p.get('Int', 0), is_numeric=True, precision=0),
+            make_row("Aerial Duels Won", lambda p: p.get('Won', 0), is_numeric=True, precision=0),
         ])
 
     tbody = dmc.TableTbody(rows)
@@ -320,7 +372,7 @@ def update_comparison_views(selected_names, metric_mode="per90"):
                         dmc.Badge("●", color=color, variant="transparent", size="sm", p=0),
                         dmc.Title(p["Player"], order=4, c="white"),
                     ], gap="xs"),
-                    dmc.Text(f"{p['Squad']} • {p['Pos']} • Style: {p.get('PlayingStyle_Name', 'Specialist')}", size="xs", c="dimmed", mt=2),
+                    dmc.Text(f"{p['Squad']} • {p['Pos']} • {p.get('SubRole', '')} • Style: {p.get('PlayingStyle_Name', 'Specialist')}", size="xs", c="dimmed", mt=2),
                     dmc.Divider(my="sm"),
 
                     dmc.Text("KEY STRENGTHS", size="xs", fw=700, c="lime", mb=4),
@@ -347,4 +399,55 @@ def update_comparison_views(selected_names, metric_mode="per90"):
     profiles_container = dmc.Grid(profile_cards, gap="md")
 
     return cross_pos_warning, radar_fig, bar_fig, stats_table, profiles_container
+
+
+# Export Comparison Matrix to CSV
+@callback(
+    Output("compare-download-csv", "data"),
+    Input("compare-export-btn", "n_clicks"),
+    State("compare-players-select", "value"),
+    State("compare-metric-mode", "value"),
+    prevent_initial_call=True,
+)
+def export_comparison_csv(n_clicks, selected_names, metric_mode):
+    if not selected_names or len(selected_names) < 2:
+        return dash.no_update
+    players = [get_player_by_name(name) for name in selected_names if get_player_by_name(name) is not None]
+    if len(players) < 2:
+        return dash.no_update
+
+    rows_data = []
+    for i, p in enumerate(players):
+        role_tag = "BASELINE" if i == 0 else f"TARGET #{i}"
+        rows_data.append({
+            "Recruitment_Role": role_tag,
+            "Player": p["Player"],
+            "Squad": p["Squad"],
+            "Competition": p.get("Comp_Clean", "Big 5"),
+            "Position": p["Pos"],
+            "Tactical_SubRole": p.get("SubRole", "N/A"),
+            "Age": p["Age"],
+            "Minutes": p["Min"],
+            "PlayingStyle_DNA": p.get("PlayingStyle_Name", "N/A"),
+            "Finishing_Score": round(float(p["Finishing_Score"]), 1),
+            "Creativity_Score": round(float(p["Creativity_Score"]), 1),
+            "Passing_Score": round(float(p["Passing_Score"]), 1),
+            "Progression_Score": round(float(p["Progression_Score"]), 1),
+            "Defending_Score_pAdj": round(float(p["Defending_Score"]), 1),
+            "BallSecurity_Score": round(float(p["BallSecurity_Score"]), 1),
+            "Aerial_Score": round(float(p["Aerial_Score"]), 1),
+            "Goals_per90": round(float(p.get("Gls_per90", 0.0)), 2),
+            "xG_per90": round(float(p.get("xG_per90", 0.0)), 2),
+            "Finishing_Diff_G_minus_xG": round(float(p.get("G-xG", 0.0)), 2),
+            "Shot_Quality_npxG_per_Sh": round(float(p.get("npxG/Sh", 0.0)), 2),
+            "Assists_per90": round(float(p.get("Ast_per90", 0.0)), 2),
+            "xA_per90": round(float(p.get("xA_per90", 0.0)), 2),
+            "PrgP_per90": round(float(p.get("PrgP_per90", 0.0)), 1),
+            "PrgC_per90": round(float(p.get("PrgC_per90", 0.0)), 1),
+            "pAdj_Defending_per90": round(float(p.get("Tkl_pAdj_per90", 0.0) + p.get("Int_pAdj_per90", 0.0)), 2),
+        })
+    df_exp = pd.DataFrame(rows_data)
+    ref_name = players[0]["Player"].replace(" ", "_")
+    return dcc.send_data_frame(df_exp.to_csv, f"scout_comparison_{ref_name}_matrix.csv", index=False)
+
 

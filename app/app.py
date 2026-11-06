@@ -35,6 +35,7 @@ NAV_ITEMS = [
     {"label": "05   Similar Players", "path": "/similar-players", "id": "nav-similar"},
     {"label": "06   Playing Styles", "path": "/playing-styles", "id": "nav-styles"},
     {"label": "07   Rankings", "path": "/player-rankings", "id": "nav-rankings"},
+    {"label": "08   Shortlists", "path": "/shortlists", "id": "nav-shortlists"},
 ]
 
 app.layout = dmc.MantineProvider(
@@ -46,6 +47,24 @@ app.layout = dmc.MantineProvider(
     },
     children=[
         dcc.Location(id="url", refresh="callback-nav"),
+        dcc.Store(
+            id="scout-shortlists",
+            storage_type="local",
+            data=[
+                {
+                    "player": "Florian Wirtz",
+                    "tier": "A-List Target",
+                    "notes": "Primary succession candidate for elite attacking midfield creator. 95th percentile creativity.",
+                    "added_at": "2024-25 Season",
+                },
+                {
+                    "player": "Moisés Caicedo",
+                    "tier": "Primary Alternative",
+                    "notes": "Elite ball-winning defensive pivot with top recovery and tackling volumes.",
+                    "added_at": "2024-25 Season",
+                },
+            ],
+        ),
         dmc.AppShell(
             id="app-shell",
             children=[
@@ -84,6 +103,11 @@ app.layout = dmc.MantineProvider(
 
                             dmc.Group(
                                 [
+                                    dcc.Link(
+                                        dmc.Badge(id="header-shortlist-badge", children="★ Shortlist: 2", color="orange", variant="light", size="sm"),
+                                        href="/shortlists",
+                                        style={"textDecoration": "none"},
+                                    ),
                                     dmc.Badge("1,692 PLAYERS", color="blue", variant="light", size="sm", visibleFrom="md"),
                                     dmc.Badge("2024–25", color="lime", variant="light", size="sm"),
                                 ],
@@ -223,6 +247,16 @@ def jump_to_player_profile(selected_name):
     if selected_name and str(selected_name).strip():
         return f"/player-profile?player={selected_name}"
     return dash.no_update
+
+
+# Callback to update header shortlist counter badge
+@app.callback(
+    Output("header-shortlist-badge", "children"),
+    Input("scout-shortlists", "data"),
+)
+def update_header_shortlist_badge(shortlist_data):
+    count = len(shortlist_data) if isinstance(shortlist_data, list) else 0
+    return f"★ Shortlist: {count}"
 
 
 if __name__ == "__main__":
