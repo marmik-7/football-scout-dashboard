@@ -49,12 +49,25 @@ layout = dmc.Container(
             badge_text="GLOBAL RANKINGS",
         ),
 
-        # FILTER AND RANKING CONTROLS
+        # FILTER AND RANKING CONTROLS (LAYER 1 + LAYER 2 PROGRESSIVE DISCLOSURE)
         dmc.Card(
             [
-                # Row 1: Positional & Geographic Scope
+                # Primary Command Row: Focused strictly on Dimension, Position, Sub-Role & Depth
                 dmc.Grid(
                     [
+                        dmc.GridCol(
+                            dmc.Select(
+                                id="rankings-attr",
+                                label="Scouting Dimension (Ranked Metric)",
+                                data=[
+                                    {"label": f"{name} (Percentile)", "value": name}
+                                    for name in ATTRIBUTE_COLUMNS
+                                ],
+                                value="Finishing",
+                                allowDeselect=False,
+                            ),
+                            span={"base": 12, "sm": 6, "md": 4},
+                        ),
                         dmc.GridCol(
                             dmc.Select(
                                 id="rankings-pos",
@@ -68,7 +81,7 @@ layout = dmc.Container(
                                 value="FW",
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 2},
+                            span={"base": 12, "sm": 6, "md": 2.5},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -80,70 +93,7 @@ layout = dmc.Container(
                                 value="ALL",
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 2.5},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="rankings-attr",
-                                label="Scouting Dimension",
-                                data=[
-                                    {"label": f"{name} (Percentile)", "value": name}
-                                    for name in ATTRIBUTE_COLUMNS
-                                ],
-                                value="Finishing",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 2.5},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="rankings-comp",
-                                label="Competition / League",
-                                data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
-                                    {"label": c, "value": c} for c in unique_competitions
-                                ],
-                                value="ALL",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 2.5},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="rankings-age-group",
-                                label="Age Bracket",
-                                data=[
-                                    {"label": "All Ages", "value": "ALL"},
-                                    {"label": "U-21 Prospects (≤21)", "value": "U21"},
-                                    {"label": "U-23 Emerging (≤23)", "value": "U23"},
-                                    {"label": "Peak Prime (24–29)", "value": "PRIME"},
-                                    {"label": "Experienced (30+)", "value": "30PLUS"},
-                                ],
-                                value="ALL",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 2.5},
-                        ),
-                    ],
-                    gap="sm",
-                ),
-
-                dmc.Divider(my="sm", color="rgba(255, 255, 255, 0.06)"),
-
-                # Row 2: Club & Output Depth
-                dmc.Grid(
-                    [
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="rankings-squad",
-                                label="Club / Squad",
-                                data=[{"label": "All Clubs", "value": "ALL"}] + [
-                                    {"label": s, "value": s} for s in unique_squads
-                                ],
-                                value="ALL",
-                                searchable=True,
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 4},
+                            span={"base": 12, "sm": 6, "md": 3},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -158,23 +108,100 @@ layout = dmc.Container(
                                 value=10,
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 4},
-                        ),
-                        dmc.GridCol(
-                            dmc.Select(
-                                id="rankings-order",
-                                label="Ranking Order",
-                                data=[
-                                    {"label": "Highest to Lowest (Desc)", "value": "desc"},
-                                    {"label": "Lowest to Highest (Asc)", "value": "asc"},
-                                ],
-                                value="desc",
-                                allowDeselect=False,
-                            ),
-                            span={"base": 12, "sm": 6, "md": 4},
+                            span={"base": 12, "sm": 6, "md": 2.5},
                         ),
                     ],
                     gap="sm",
+                ),
+
+                # Progressive Disclosure: Secondary Geographic, Age & Club Filters (Layer 2)
+                dmc.Accordion(
+                    styles={
+                        "item": {"border": "none", "backgroundColor": "transparent"},
+                        "control": {
+                            "padding": "6px 0px",
+                            "color": "#94A3B8",
+                            "&:hover": {"backgroundColor": "transparent"},
+                        },
+                        "panel": {"padding": "8px 0px 0px 0px"},
+                    },
+                    children=[
+                        dmc.AccordionItem(
+                            [
+                                dmc.AccordionControl(
+                                    dmc.Group([
+                                        dmc.Badge("⚙ ADVANCED SCOPE & FILTERS", color="gray", variant="outline", size="xs"),
+                                        dmc.Text("League, Age Bracket, Club Screening & Sort Order", size="xs", c="dimmed"),
+                                    ], gap="xs")
+                                ),
+                                dmc.AccordionPanel(
+                                    dmc.Box([
+                                        dmc.Divider(mb="sm", color="rgba(255, 255, 255, 0.06)"),
+                                        dmc.Grid(
+                                            [
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="rankings-comp",
+                                                        label="Competition / League",
+                                                        data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
+                                                            {"label": c, "value": c} for c in unique_competitions
+                                                        ],
+                                                        value="ALL",
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="rankings-age-group",
+                                                        label="Age Bracket",
+                                                        data=[
+                                                            {"label": "All Ages", "value": "ALL"},
+                                                            {"label": "U-21 Prospects (≤21)", "value": "U21"},
+                                                            {"label": "U-23 Emerging (≤23)", "value": "U23"},
+                                                            {"label": "Peak Prime (24–29)", "value": "PRIME"},
+                                                            {"label": "Experienced (30+)", "value": "30PLUS"},
+                                                        ],
+                                                        value="ALL",
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="rankings-squad",
+                                                        label="Club / Squad",
+                                                        data=[{"label": "All Clubs", "value": "ALL"}] + [
+                                                            {"label": s, "value": s} for s in unique_squads
+                                                        ],
+                                                        value="ALL",
+                                                        searchable=True,
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 3.5},
+                                                ),
+                                                dmc.GridCol(
+                                                    dmc.Select(
+                                                        id="rankings-order",
+                                                        label="Ranking Order",
+                                                        data=[
+                                                            {"label": "Highest First (Desc)", "value": "desc"},
+                                                            {"label": "Lowest First (Asc)", "value": "asc"},
+                                                        ],
+                                                        value="desc",
+                                                        allowDeselect=False,
+                                                    ),
+                                                    span={"base": 12, "sm": 6, "md": 2.5},
+                                                ),
+                                            ],
+                                            gap="sm",
+                                        ),
+                                    ])
+                                ),
+                            ],
+                            value="advanced",
+                        )
+                    ],
                 ),
             ],
             withBorder=True,

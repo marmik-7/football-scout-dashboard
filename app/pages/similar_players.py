@@ -50,10 +50,10 @@ def layout(player=None, **kwargs):
                 badge_text="SIMILARITY ENGINE",
             ),
 
-            # FILTER AND CONFIG PANEL
+            # FILTER AND CONFIG PANEL (LAYER 1 + LAYER 2 PROGRESSIVE DISCLOSURE)
             create_section_card(
                 dmc.Box([
-                    # Row 1: Reference Player & Positional / Geographic Filters
+                    # Row 1: Primary Query Controls (Immediate)
                     dmc.Grid(
                         [
                             dmc.GridCol(
@@ -66,7 +66,7 @@ def layout(player=None, **kwargs):
                                     searchable=True,
                                     allowDeselect=False,
                                 ),
-                                span={"base": 12, "sm": 6, "md": 3},
+                                span={"base": 12, "sm": 6, "md": 5},
                             ),
                             dmc.GridCol(
                                 dmc.Select(
@@ -82,31 +82,7 @@ def layout(player=None, **kwargs):
                                     value="SAME",
                                     allowDeselect=False,
                                 ),
-                                span={"base": 12, "sm": 6, "md": 2},
-                            ),
-                            dmc.GridCol(
-                                dmc.Select(
-                                    id="similar-subrole-filter",
-                                    label="Tactical Sub-Role",
-                                    data=[{"label": "All Sub-Roles", "value": "ALL"}] + [
-                                        {"label": s, "value": s} for s in unique_subroles
-                                    ],
-                                    value="ALL",
-                                    allowDeselect=False,
-                                ),
-                                span={"base": 12, "sm": 6, "md": 2.5},
-                            ),
-                            dmc.GridCol(
-                                dmc.Select(
-                                    id="similar-comp-filter",
-                                    label="Target League",
-                                    data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
-                                        {"label": c, "value": c} for c in unique_competitions
-                                    ],
-                                    value="ALL",
-                                    allowDeselect=False,
-                                ),
-                                span={"base": 12, "sm": 6, "md": 2.5},
+                                span={"base": 12, "sm": 6, "md": 3.5},
                             ),
                             dmc.GridCol(
                                 dmc.Select(
@@ -121,47 +97,98 @@ def layout(player=None, **kwargs):
                                     value="ALL",
                                     allowDeselect=False,
                                 ),
-                                span={"base": 12, "sm": 6, "md": 2},
+                                span={"base": 12, "sm": 6, "md": 3.5},
                             ),
                         ],
                         gap="sm",
                     ),
 
-                    dmc.Space(h=10),
-
-                    # Row 2: Candidate Club & Depth
-                    dmc.Grid(
-                        [
-                            dmc.GridCol(
-                                dmc.Select(
-                                    id="similar-club-filter",
-                                    label="Candidate Club",
-                                    data=[{"label": "All Clubs", "value": "ALL"}] + [
-                                        {"label": s, "value": s} for s in unique_squads
-                                    ],
-                                    value="ALL",
-                                    searchable=True,
-                                    allowDeselect=False,
-                                ),
-                                span={"base": 12, "sm": 8, "md": 9},
-                            ),
-                            dmc.GridCol(
-                                dmc.Select(
-                                    id="similar-top-n",
-                                    label="Results Depth",
-                                    data=[
-                                        {"label": "Top 5 Candidates", "value": 5},
-                                        {"label": "Top 10 Candidates", "value": 10},
-                                        {"label": "Top 15 Candidates", "value": 15},
-                                        {"label": "Top 20 Candidates", "value": 20},
-                                    ],
-                                    value=10,
-                                    allowDeselect=False,
-                                ),
-                                span={"base": 12, "sm": 4, "md": 3},
-                            ),
+                    # Layer 2: Progressive Disclosure for Secondary Filters
+                    dmc.Accordion(
+                        styles={
+                            "item": {"border": "none", "backgroundColor": "transparent"},
+                            "control": {
+                                "padding": "6px 0px",
+                                "color": "#94A3B8",
+                                "&:hover": {"backgroundColor": "transparent"},
+                            },
+                            "panel": {"padding": "8px 0px 0px 0px"},
+                        },
+                        children=[
+                            dmc.AccordionItem(
+                                [
+                                    dmc.AccordionControl(
+                                        dmc.Group([
+                                            dmc.Badge("⚙ ADVANCED SCOUTING SCOPE", color="gray", variant="outline", size="xs"),
+                                            dmc.Text("Sub-Role, League Scope, Club Filter & Results Depth", size="xs", c="dimmed"),
+                                        ], gap="xs")
+                                    ),
+                                    dmc.AccordionPanel(
+                                        dmc.Box([
+                                            dmc.Divider(mb="sm", color="rgba(255, 255, 255, 0.06)"),
+                                            dmc.Grid(
+                                                [
+                                                    dmc.GridCol(
+                                                        dmc.Select(
+                                                            id="similar-subrole-filter",
+                                                            label="Tactical Sub-Role",
+                                                            data=[{"label": "All Sub-Roles", "value": "ALL"}] + [
+                                                                {"label": s, "value": s} for s in unique_subroles
+                                                            ],
+                                                            value="ALL",
+                                                            allowDeselect=False,
+                                                        ),
+                                                        span={"base": 12, "sm": 6, "md": 4},
+                                                    ),
+                                                    dmc.GridCol(
+                                                        dmc.Select(
+                                                            id="similar-comp-filter",
+                                                            label="Target League",
+                                                            data=[{"label": "All 5 Leagues", "value": "ALL"}] + [
+                                                                {"label": c, "value": c} for c in unique_competitions
+                                                            ],
+                                                            value="ALL",
+                                                            allowDeselect=False,
+                                                        ),
+                                                        span={"base": 12, "sm": 6, "md": 4},
+                                                    ),
+                                                    dmc.GridCol(
+                                                        dmc.Select(
+                                                            id="similar-top-n",
+                                                            label="Results Depth",
+                                                            data=[
+                                                                {"label": "Top 5 Candidates", "value": 5},
+                                                                {"label": "Top 10 Candidates", "value": 10},
+                                                                {"label": "Top 15 Candidates", "value": 15},
+                                                                {"label": "Top 20 Candidates", "value": 20},
+                                                            ],
+                                                            value=10,
+                                                            allowDeselect=False,
+                                                        ),
+                                                        span={"base": 12, "sm": 6, "md": 4},
+                                                    ),
+                                                    dmc.GridCol(
+                                                        dmc.Select(
+                                                            id="similar-club-filter",
+                                                            label="Candidate Club",
+                                                            data=[{"label": "All Clubs", "value": "ALL"}] + [
+                                                                {"label": s, "value": s} for s in unique_squads
+                                                            ],
+                                                            value="ALL",
+                                                            searchable=True,
+                                                            allowDeselect=False,
+                                                        ),
+                                                        span={"base": 12, "md": 12},
+                                                    ),
+                                                ],
+                                                gap="sm",
+                                            ),
+                                        ])
+                                    ),
+                                ],
+                                value="advanced",
+                            )
                         ],
-                        gap="sm",
                     ),
                 ]),
                 title="Similarity Query Parameters",
@@ -414,25 +441,38 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
         )
         return banner, radar_fig, methodology, table_container
 
-    thead = dmc.TableThead(
-        dmc.TableTr([
-            dmc.TableTh("RANK", style={"color": TEXT, "width": "50px", "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("SIMILARITY", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("MATCH TIER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
-        ])
-    )
+    if scout_analyst_mode == "scout":
+        thead = dmc.TableThead(
+            dmc.TableTr([
+                dmc.TableTh("RANK", style={"color": TEXT, "width": "50px", "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("ROLE DNA", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("SIMILARITY", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("MATCH TIER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
+            ])
+        )
+    else:
+        thead = dmc.TableThead(
+            dmc.TableTr([
+                dmc.TableTh("RANK", style={"color": TEXT, "width": "50px", "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("SIMILARITY", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("MATCH TIER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
+            ])
+        )
 
     rows = []
     for rank, (_, r) in enumerate(sim_results.iterrows(), start=1):
@@ -461,8 +501,44 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
 
         sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px", "marginLeft": "4px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
 
-        rows.append(
-            dmc.TableTr([
+        if scout_analyst_mode == "scout":
+            row_cells = [
+                dmc.TableTd(rank_badge),
+                dmc.TableTd([
+                    dmc.Group([
+                        dmc.Text(r["Player"], size="xs", fw=600, c="white"),
+                        *([sample_pill] if sample_pill else []),
+                    ], gap=4, align="center"),
+                    dmc.Text(f"Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
+                ]),
+                dmc.TableTd([
+                    dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
+                    dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
+                ]),
+                dmc.TableTd([
+                    dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
+                    dmc.Text(r.get("SubRole", ""), size="10px", c="dimmed", mt=2),
+                ]),
+                dmc.TableTd(
+                    dmc.Badge(
+                        f"{sim_pct:.1f}%",
+                        size="xs",
+                        variant="light",
+                        color="emerald" if sim_pct >= 95 else "cyan" if sim_pct >= 88 else "orange",
+                    )
+                ),
+                dmc.TableTd(tier_badge),
+                dmc.TableTd(
+                    dcc.Link(
+                        dmc.Button("Dossier →", size="xs", variant="subtle", color="emerald"),
+                        href=profile_url,
+                        style={"textDecoration": "none"},
+                    ),
+                    style={"textAlign": "center"},
+                ),
+            ]
+        else:
+            row_cells = [
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
                     dmc.Group([
@@ -489,7 +565,6 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                     )
                 ),
                 dmc.TableTd(tier_badge),
-
                 dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
@@ -497,7 +572,6 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['BallSecurity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['BallSecurity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Aerial_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Aerial_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
-
                 dmc.TableTd(
                     dcc.Link(
                         dmc.Button("Dossier →", size="xs", variant="subtle", color="emerald"),
@@ -506,8 +580,9 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                     ),
                     style={"textAlign": "center"},
                 ),
-            ])
-        )
+            ]
+
+        rows.append(dmc.TableTr(row_cells))
 
     tbody = dmc.TableTbody(rows)
     table = dmc.Table(

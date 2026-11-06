@@ -137,20 +137,50 @@ layout = dmc.Container(
 
         dmc.Space(h=16),
 
-        # CLUSTER PROFILES COMPARISON TABLE
-        create_section_card(
-            html.Div(id="styles-summary-table-container", style={"overflowX": "auto"}),
-            title="Cluster Attribute Means Matrix",
-            subtitle="Mean percentile scores (0–100) across all 7 tactical dimensions for each identified archetype",
-        ),
-
-        dmc.Space(h=16),
-
-        # REPRESENTATIVE ROSTER TABLE
+        # REPRESENTATIVE ROSTER TABLE (LAYER 1 CANDIDATE DISCOVERY)
         create_section_card(
             html.Div(id="styles-roster-table-container", style={"overflowX": "auto"}),
             title="Archetype Player Roster & Representatives",
             subtitle="Qualified candidates classified under the selected playing style archetype",
+        ),
+
+        dmc.Space(h=16),
+
+        # CLUSTER PROFILES COMPARISON TABLE (LAYER 3 PROGRESSIVE DISCLOSURE)
+        dmc.Accordion(
+            styles={
+                "item": {
+                    "backgroundColor": PANEL,
+                    "border": f"1px solid {BORDER}",
+                    "borderRadius": "6px",
+                    "marginBottom": "12px",
+                },
+                "control": {
+                    "color": "white",
+                    "padding": "12px 18px",
+                },
+                "panel": {
+                    "padding": "0px 18px 18px 18px",
+                    "overflowX": "auto",
+                },
+            },
+            children=[
+                dmc.AccordionItem(
+                    [
+                        dmc.AccordionControl(
+                            dmc.Group([
+                                dmc.Text("Cluster Attribute Means Matrix", fw=700, size="sm", c="white"),
+                                dmc.Badge("RAW MATHEMATICAL MEANS", color="indigo", variant="light", size="xs"),
+                                dmc.Text("Mean percentile scores across all 7 tactical dimensions for each identified cluster", size="xs", c="dimmed"),
+                            ], gap="xs")
+                        ),
+                        dmc.AccordionPanel(
+                            html.Div(id="styles-summary-table-container")
+                        ),
+                    ],
+                    value="cluster-matrix",
+                )
+            ],
         ),
     ],
     fluid=True,
