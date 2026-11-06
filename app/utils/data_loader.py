@@ -67,14 +67,22 @@ def format_nation_flag(nation_code):
 
 _CACHED_DF = None
 _CACHED_SUMMARY = None
+_PLAYER_LOOKUP_INDEX = {}
+_POSITION_AVERAGES_CACHE = {}
+_ALL_PLAYER_NAMES_CACHE = None
+_UNIQUE_SQUADS_CACHE = None
+_UNIQUE_NATIONS_CACHE = None
 
 
 def load_data():
     """
     Loads and caches the 1,692 player dataset with precomputed
     percentile scores, K-Means clusters, and PCA coordinates.
+    Also builds high-speed in-memory hash indexes and benchmark distributions.
     """
-    global _CACHED_DF
+    global _CACHED_DF, _PLAYER_LOOKUP_INDEX, _POSITION_AVERAGES_CACHE
+    global _ALL_PLAYER_NAMES_CACHE, _UNIQUE_SQUADS_CACHE, _UNIQUE_NATIONS_CACHE
+
     if _CACHED_DF is not None:
         return _CACHED_DF
 
@@ -117,6 +125,46 @@ def load_data():
         Min=pd.to_numeric(df["Min"], errors="coerce").fillna(0).astype(int),
     )
 
+    # 1. Build O(1) Fast Player Lookup Index
+    lookup = {}
+    for idx in range(len(df)):
+        row = df.iloc[idx]
+        u_name = row["Player_Unique"]
+        p_name = row["Player"]
+        lookup[u_name] = row
+        if p_name not in lookup:
+            lookup[p_name] = row
+    _PLAYER_LOOKUP_INDEX = lookup
+
+    # 2. Precompute Position Attribute Averages
+    attr_cols = {
+        "Finishing": "Finishing_Score",
+        "Creativity": "Creativity_Score",
+        "Passing": "Passing_Score",
+        "Progression": "Progression_Score",
+        "Defending": "Defending_Score",
+        "Ball Security": "BallSecurity_Score",
+        "Aerial": "Aerial_Score",
+    }
+    pos_avgs = {}
+    for pos_key in ["DF", "MF", "FW", None]:
+        sub = df[df["Pos"] == pos_key] if pos_key else df
+        pos_avgs[pos_key] = {k: float(sub[v].mean()) for k, v in attr_cols.items()}
+    _POSITION_AVERAGES_CACHE = pos_avgs
+
+    # 3. Precompute Lists
+    _ALL_PLAYER_NAMES_CACHE = sorted(df["Player_Unique"].tolist())
+
+    squads = set()
+    for s in df["Squad"].dropna():
+        for club in str(s).split(","):
+            clean_club = club.strip()
+            if clean_club:
+                squads.add(clean_club)
+    _UNIQUE_SQUADS_CACHE = sorted(list(squads))
+
+    _UNIQUE_NATIONS_CACHE = sorted([n for n in df["Nation_Clean"].unique() if n != "N/A"])
+
     _CACHED_DF = df
     return _CACHED_DF
 
@@ -141,38 +189,31 @@ def load_cluster_summary():
 
 def get_player_by_name(player_name):
     """
-    Looks up a single player by unique or standard name.
+    High-speed O(1) in-memory lookup of a single player record.
     """
-    df = load_data()
-    match = df[df["Player_Unique"] == player_name]
-    if match.empty:
-        match = df[df["Player"] == player_name]
-    if match.empty:
-        return None
-    return match.iloc[0]
+    if not _PLAYER_LOOKUP_INDEX:
+        load_data()
+    return _PLAYER_LOOKUP_INDEX.get(player_name, None)
 
 
 def get_all_player_names():
     """
     Returns list of unique display names for dropdowns and search inputs.
     """
-    df = load_data()
-    return sorted(df["Player_Unique"].tolist())
+    global _ALL_PLAYER_NAMES_CACHE
+    if _ALL_PLAYER_NAMES_CACHE is None:
+        load_data()
+    return _ALL_PLAYER_NAMES_CACHE
 
 
 def get_unique_squads():
     """
     Returns sorted list of distinct individual club names.
-    Splits multi-club transfer strings so every club appears cleanly.
     """
-    df = load_data()
-    squads = set()
-    for s in df["Squad"].dropna():
-        for club in str(s).split(","):
-            clean_club = club.strip()
-            if clean_club:
-                squads.add(clean_club)
-    return sorted(list(squads))
+    global _UNIQUE_SQUADS_CACHE
+    if _UNIQUE_SQUADS_CACHE is None:
+        load_data()
+    return _UNIQUE_SQUADS_CACHE
 
 
 def get_unique_competitions():
@@ -201,20 +242,16 @@ def get_unique_nations():
     """
     Returns sorted list of unique clean nations.
     """
-    df = load_data()
-    return sorted([n for n in df["Nation_Clean"].unique() if n != "N/A"])
+    global _UNIQUE_NATIONS_CACHE
+    if _UNIQUE_NATIONS_CACHE is None:
+        load_data()
+    return _UNIQUE_NATIONS_CACHE
 
 
 def get_position_averages(pos=None):
     """
-    Returns mean attribute scores for players in a specific position (or all players).
+    Returns precomputed mean attribute scores for players in a specific position (or all players).
     """
-    df = load_data()
-    from app.utils.styling import ATTRIBUTE_COLUMNS
-
-    if pos and pos in ["DF", "MF", "FW"]:
-        sub_df = df[df["Pos"] == pos]
-    else:
-        sub_df = df
-
-    return {k: float(sub_df[v].mean()) for k, v in ATTRIBUTE_COLUMNS.items()}
+    if not _POSITION_AVERAGES_CACHE:
+        load_data()
+    return _POSITION_AVERAGES_CACHE.get(pos, _POSITION_AVERAGES_CACHE.get(None, {}))
