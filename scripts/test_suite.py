@@ -253,8 +253,60 @@ def run_full_scout_test_suite():
     assert get_layout(shortlists) is not None
     print("PASS: All 8 Page Layouts successfully instantiated!")
 
+    print("\n=== TEST 13: Metric Definitions & Global View Infrastructure ===")
+    from app.utils.metric_definitions import (
+        METRIC_DEFINITIONS,
+        get_metric_label,
+        get_metric_tooltip,
+        get_role_metrics,
+        get_sample_size_badge,
+        SAMPLE_SIZE_THRESHOLD,
+    )
+    from app.app import app as main_app
+
+    # Verify key metrics exist
+    for m in ["Gls_per90", "xG_per90", "G-xG", "npxG/Sh", "PrgP_per90", "Tkl_pAdj_per90", "Won%"]:
+        assert m in METRIC_DEFINITIONS, f"Metric '{m}' missing from METRIC_DEFINITIONS!"
+        info = METRIC_DEFINITIONS[m]
+        assert "scout_name" in info and len(info["scout_name"]) > 0
+        assert "technical_name" in info and len(info["technical_name"]) > 0
+        assert "category" in info
+        assert "description" in info
+        assert "why_it_matters" in info
+        assert info["tier"] in ["scout", "analyst"]
+
+    # Verify labels in both scout and analyst mode
+    assert get_metric_label("G-xG", mode="scout") == "Finishing Over/Underperformance"
+    assert get_metric_label("G-xG", mode="analyst") == "Finishing Variance (G - xG)"
+    assert "Measures shot selection discipline" in get_metric_tooltip("npxG/Sh")
+
+    # Verify all 7 subroles have 6 role-tailored metrics
+    for sr in [
+        "Center Forward",
+        "Winger",
+        "Attacking Midfielder",
+        "Central Midfielder",
+        "Defensive Midfielder",
+        "Full-Back / Wing-Back",
+        "Center-Back",
+    ]:
+        role_mets = get_role_metrics(sr)
+        assert len(role_mets) == 6, f"Expected 6 role metrics for {sr}, got {len(role_mets)}"
+
+    # Verify sample size thresholds
+    badge_low = get_sample_size_badge(450)
+    assert badge_low is not None
+    badge_high = get_sample_size_badge(1800)
+    assert badge_high is None
+
+    # Verify layout contains scout-analyst-mode store and global-view-toggle
+    layout_str = str(main_app.layout)
+    assert "scout-analyst-mode" in layout_str
+    assert "global-view-toggle" in layout_str
+    print("PASS: Metric Definitions & Global View Infrastructure")
+
     print("\n========================================================")
-    print("ALL 12 UNIT AND INTEGRATION TEST SUITES PASSED PERFECTLY!")
+    print("ALL 13 UNIT AND INTEGRATION TEST SUITES PASSED PERFECTLY!")
     print("========================================================")
 
 

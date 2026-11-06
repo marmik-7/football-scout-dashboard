@@ -48,6 +48,11 @@ app.layout = dmc.MantineProvider(
     children=[
         dcc.Location(id="url", refresh="callback-nav"),
         dcc.Store(
+            id="scout-analyst-mode",
+            storage_type="local",
+            data="scout",
+        ),
+        dcc.Store(
             id="scout-shortlists",
             storage_type="local",
             data=[
@@ -117,6 +122,19 @@ app.layout = dmc.MantineProvider(
 
                             dmc.Group(
                                 [
+                                    dmc.SegmentedControl(
+                                        id="global-view-toggle",
+                                        data=[
+                                            {"label": "👤 Scout View", "value": "scout"},
+                                            {"label": "🔬 Analyst View", "value": "analyst"},
+                                        ],
+                                        value="scout",
+                                        size="xs",
+                                        color="teal",
+                                        persistence=True,
+                                        persistence_type="local",
+                                        style={"fontWeight": 600},
+                                    ),
                                     dcc.Link(
                                         dmc.Badge(
                                             id="header-shortlist-badge",
@@ -305,6 +323,15 @@ def jump_to_player_profile(selected_name):
 def update_header_shortlist_badge(shortlist_data):
     count = len(shortlist_data) if isinstance(shortlist_data, list) else 0
     return f"Pipeline: {count}"
+
+
+# Callback to synchronize global view mode (Scout View vs Analyst View)
+@app.callback(
+    Output("scout-analyst-mode", "data"),
+    Input("global-view-toggle", "value"),
+)
+def update_scout_analyst_mode(selected_mode):
+    return selected_mode or "scout"
 
 
 if __name__ == "__main__":
