@@ -34,8 +34,8 @@ layout = dmc.Container(
     [
         create_page_header(
             title="Tactical Playing Styles",
-            subtitle="Unsupervised machine learning archetypes. Discover tactical sub-roles and spatial distributions using K-Means clustering and PCA.",
-            badge_text="K-MEANS & PCA MODELING",
+            subtitle="Unsupervised machine learning archetypes. Spatial 2D projection and cluster DNA via K-Means clustering and PCA.",
+            badge_text="TACTICAL ARCHETYPES",
         ),
 
         # POSITION AND CLUSTER CONTROLS
@@ -45,7 +45,7 @@ layout = dmc.Container(
                     dmc.GridCol(
                         dmc.Select(
                             id="styles-pos-select",
-                            label="Position Group",
+                            label="Position Cohort",
                             data=[
                                 {"label": "Forwards (FW)", "value": "FW"},
                                 {"label": "Midfielders (MF)", "value": "MF"},
@@ -59,7 +59,7 @@ layout = dmc.Container(
                     dmc.GridCol(
                         dmc.Select(
                             id="styles-cluster-select",
-                            label="Cluster Filter",
+                            label="Tactical Archetype Filter",
                             data=[
                                 {"label": "All 4 Clusters", "value": "ALL"},
                                 {"label": "Cluster 0", "value": "0"},
@@ -75,8 +75,8 @@ layout = dmc.Container(
                     dmc.GridCol(
                         dmc.Select(
                             id="styles-player-locator",
-                            label="📍 Pinpoint Candidate in Tactical Space",
-                            placeholder="Search candidate to plot pin...",
+                            label="Pinpoint Candidate in 2D Space",
+                            placeholder="Select candidate to plot beacon pin...",
                             data=[{"label": "None (View All)", "value": "NONE"}] + [
                                 {"label": name, "value": name}
                                 for name in sorted(df[df["Pos"] == "FW"]["Player"].unique())
@@ -88,18 +88,18 @@ layout = dmc.Container(
                         span={"base": 12, "md": 4},
                     ),
                 ],
-                gap="md",
+                gap="sm",
             ),
-            title="Tactical Scope",
-            subtitle="Select position peer group, target playing style cluster, and locate specific players",
+            title="Archetype Scope & Locator",
+            subtitle="Select position peer group, filter specific playing style clusters, or pinpoint an individual player's coordinates",
         ),
 
-        dmc.Space(h=20),
+        dmc.Space(h=16),
 
         # CLUSTER KPI CARDS
         html.Div(id="styles-cards-container"),
 
-        dmc.Space(h=20),
+        dmc.Space(h=16),
 
         # VISUALIZATIONS: PCA SCATTER + RADAR DNA
         dmc.Grid(
@@ -112,7 +112,7 @@ layout = dmc.Container(
                             responsive=True,
                         ),
                         title="Principal Component Analysis (PCA)",
-                        subtitle="2D projection of player attribute space highlighting spatial clusters",
+                        subtitle="2D projection of player attribute space highlighting spatial archetype clusters",
                     ),
                     span={"base": 12, "lg": 7},
                 ),
@@ -124,30 +124,30 @@ layout = dmc.Container(
                             responsive=True,
                         ),
                         title="Tactical DNA Archetype Radar",
-                        subtitle="Comparative mean profiles of the 4 positional clusters",
+                        subtitle="Comparative mean fingerprint profiles across the 4 positional clusters",
                     ),
                     span={"base": 12, "lg": 5},
                 ),
             ],
-            gap="lg",
+            gap="md",
         ),
 
-        dmc.Space(h=25),
+        dmc.Space(h=16),
 
         # CLUSTER PROFILES COMPARISON TABLE
         create_section_card(
             html.Div(id="styles-summary-table-container", style={"overflowX": "auto"}),
             title="Cluster Attribute Means Matrix",
-            subtitle="Mean percentile scores (0–100) across all 7 dimensions for each identified playing style",
+            subtitle="Mean percentile scores (0–100) across all 7 tactical dimensions for each identified archetype",
         ),
 
-        dmc.Space(h=25),
+        dmc.Space(h=16),
 
         # REPRESENTATIVE ROSTER TABLE
         create_section_card(
             html.Div(id="styles-roster-table-container", style={"overflowX": "auto"}),
-            title="Cluster Player Roster & Representatives",
-            subtitle="Explore qualified players assigned to the selected playing style archetype",
+            title="Archetype Player Roster & Representatives",
+            subtitle="Qualified candidates classified under the selected playing style archetype",
         ),
     ],
     fluid=True,
@@ -213,26 +213,28 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
             "Aerial": r["Aerial"],
         }
         top_2 = sorted(attr_means.items(), key=lambda x: x[1], reverse=True)[:2]
-        traits_str = f"Signature: {top_2[0][0]} ({top_2[0][1]:.1f}), {top_2[1][0]} ({top_2[1][1]:.1f})"
+        traits_str = f"{top_2[0][0]} ({top_2[0][1]:.1f}) • {top_2[1][0]} ({top_2[1][1]:.1f})"
 
         cards.append(
             dmc.GridCol(
-                dmc.Card(
+                dmc.Box(
                     [
                         dmc.Group([
-                            dmc.Badge(f"Cluster {c_id}", color=color, variant="filled", size="xs"),
-                            dmc.Text(f"{c_count} players ({c_pct:.1f}%)", size="xs", c="dimmed"),
+                            dmc.Group([
+                                html.Span("●", style={"color": color, "fontSize": "12px", "lineHeight": 1}),
+                                dmc.Text(f"CLUSTER {c_id}", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}),
+                            ], gap=6),
+                            dmc.Text(f"{c_count} players ({c_pct:.1f}%)", size="10px", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
                         ], justify="space-between"),
-                        dmc.Title(c_name, order=4, c="white", mt=6),
-                        dmc.Text(traits_str, size="xs", c="dimmed", mt=4),
+                        dmc.Title(c_name, order=4, c="white", mt=4, style={"fontSize": "15px"}),
+                        dmc.Text(traits_str, size="10px", c="dimmed", mt=4),
                     ],
-                    withBorder=True,
-                    radius="md",
-                    p="md",
                     style={
-                        "backgroundColor": "#131E30",
-                        "borderColor": color if is_selected else BORDER,
-                        "borderTop": f"3px solid {color}",
+                        "backgroundColor": "#0D131F",
+                        "border": f"1px solid {color if is_selected else BORDER}",
+                        "borderTop": f"2px solid {color}",
+                        "borderRadius": "4px",
+                        "padding": "12px 14px",
                     },
                 ),
                 span={"base": 12, "sm": 6, "lg": 3},
@@ -246,25 +248,25 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
         pos=pos,
         selected_cluster=cluster_filter,
         highlight_player=locator_player,
-        height=450,
+        height=420,
     )
 
     # 3. Cluster DNA Radar
-    radar_fig = build_cluster_dna_radar(summary_df, pos=pos, height=420)
+    radar_fig = build_cluster_dna_radar(summary_df, pos=pos, height=400)
 
     # 4. Cluster Summary Means Table
     thead_summary = dmc.TableThead(
         dmc.TableTr([
-            dmc.TableTh("Cluster", style={"color": TEXT}),
-            dmc.TableTh("Archetype Name", style={"color": TEXT}),
-            dmc.TableTh("Players", style={"color": TEXT}),
-            dmc.TableTh("Finishing", style={"color": TEXT}),
-            dmc.TableTh("Creativity", style={"color": TEXT}),
-            dmc.TableTh("Passing", style={"color": TEXT}),
-            dmc.TableTh("Progression", style={"color": TEXT}),
-            dmc.TableTh("Defending", style={"color": TEXT}),
-            dmc.TableTh("Security", style={"color": TEXT}),
-            dmc.TableTh("Aerial", style={"color": TEXT}),
+            dmc.TableTh("CLUSTER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "width": "110px"}),
+            dmc.TableTh("ARCHETYPE NAME", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("PLAYERS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("FINISHING", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("CREATIVITY", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PASSING", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PROGRESSION", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("DEFENDING", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("SECURITY", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("AERIAL", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
         ])
     )
 
@@ -275,21 +277,26 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
 
         def fmt_cell(val):
             v = float(val)
-            c = "#84CC16" if v >= 65 else "#38BDF8" if v >= 50 else "#F59E0B" if v >= 35 else "#EF4444"
-            return dmc.Text(f"{v:.1f}", fw=600, style={"color": c})
+            c = ACCENT if v >= 65 else "#38BDF8" if v >= 50 else "#F59E0B" if v >= 35 else "#EF4444"
+            return dmc.TableTd(dmc.Text(f"{v:.1f}", fw=600, size="xs", style={"color": c, "fontVariantNumeric": "tabular-nums", "textAlign": "right"}))
 
         summary_rows.append(
             dmc.TableTr([
-                dmc.TableTd(dmc.Badge(f"Cluster {c_id}", color=color, variant="filled", size="xs")),
-                dmc.TableTd(dmc.Text(r["Cluster_Name"], fw=600, c="white")),
-                dmc.TableTd(dmc.Text(str(int(r["Player_Count"])), c="dimmed")),
-                dmc.TableTd(fmt_cell(r["Finishing"])),
-                dmc.TableTd(fmt_cell(r["Creativity"])),
-                dmc.TableTd(fmt_cell(r["Passing"])),
-                dmc.TableTd(fmt_cell(r["Progression"])),
-                dmc.TableTd(fmt_cell(r["Defending"])),
-                dmc.TableTd(fmt_cell(r["BallSecurity"])),
-                dmc.TableTd(fmt_cell(r["Aerial"])),
+                dmc.TableTd(
+                    dmc.Group([
+                        html.Span("●", style={"color": color, "fontSize": "12px", "lineHeight": 1}),
+                        dmc.Text(f"Cluster {c_id}", size="xs", fw=600, c="white"),
+                    ], gap=6)
+                ),
+                dmc.TableTd(dmc.Text(r["Cluster_Name"], fw=600, size="xs", c="white")),
+                dmc.TableTd(dmc.Text(str(int(r["Player_Count"])), size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
+                fmt_cell(r["Finishing"]),
+                fmt_cell(r["Creativity"]),
+                fmt_cell(r["Passing"]),
+                fmt_cell(r["Progression"]),
+                fmt_cell(r["Defending"]),
+                fmt_cell(r["BallSecurity"]),
+                fmt_cell(r["Aerial"]),
             ])
         )
 
@@ -298,7 +305,7 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
         striped=True,
         highlightOnHover=True,
         withTableBorder=True,
-        style={"backgroundColor": PANEL, "fontSize": "13px", "borderColor": BORDER},
+        style={"backgroundColor": PANEL, "fontSize": "12px", "borderColor": BORDER},
     )
 
     # 5. Roster Table for Cluster
@@ -311,17 +318,17 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
 
     thead_roster = dmc.TableThead(
         dmc.TableTr([
-            dmc.TableTh("Player", style={"color": TEXT}),
-            dmc.TableTh("Club", style={"color": TEXT}),
-            dmc.TableTh("Cluster / Archetype", style={"color": TEXT}),
-            dmc.TableTh("Min", style={"color": TEXT}),
-            dmc.TableTh("G+A", style={"color": TEXT}),
-            dmc.TableTh("Finishing", style={"color": TEXT}),
-            dmc.TableTh("Creativity", style={"color": TEXT}),
-            dmc.TableTh("Passing", style={"color": TEXT}),
-            dmc.TableTh("Progression", style={"color": TEXT}),
-            dmc.TableTh("Defending", style={"color": TEXT}),
-            dmc.TableTh("Action", style={"color": TEXT, "textAlign": "center"}),
+            dmc.TableTh("PLAYER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("SQUAD", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("ARCHETYPE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("G+A", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
+            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
         ])
     )
 
@@ -334,19 +341,21 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
 
         roster_rows.append(
             dmc.TableTr([
-                dmc.TableTd(dmc.Text(r["Player"], fw=600, c="white")),
+                dmc.TableTd(dmc.Text(r["Player"], fw=600, size="xs", c="white")),
                 dmc.TableTd(dmc.Text(r["Squad"], size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Badge(r.get("PlayingStyle_Name", f"Cluster {c_id}"), color=color, variant="light", size="xs")),
-                dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed")),
-                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white")),
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"]})),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"]})),
+                dmc.TableTd(
+                    dmc.Badge(r.get("PlayingStyle_Name", f"Cluster {c_id}"), color="gray", variant="light", size="xs")
+                ),
+                dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(
                     dcc.Link(
-                        dmc.Button("Profile →", size="xs", variant="light", color="lime"),
+                        dmc.Button("Dossier →", size="xs", variant="subtle", color="emerald"),
                         href=profile_url,
                         style={"textDecoration": "none"},
                     ),
@@ -360,8 +369,7 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE"):
         striped=True,
         highlightOnHover=True,
         withTableBorder=True,
-        style={"backgroundColor": PANEL, "fontSize": "13px", "borderColor": BORDER},
+        style={"backgroundColor": PANEL, "fontSize": "12px", "borderColor": BORDER},
     )
 
     return cards_container, pca_fig, radar_fig, summary_table, roster_table
-
