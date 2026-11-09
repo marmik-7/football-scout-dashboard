@@ -433,7 +433,7 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
                         dcc.Link(
                             dmc.Button("Compare", size="xs", variant="subtle", color="gray"),
                             href=compare_url,
-                            style={"textDecoration": "none", "color": "#94A3B8"},
+                            style={"textDecoration": "none", "color": "var(--scout-text-secondary)"},
                         ),
                         dmc.Button(
                             "Remove",

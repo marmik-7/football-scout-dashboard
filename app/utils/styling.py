@@ -17,8 +17,8 @@ THEME_TOKENS = {
         "border_subtle": "rgba(255, 255, 255, 0.04)",
         "border_focus": "#10B981",
         "text_primary": "#F8FAFC",
-        "text_secondary": "#94A3B8",
-        "text_muted": "#64748B",
+        "text_secondary": "#CBD5E1",
+        "text_muted": "#94A3B8",
         "accent_emerald": "#10B981",
         "accent_emerald_dim": "rgba(16, 185, 129, 0.12)",
         "accent_emerald_border": "rgba(16, 185, 129, 0.25)",
@@ -33,8 +33,8 @@ THEME_TOKENS = {
         "border_subtle": "rgba(15, 23, 42, 0.04)",
         "border_focus": "#059669",
         "text_primary": "#0F172A",
-        "text_secondary": "#64748B",
-        "text_muted": "#94A3B8",
+        "text_secondary": "#334155",
+        "text_muted": "#475569",
         "accent_emerald": "#059669",
         "accent_emerald_dim": "rgba(5, 150, 105, 0.08)",
         "accent_emerald_border": "rgba(5, 150, 105, 0.20)",
@@ -49,8 +49,8 @@ PANEL_ALT = "var(--scout-surface-secondary, #1E293B)"
 BORDER = "var(--scout-border, rgba(255, 255, 255, 0.08))"
 BORDER_SUBTLE = "var(--scout-border-subtle, rgba(255, 255, 255, 0.04))"
 TEXT = "var(--scout-text-primary, #F8FAFC)"
-MUTED = "var(--scout-text-secondary, #94A3B8)"
-SUBTLE = "var(--scout-text-muted, #64748B)"
+MUTED = "var(--scout-text-secondary, #CBD5E1)"
+SUBTLE = "var(--scout-text-muted, #94A3B8)"
 ACCENT = "var(--scout-accent, #10B981)"
 ACCENT_BG = "var(--scout-accent-dim, rgba(16, 185, 129, 0.12))"
 ACCENT_BORDER = "var(--scout-accent-border, rgba(16, 185, 129, 0.25))"
@@ -110,7 +110,7 @@ def get_percentile_tier(score):
     elif val >= 75:
         return {"tier": "Strong", "color": "#38BDF8", "badge_color": "cyan"}
     elif val >= 50:
-        return {"tier": "Average", "color": "#94A3B8", "badge_color": "gray"}
+        return {"tier": "Average", "color": "var(--scout-text-secondary)", "badge_color": "gray"}
     elif val >= 25:
         return {"tier": "Developing", "color": "#F59E0B", "badge_color": "yellow"}
     else:
@@ -131,21 +131,21 @@ def style_figure(fig, height=350, show_grid=True, theme="dark"):
     paper_bg = "rgba(0, 0, 0, 0)"
     plot_bg = "rgba(0, 0, 0, 0)"
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(255, 255, 255, 0.06)"
     zeroline_color = "rgba(15, 23, 42, 0.12)" if is_light else "rgba(255, 255, 255, 0.08)"
     hover_bg = "#FFFFFF" if is_light else "#1E293B"
     hover_text = "#0F172A" if is_light else "#FFFFFF"
-    hover_border = "#CBD5E1" if is_light else "rgba(255, 255, 255, 0.15)"
+    hover_border = "#94A3B8" if is_light else "rgba(255, 255, 255, 0.15)"
 
     fig.update_layout(
         height=height,
         paper_bgcolor=paper_bg,
         plot_bgcolor=plot_bg,
-        font=dict(color=text_color, family="Inter, -apple-system, BlinkMacSystemFont, sans-serif"),
+        font=dict(color=text_color, family="'Twemoji Country Flags', Inter, -apple-system, BlinkMacSystemFont, sans-serif"),
         title=dict(
-            font=dict(color=text_color, size=14, family="Inter, sans-serif", weight=600),
-            subtitle=dict(font=dict(color=muted_color, size=11, family="Inter, sans-serif")),
+            font=dict(color=text_color, size=14, family="'Twemoji Country Flags', Inter, sans-serif", weight=600),
+            subtitle=dict(font=dict(color=muted_color, size=11, family="'Twemoji Country Flags', Inter, sans-serif")),
         ),
         margin=dict(l=35, r=25, t=40, b=30),
         legend=dict(
@@ -167,7 +167,7 @@ def style_figure(fig, height=350, show_grid=True, theme="dark"):
         hoverlabel=dict(
             bgcolor=hover_bg,
             font_size=11,
-            font_family="Inter, sans-serif",
+            font_family="'Twemoji Country Flags', Inter, sans-serif",
             font_color=hover_text,
             bordercolor=hover_border,
         ),
@@ -225,7 +225,7 @@ def create_page_header(title, subtitle=None, badge_text=None, extra=None):
                 style={
                     "lineHeight": 1.5,
                     "maxWidth": "850px",
-                    "color": "var(--scout-text-secondary, #94A3B8)",
+                    "color": "var(--scout-text-secondary, #CBD5E1)",
                 },
             )
         )
@@ -260,7 +260,7 @@ def create_metric_card(title, value, description=None, color=None):
                 fw=700,
                 style={
                     "letterSpacing": "0.8px",
-                    "color": "var(--scout-text-muted, #64748B)",
+                    "color": "var(--scout-text-muted, #94A3B8)",
                 },
             ),
             dmc.Title(
@@ -281,7 +281,7 @@ def create_metric_card(title, value, description=None, color=None):
                 mt=4,
                 style={
                     "lineHeight": 1.35,
-                    "color": "var(--scout-text-secondary, #94A3B8)",
+                    "color": "var(--scout-text-secondary, #CBD5E1)",
                 },
             ) if description else html.Div(),
         ],
@@ -321,7 +321,7 @@ def create_section_card(children, title=None, subtitle=None, extra_header=None, 
                 mt=2,
                 style={
                     "lineHeight": 1.4,
-                    "color": "var(--scout-text-secondary, #94A3B8)",
+                    "color": "var(--scout-text-secondary, #CBD5E1)",
                 },
             ) if subtitle else html.Div(),
         ])
@@ -363,7 +363,7 @@ def create_empty_state(title="No Records Found", description="Try adjusting your
         children.append(dmc.Text(icon, style={"fontSize": "24px", "opacity": 0.5}))
     children.extend([
         dmc.Text(title, fw=600, size="sm", c="var(--scout-text-primary, #F8FAFC)", mt="xs" if icon else 0),
-        dmc.Text(description, size="xs", c="var(--scout-text-secondary, #94A3B8)", mt=4),
+        dmc.Text(description, size="xs", c="var(--scout-text-secondary, #CBD5E1)", mt=4),
     ])
     return dmc.Box(
         children,

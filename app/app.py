@@ -23,7 +23,29 @@ app = Dash(
     use_pages=True,
     pages_folder=PAGES_FOLDER,
     suppress_callback_exceptions=True,
+    title="SCOUT — Recruitment Intelligence",
+    update_title=None,
 )
+
+app.index_string = """<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+        <link rel="alternate icon" type="image/x-icon" href="/assets/favicon.ico">
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>"""
 
 all_players = get_all_player_names()
 
@@ -63,7 +85,7 @@ app.layout = dmc.MantineProvider(
     forceColorScheme="dark",
     theme={
         "primaryColor": "teal",
-        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+        "fontFamily": '"Twemoji Country Flags", Inter, -apple-system, BlinkMacSystemFont, sans-serif',
         "defaultRadius": "sm",
     },
     children=[
@@ -233,14 +255,11 @@ app.layout = dmc.MantineProvider(
                                         dmc.Text(cat["category"], className="scout-nav-category"),
                                         html.Div(
                                             [
-                                                dcc.Link(
-                                                    dmc.NavLink(
-                                                        id=item["id"],
-                                                        label=item["label"],
-                                                        style={"marginBottom": "2px", "borderRadius": "5px"},
-                                                    ),
+                                                dmc.NavLink(
+                                                    id=item["id"],
+                                                    label=item["label"],
                                                     href=item["path"],
-                                                    style={"textDecoration": "none"},
+                                                    style={"marginBottom": "2px", "borderRadius": "5px"},
                                                 )
                                                 for item in cat["items"]
                                             ]

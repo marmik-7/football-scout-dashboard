@@ -27,6 +27,7 @@ from app.utils.styling import (
 from app.utils.similarity import find_similar_players, explain_similarity
 from app.utils.metric_definitions import get_sample_size_badge, SAMPLE_SIZE_THRESHOLD
 from app.utils.charts import build_radar_chart
+from app.utils.player_portraits import render_player_portrait
 
 dash.register_page(__name__, path="/similar-players", name="Similar Players", order=5)
 
@@ -109,7 +110,7 @@ def layout(player=None, **kwargs):
                             "item": {"border": "none", "backgroundColor": "transparent"},
                             "control": {
                                 "padding": "6px 0px",
-                                "color": "#94A3B8",
+                                "color": "var(--scout-text-secondary)",
                                 "&:hover": {"backgroundColor": "transparent"},
                             },
                             "panel": {"padding": "8px 0px 0px 0px"},
@@ -125,7 +126,7 @@ def layout(player=None, **kwargs):
                                     ),
                                     dmc.AccordionPanel(
                                         dmc.Box([
-                                            dmc.Divider(mb="sm", color="rgba(255, 255, 255, 0.06)"),
+                                            dmc.Divider(mb="sm", color="var(--scout-border-subtle)"),
                                             dmc.Grid(
                                                 [
                                                     dmc.GridCol(
@@ -301,18 +302,24 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                                 dmc.Text("REFERENCE BENCHMARK", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.8px"}),
                                 *([ref_sample_badge] if ref_sample_badge else []),
                             ], justify="space-between", align="center"),
-                            dmc.Title(ref_player["Player"], order=3, c="var(--scout-text-primary)", mt=2, style={"fontSize": "18px"}),
-                            dmc.Group(
-                                [
-                                    dmc.Badge(ref_player["Pos"], color=ref_pos_color, variant="filled", size="xs"),
-                                    dmc.Badge(ref_player.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
-                                    dmc.Text(f"{ref_player['Squad']} • {ref_player.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
-                                    dmc.Text(f"Min: {ref_player['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
-                                ],
-                                gap="xs",
-                                mt=6,
-                            ),
-                            dmc.Text(f"Tactical Style: {ref_player.get('PlayingStyle_Name', 'Specialist')}", size="xs", style={"color": ACCENT}, mt=4),
+                            dmc.Group([
+                                render_player_portrait(ref_player["Player_Unique"], size=44, radius=6),
+                                dmc.Box([
+                                    dmc.Title(ref_player["Player"], order=3, c="var(--scout-text-primary)", style={"fontSize": "18px"}),
+                                    dmc.Group(
+                                        [
+                                            dmc.Badge(ref_player["Pos"], color=ref_pos_color, variant="filled", size="xs"),
+                                            dmc.Badge(ref_player.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
+                                            dmc.Text(f"{ref_player.get('Nation_Display', ref_player['Nation_Clean'])} • {ref_player['Squad']} • {ref_player.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
+                                            dmc.Text(f"Min: {ref_player['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
+                                        ],
+                                        gap="xs",
+                                        mt=4,
+                                        wrap="wrap",
+                                    ),
+                                ]),
+                            ], gap="sm", align="center", mt=6),
+                            dmc.Text(f"Tactical Style: {ref_player.get('PlayingStyle_Name', 'Specialist')}", size="xs", style={"color": ACCENT}, mt=6),
                         ],
                         style={
                             "backgroundColor": "var(--scout-surface-secondary)",
@@ -334,19 +341,25 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                                 ], gap="xs", align="center"),
                                 dmc.Badge(f"{best_sim_pct:.1f}% SIMILARITY", color="emerald", variant="filled", size="sm"),
                             ], justify="space-between"),
-                            dmc.Title(best_match["Player"], order=3, c="var(--scout-text-primary)", mt=2, style={"fontSize": "18px"}),
-                            dmc.Group(
-                                [
-                                    dmc.Badge(best_match["Pos"], color=match_pos_color, variant="filled", size="xs"),
-                                    dmc.Badge(best_match.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
-                                    dmc.Badge(sim_explanation.get("positional_compat_level", "Direct"), color="teal" if sim_explanation.get("positional_compat_level") == "Direct" else "orange", variant="outline", size="xs"),
-                                    dmc.Text(f"{best_match['Squad']} • {best_match.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
-                                    dmc.Text(f"Min: {best_match['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
-                                ],
-                                gap="xs",
-                                mt=6,
-                            ),
-                            dmc.Text(f"Succession Horizon: {sim_explanation.get('succession_note', '')}", size="xs", c="cyan", mt=4),
+                            dmc.Group([
+                                render_player_portrait(best_match["Player_Unique"], size=44, radius=6),
+                                dmc.Box([
+                                    dmc.Title(best_match["Player"], order=3, c="var(--scout-text-primary)", style={"fontSize": "18px"}),
+                                    dmc.Group(
+                                        [
+                                            dmc.Badge(best_match["Pos"], color=match_pos_color, variant="filled", size="xs"),
+                                            dmc.Badge(best_match.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
+                                            dmc.Badge(sim_explanation.get("positional_compat_level", "Direct"), color="teal" if sim_explanation.get("positional_compat_level") == "Direct" else "orange", variant="outline", size="xs"),
+                                            dmc.Text(f"{best_match.get('Nation_Display', best_match['Nation_Clean'])} • {best_match['Squad']} • {best_match.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
+                                            dmc.Text(f"Min: {best_match['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
+                                        ],
+                                        gap="xs",
+                                        mt=4,
+                                        wrap="wrap",
+                                    ),
+                                ]),
+                            ], gap="sm", align="center", mt=6),
+                            dmc.Text(f"Succession Horizon: {sim_explanation.get('succession_note', '')}", size="xs", c="cyan", mt=6),
                         ],
                         style={
                             "backgroundColor": "var(--scout-surface-secondary)",
@@ -380,11 +393,11 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
 
     # 3. Methodology & Explainable Drivers of Similarity
     shared_items = [
-        html.Li(dmc.Text(s, size="xs", c="#CBD5E1", style={"lineHeight": 1.4}), style={"marginBottom": "3px"})
+        html.Li(dmc.Text(s, size="xs", c="var(--scout-text-secondary)", style={"lineHeight": 1.4}), style={"marginBottom": "3px"})
         for s in sim_explanation.get("shared_strengths", [])
     ]
     diff_items = [
-        html.Li(dmc.Text(d, size="xs", c="#CBD5E1", style={"lineHeight": 1.4}), style={"marginBottom": "3px"})
+        html.Li(dmc.Text(d, size="xs", c="var(--scout-text-secondary)", style={"lineHeight": 1.4}), style={"marginBottom": "3px"})
         for d in sim_explanation.get("key_differences", [])
     ]
 
@@ -413,7 +426,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
         dmc.Text(
             f"Role Relationship: {sim_explanation.get('positional_compatibility', 'N/A')}. {sim_explanation.get('succession_note', '')}",
             size="xs",
-            c="#CBD5E1",
+            c="var(--scout-text-secondary)",
             mt=2,
         ),
     ]
@@ -426,7 +439,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 "Cosine similarity calculated over 7 position-standardized Z-score vectors (Finishing, Creativity, Passing, Progression, Defending pAdj, Ball Security, Aerial). "
                 "Feature scaling applies StandardScaler(with_mean=True, with_std=True) within position cohorts.",
                 size="10px",
-                c="#94A3B8",
+                c="var(--scout-text-muted)",
                 style={"lineHeight": 1.45},
             ),
         ])
@@ -508,10 +521,15 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], size="xs", fw=600, c="var(--scout-text-primary)"),
-                        *([sample_pill] if sample_pill else []),
-                    ], gap=4, align="center"),
-                    dmc.Text(f"Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
+                        render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                        dmc.Box([
+                            dmc.Group([
+                                dmc.Text(r["Player"], size="xs", fw=600, c="var(--scout-text-primary)"),
+                                *([sample_pill] if sample_pill else []),
+                            ], gap=4, align="center"),
+                            dmc.Text(f"{r.get('Nation_Display', r['Nation_Clean'])} • Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
+                        ]),
+                    ], gap="xs", align="center", wrap="nowrap"),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
@@ -544,10 +562,15 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], size="xs", fw=600, c="var(--scout-text-primary)"),
-                        *([sample_pill] if sample_pill else []),
-                    ], gap=4, align="center"),
-                    dmc.Text(f"Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
+                        render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                        dmc.Box([
+                            dmc.Group([
+                                dmc.Text(r["Player"], size="xs", fw=600, c="var(--scout-text-primary)"),
+                                *([sample_pill] if sample_pill else []),
+                            ], gap=4, align="center"),
+                            dmc.Text(f"{r.get('Nation_Display', r['Nation_Clean'])} • Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
+                        ]),
+                    ], gap="xs", align="center", wrap="nowrap"),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),

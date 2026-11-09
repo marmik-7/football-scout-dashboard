@@ -4,6 +4,14 @@
    Complete Dark & Light Theme Support
    ========================================================================== */
 
+/* Country Flag Emoji Polyfill for Windows Cross-Browser Compatibility */
+@font-face {
+    font-family: "Twemoji Country Flags";
+    src: url("/assets/TwemojiCountryFlags.woff2") format("woff2");
+    unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E007F;
+    font-display: swap;
+}
+
 /* --------------------------------------------------
    THEME VARIABLES
    -------------------------------------------------- */
@@ -15,27 +23,28 @@
     --scout-surface-primary: #111827;
     --scout-surface-secondary: #1E293B;
     --scout-surface-elevated: #1E293B;
-    --scout-surface-hover: rgba(255, 255, 255, 0.035);
+    --scout-surface-hover: rgba(255, 255, 255, 0.04);
     
-    --scout-border: rgba(255, 255, 255, 0.08);
-    --scout-border-subtle: rgba(255, 255, 255, 0.04);
-    --scout-border-hover: rgba(255, 255, 255, 0.14);
+    --scout-border: rgba(255, 255, 255, 0.10);
+    --scout-border-subtle: rgba(255, 255, 255, 0.05);
+    --scout-border-hover: rgba(255, 255, 255, 0.18);
     --scout-border-focus: #10B981;
 
     --scout-text-primary: #F8FAFC;
-    --scout-text-secondary: #94A3B8;
-    --scout-text-muted: #64748B;
+    --scout-text-secondary: #CBD5E1;
+    --scout-text-muted: #94A3B8;
+    --mantine-color-dimmed: #CBD5E1;
     
     --scout-accent: #10B981;
     --scout-accent-light: #34D399;
-    --scout-accent-dim: rgba(16, 185, 129, 0.12);
-    --scout-accent-border: rgba(16, 185, 129, 0.25);
+    --scout-accent-dim: rgba(16, 185, 129, 0.14);
+    --scout-accent-border: rgba(16, 185, 129, 0.28);
 
-    --scout-table-header-bg: rgba(17, 24, 39, 0.95);
-    --scout-table-row-hover: rgba(255, 255, 255, 0.025);
+    --scout-table-header-bg: rgba(17, 24, 39, 0.96);
+    --scout-table-row-hover: rgba(255, 255, 255, 0.035);
     --scout-input-bg: #090D14;
-    --scout-dropdown-bg: rgba(15, 23, 42, 0.97);
-    --scout-scrollbar-thumb: rgba(255, 255, 255, 0.12);
+    --scout-dropdown-bg: rgba(15, 23, 42, 0.98);
+    --scout-scrollbar-thumb: rgba(255, 255, 255, 0.16);
 }
 
 [data-mantine-color-scheme="light"] {
@@ -44,27 +53,28 @@
     --scout-surface-primary: #FFFFFF;
     --scout-surface-secondary: #F1F5F9;
     --scout-surface-elevated: #FFFFFF;
-    --scout-surface-hover: rgba(15, 23, 42, 0.035);
+    --scout-surface-hover: rgba(15, 23, 42, 0.04);
     
-    --scout-border: rgba(15, 23, 42, 0.08);
-    --scout-border-subtle: rgba(15, 23, 42, 0.04);
-    --scout-border-hover: rgba(15, 23, 42, 0.16);
+    --scout-border: rgba(15, 23, 42, 0.10);
+    --scout-border-subtle: rgba(15, 23, 42, 0.05);
+    --scout-border-hover: rgba(15, 23, 42, 0.20);
     --scout-border-focus: #059669;
 
     --scout-text-primary: #0F172A;
-    --scout-text-secondary: #64748B;
-    --scout-text-muted: #94A3B8;
+    --scout-text-secondary: #334155;
+    --scout-text-muted: #475569;
+    --mantine-color-dimmed: #334155;
     
     --scout-accent: #059669;
     --scout-accent-light: #10B981;
-    --scout-accent-dim: rgba(5, 150, 105, 0.08);
-    --scout-accent-border: rgba(5, 150, 105, 0.20);
+    --scout-accent-dim: rgba(5, 150, 105, 0.10);
+    --scout-accent-border: rgba(5, 150, 105, 0.24);
 
-    --scout-table-header-bg: rgba(241, 245, 249, 0.95);
-    --scout-table-row-hover: rgba(15, 23, 42, 0.025);
+    --scout-table-header-bg: rgba(241, 245, 249, 0.97);
+    --scout-table-row-hover: rgba(15, 23, 42, 0.035);
     --scout-input-bg: #FFFFFF;
-    --scout-dropdown-bg: rgba(255, 255, 255, 0.98);
-    --scout-scrollbar-thumb: rgba(15, 23, 42, 0.15);
+    --scout-dropdown-bg: rgba(255, 255, 255, 0.99);
+    --scout-scrollbar-thumb: rgba(15, 23, 42, 0.20);
 }
 
 /* Global Reset & Base */
@@ -77,11 +87,35 @@ html, body {
     padding: 0;
     background-color: var(--scout-bg);
     color: var(--scout-text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Twemoji Country Flags", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Ensure flag emojis render seamlessly across all components */
+body, input, button, select, textarea, table, td, th, .mantine-Text-root, .mantine-Badge-root, .mantine-Table-root {
+    font-family: "Twemoji Country Flags", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* High-Contrast Dimmed & Secondary Text Rules (Fixes grayish/faint text across both themes) */
+.mantine-Text-dimmed,
+.mantine-Text-root[data-dimmed],
+[data-dimmed] {
+    color: var(--scout-text-secondary) !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Text-dimmed,
+[data-mantine-color-scheme="dark"] .mantine-Text-root[data-dimmed],
+[data-mantine-color-scheme="dark"] [data-dimmed] {
+    color: #CBD5E1 !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Text-dimmed,
+[data-mantine-color-scheme="light"] .mantine-Text-root[data-dimmed],
+[data-mantine-color-scheme="light"] [data-dimmed] {
+    color: #334155 !important;
 }
 
 /* Typography Hierarchy */
@@ -130,7 +164,7 @@ p, span, div {
     font-weight: 700 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.8px !important;
-    color: var(--scout-text-muted) !important;
+    color: var(--scout-text-secondary) !important;
     padding: 10px 10px 4px 10px !important;
     margin-top: 6px !important;
 }

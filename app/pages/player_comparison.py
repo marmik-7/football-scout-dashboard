@@ -18,6 +18,7 @@ from app.utils.styling import (
     get_percentile_tier,
 )
 from app.utils.charts import build_radar_chart, build_comparison_bars, PLAYER_COMPARE_COLORS
+from app.utils.player_portraits import render_player_portrait
 from app.utils.player_analysis import get_player_strengths_and_weaknesses
 from app.utils.metric_definitions import (
     get_metric_label,
@@ -205,7 +206,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         empty_fig.add_annotation(
             text="Select 2 to 4 players to view comparison charts.",
             showarrow=False,
-            font=dict(color="#64748B" if theme == "light" else "#94A3B8", size=13),
+            font=dict(color="#475569" if theme == "light" else "#CBD5E1", size=13),
             x=0.5,
             y=0.5,
             xref="paper",
@@ -275,17 +276,27 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
             dmc.Grid([
                 dmc.GridCol([
                     dmc.Group([
-                        html.Span("●", style={"color": PLAYER_COMPARE_COLORS[0], "fontSize": "13px"}),
-                        dmc.Text(f"Baseline Starter Advantage: {p1['Player']}", size="xs", fw=700, c="var(--scout-text-primary)"),
-                    ], gap="xs"),
-                    dmc.Text(f"Superior production in: {p1_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
+                        render_player_portrait(p1["Player_Unique"], size=40, radius=6),
+                        dmc.Box([
+                            dmc.Group([
+                                html.Span("●", style={"color": PLAYER_COMPARE_COLORS[0], "fontSize": "13px"}),
+                                dmc.Text(f"Baseline Starter Advantage: {p1['Player']}", size="xs", fw=700, c="var(--scout-text-primary)"),
+                            ], gap="xs"),
+                            dmc.Text(f"Superior production in: {p1_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
+                        ]),
+                    ], gap="sm", align="center"),
                 ], span={"base": 12, "md": 6}),
                 dmc.GridCol([
                     dmc.Group([
-                        html.Span("●", style={"color": PLAYER_COMPARE_COLORS[1], "fontSize": "13px"}),
-                        dmc.Text(f"Target Alternative Advantage: {p2['Player']}", size="xs", fw=700, c="#38BDF8"),
-                    ], gap="xs"),
-                    dmc.Text(f"Superior production in: {p2_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
+                        render_player_portrait(p2["Player_Unique"], size=40, radius=6),
+                        dmc.Box([
+                            dmc.Group([
+                                html.Span("●", style={"color": PLAYER_COMPARE_COLORS[1], "fontSize": "13px"}),
+                                dmc.Text(f"Target Alternative Advantage: {p2['Player']}", size="xs", fw=700, c="#38BDF8"),
+                            ], gap="xs"),
+                            dmc.Text(f"Superior production in: {p2_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
+                        ]),
+                    ], gap="sm", align="center"),
                 ], span={"base": 12, "md": 6}),
             ], gap="sm"),
 
@@ -346,16 +357,19 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         role_badge = dmc.Badge("BASELINE", color="emerald", variant="filled", size="xs") if i == 0 else dmc.Badge(f"TARGET #{i}", color="cyan", variant="light", size="xs")
         table_headers.append(
             dmc.TableTh(
-                dmc.Box([
-                    dmc.Group([
-                        html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
-                        dmc.Text(p["Player"], fw=700, c="var(--scout-text-primary)", size="xs"),
-                    ], gap="xs"),
-                    dmc.Group([
-                        role_badge,
-                        dmc.Text(f"{p['Squad']} • {p.get('SubRole', p['Pos'])}", size="10px", c="dimmed"),
-                    ], gap="xs", mt=4),
-                ]),
+                dmc.Group([
+                    render_player_portrait(p.get("Player_Unique", p["Player"]), size=32, radius=4),
+                    dmc.Box([
+                        dmc.Group([
+                            html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
+                            dmc.Text(p["Player"], fw=700, c="var(--scout-text-primary)", size="xs"),
+                        ], gap="xs"),
+                        dmc.Group([
+                            role_badge,
+                            dmc.Text(f"{p['Squad']} • {p.get('SubRole', p['Pos'])}", size="10px", c="dimmed"),
+                        ], gap="xs", mt=4),
+                    ]),
+                ], gap="xs", align="center", wrap="nowrap"),
                 style={"color": TEXT},
             )
         )
@@ -517,10 +531,15 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
             dmc.Box(
                 [
                     dmc.Group([
-                        html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
-                        dmc.Text(p["Player"], fw=700, c="var(--scout-text-primary)", size="sm"),
-                    ], gap="xs"),
-                    dmc.Text(f"{p['Squad']} • {p['Pos']} • {p.get('SubRole', '')} • {p.get('PlayingStyle_Name', 'Specialist')}", size="10px", c="dimmed", mt=2),
+                        render_player_portrait(p.get("Player_Unique", p["Player"]), size=40, radius=6),
+                        dmc.Box([
+                            dmc.Group([
+                                html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
+                                dmc.Text(p["Player"], fw=700, c="var(--scout-text-primary)", size="sm"),
+                            ], gap="xs"),
+                            dmc.Text(f"{p.get('Nation_Display', p['Nation_Clean'])} • {p['Squad']} • {p.get('SubRole', p['Pos'])} • {p.get('PlayingStyle_Name', 'Specialist')}", size="10px", c="dimmed", mt=2),
+                        ]),
+                    ], gap="sm", align="center", wrap="nowrap"),
                     dmc.Divider(my="xs", color=BORDER),
 
                     dmc.Text("KEY STRENGTHS", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}, mb=4),
@@ -536,7 +555,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                     ], gap="xs", wrap="wrap"),
                 ],
                 style={
-                    "backgroundColor": "#0D131F",
+                    "backgroundColor": "var(--scout-surface-secondary)",
                     "border": f"1px solid {BORDER}",
                     "borderTop": f"2px solid {color}",
                     "borderRadius": "4px",

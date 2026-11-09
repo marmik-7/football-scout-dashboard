@@ -22,19 +22,26 @@ CLUSTER_NAMES = {
     ("FW", 3): "Dynamic Inverted Creator",
 }
 
-# IOC / FIFA 3-letter country code to Flag emoji mapping
+# IOC / FIFA 3-letter country code to Flag emoji mapping (complete dataset coverage)
 COUNTRY_FLAGS = {
-    "ESP": "🇪🇸", "FRA": "🇫🇷", "GER": "🇩🇪", "ENG": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "ITA": "🇮🇹", "BRA": "🇧🇷",
-    "ARG": "🇦🇷", "NED": "🇳🇱", "POR": "🇵🇹", "BEL": "🇧🇪", "DEN": "🇩🇰", "MAR": "🇲🇦",
-    "CIV": "🇨🇮", "AUT": "🇦🇹", "SEN": "🇸🇳", "CRO": "🇭🇷", "NGA": "🇳🇬", "SWE": "🇸🇪",
-    "SUI": "🇨🇭", "ALG": "🇩🇿", "USA": "🇺🇸", "NOR": "🇳🇴", "GHA": "🇬🇭", "MLI": "🇲🇱",
-    "URU": "🇺🇾", "SRB": "🇷🇸", "JPN": "🇯🇵", "SCO": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "CMR": "🇨🇲", "COL": "🇨🇴",
-    "POL": "🇵🇱", "WAL": "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "IRL": "🇮🇪", "CZE": "🇨🇿", "GRE": "🇬🇷", "HUN": "🇭🇺",
-    "TUR": "🇹🇷", "GUI": "🇬🇳", "ALB": "🇦🇱", "CAN": "🇨🇦", "UKR": "🇺🇦", "SVN": "🇸🇮",
-    "SVK": "🇸🇰", "TUN": "🇹🇳", "KOR": "🇰🇷", "MEX": "🇲🇽", "CHI": "🇨🇱", "ECU": "🇪🇨",
-    "PAR": "🇵🇾", "ROU": "🇷🇴", "BIH": "🇧🇦", "GEO": "🇬🇪", "EGY": "🇪🇬", "BFA": "🇧🇫",
-    "COD": "🇨🇩", "GAB": "🇬🇦", "JAM": "🇯🇲", "AUS": "🇦🇺", "VEN": "🇻🇪", "KOS": "🇽🇰",
-    "MNE": "🇲🇪", "MKD": "🇲🇰", "NIR": "🇬🇧", "ISL": "🇮🇸", "FIN": "🇫🇮", "ISR": "🇮🇱",
+    "ALB": "🇦🇱", "ALG": "🇩🇿", "ANG": "🇦🇴", "ARG": "🇦🇷", "ARM": "🇦🇲", "AUS": "🇦🇺",
+    "AUT": "🇦🇹", "BDI": "🇧🇮", "BEL": "🇧🇪", "BFA": "🇧🇫", "BIH": "🇧🇦", "BRA": "🇧🇷",
+    "CAN": "🇨🇦", "CGO": "🇨🇬", "CHI": "🇨🇱", "CIV": "🇨🇮", "CMR": "🇨🇲", "COD": "🇨🇩",
+    "COL": "🇨🇴", "CPV": "🇨🇻", "CRO": "🇭🇷", "CTA": "🇨🇫", "CYP": "🇨🇾", "CZE": "🇨🇿",
+    "DEN": "🇩🇰", "DOM": "🇩🇴", "ECU": "🇪🇨", "EGY": "🇪🇬", "ENG": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "EQG": "🇬🇶",
+    "ESP": "🇪🇸", "EST": "🇪🇪", "FIN": "🇫🇮", "FRA": "🇫🇷", "GAB": "🇬🇦", "GAM": "🇬🇲",
+    "GEO": "🇬🇪", "GER": "🇩🇪", "GHA": "🇬🇭", "GLP": "🇬🇵", "GNB": "🇬🇼", "GRE": "🇬🇷",
+    "GUF": "🇬🇫", "GUI": "🇬🇳", "HAI": "🇭🇹", "HUN": "🇭🇺", "IDN": "🇮🇩", "IRL": "🇮🇪",
+    "IRN": "🇮🇷", "ISL": "🇮🇸", "ISR": "🇮🇱", "ITA": "🇮🇹", "JAM": "🇯🇲", "JOR": "🇯🇴",
+    "JPN": "🇯🇵", "KEN": "🇰🇪", "KOR": "🇰🇷", "KOS": "🇽🇰", "KVX": "🇽🇰", "LTU": "🇱🇹",
+    "LUX": "🇱🇺", "MAD": "🇲🇬", "MAR": "🇲🇦", "MAS": "🇲🇾", "MEX": "🇲🇽", "MKD": "🇲🇰",
+    "MLI": "🇲🇱", "MLT": "🇲🇹", "MNE": "🇲🇪", "MOZ": "🇲🇿", "NED": "🇳🇱", "NGA": "🇳🇬",
+    "NIR": "🇬🇧", "NOR": "🇳🇴", "NZL": "🇳🇿", "PAN": "🇵🇦", "PAR": "🇵🇾", "PER": "🇵🇪",
+    "PHI": "🇵🇭", "POL": "🇵🇱", "POR": "🇵🇹", "ROU": "🇷🇴", "RUS": "🇷🇺", "SCO": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "SEN": "🇸🇳", "SLE": "🇸🇱", "SRB": "🇷🇸", "SUI": "🇨🇭", "SUR": "🇸🇷", "SVK": "🇸🇰",
+    "SVN": "🇸🇮", "SWE": "🇸🇪", "TOG": "🇹🇬", "TUN": "🇹🇳", "TUR": "🇹🇷", "UKR": "🇺🇦",
+    "URU": "🇺🇾", "USA": "🇺🇸", "UZB": "🇺🇿", "VEN": "🇻🇪", "WAL": "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "ZAM": "🇿🇲",
+    "ZIM": "🇿🇼"
 }
 
 # Standard European Top 5 League mappings

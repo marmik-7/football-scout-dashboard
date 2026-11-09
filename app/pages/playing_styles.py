@@ -425,7 +425,10 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
                         *([sample_pill] if sample_pill else []),
                     ], gap=4, align="center"),
                 ]),
-                dmc.TableTd(dmc.Text(r["Squad"], size="xs", c="dimmed")),
+                dmc.TableTd([
+                    dmc.Text(r["Squad"], size="xs", c="var(--scout-text-primary)"),
+                    dmc.Text(r.get("Nation_Display", r["Nation_Clean"]), size="10px", c="dimmed", mt=1),
+                ]),
                 dmc.TableTd(
                     dmc.Badge(r.get("PlayingStyle_Name", f"Cluster {c_id}"), color="gray", variant="light", size="xs")
                 ),

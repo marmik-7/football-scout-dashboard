@@ -25,6 +25,7 @@ from app.utils.styling import (
     get_percentile_tier,
 )
 from app.utils.charts import build_radar_chart, build_pizza_chart
+from app.utils.player_portraits import render_player_portrait
 from app.utils.player_analysis import (
     get_player_strengths_and_weaknesses,
     generate_scouting_report,
@@ -92,7 +93,7 @@ def layout(player=None, **kwargs):
                                             variant="outline",
                                             color="gray",
                                             size="xs",
-                                            style={"color": "#E2E8F0", "borderColor": BORDER},
+                                            style={"color": "var(--scout-text-primary)", "borderColor": "var(--scout-border)"},
                                         ),
                                         id="profile-compare-btn",
                                         href="/player-comparison",
@@ -399,33 +400,49 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             ),
             dmc.Group(
                 [
-                    dmc.Box([
-                        dmc.Group(
-                            [
-                                dmc.Title(name, order=2, c="var(--scout-text-primary)", style={"fontSize": "22px", "fontWeight": 700}),
-                                dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="sm"),
-                                dmc.Badge(subrole, color="cyan", variant="light", size="sm"),
-                                *([sample_badge] if sample_badge else []),
-                            ],
-                            gap="xs",
-                            wrap="wrap",
-                            align="center",
-                        ),
-                        dmc.Group(
-                            [
-                                dmc.Text(club, size="xs", fw=600, c="var(--scout-text-primary)"),
-                                dmc.Text("•", c="dimmed"),
-                                dmc.Text(nation, size="xs", c="dimmed"),
-                                dmc.Text("•", c="dimmed"),
-                                dmc.Text(f"Age {age} ({born})", size="xs", c="dimmed"),
-                                dmc.Text("•", c="dimmed"),
-                                dmc.Text(f"{int(minutes):,} mins ({minutes/90:.1f} 90s)", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
-                            ],
-                            gap="xs",
-                            mt=6,
-                            wrap="wrap",
-                        ),
-                    ]),
+                    dmc.Group(
+                        [
+                            render_player_portrait(
+                                player["Player_Unique"],
+                                size=115,
+                                radius=8,
+                                style={
+                                    "border": f"1px solid {BORDER}",
+                                    "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
+                                },
+                            ),
+                            dmc.Box([
+                                dmc.Group(
+                                    [
+                                        dmc.Title(name, order=2, c="var(--scout-text-primary)", style={"fontSize": "22px", "fontWeight": 700}),
+                                        dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="sm"),
+                                        dmc.Badge(subrole, color="cyan", variant="light", size="sm"),
+                                        *([sample_badge] if sample_badge else []),
+                                    ],
+                                    gap="xs",
+                                    wrap="wrap",
+                                    align="center",
+                                ),
+                                dmc.Group(
+                                    [
+                                        dmc.Text(club, size="xs", fw=600, c="var(--scout-text-primary)"),
+                                        dmc.Text("•", c="dimmed"),
+                                        dmc.Text(nation, size="xs", c="dimmed"),
+                                        dmc.Text("•", c="dimmed"),
+                                        dmc.Text(f"Age {age} ({born})", size="xs", c="dimmed"),
+                                        dmc.Text("•", c="dimmed"),
+                                        dmc.Text(f"{int(minutes):,} mins ({minutes/90:.1f} 90s)", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
+                                    ],
+                                    gap="xs",
+                                    mt=6,
+                                    wrap="wrap",
+                                ),
+                            ]),
+                        ],
+                        gap="md",
+                        align="center",
+                        wrap="wrap",
+                    ),
                     dmc.Box(
                         [
                             dmc.Badge(style_name, color="emerald", variant="light", size="sm"),
@@ -592,28 +609,28 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
     # Recruitment Suitability UI Elements (Concise 2–3 items)
     attractions_list = [
         html.Li(
-            dmc.Text(att, size="xs", c="#CBD5E1", style={"lineHeight": 1.45}),
+            dmc.Text(att, size="xs", c="var(--scout-text-secondary)", style={"lineHeight": 1.45}),
             style={"marginBottom": "3px"}
         )
         for att in recruitment_assessment.get("attractions", [])[:3]
     ]
     concerns_list = [
         html.Li(
-            dmc.Text(con, size="xs", c="#CBD5E1", style={"lineHeight": 1.45}),
+            dmc.Text(con, size="xs", c="var(--scout-text-secondary)", style={"lineHeight": 1.45}),
             style={"marginBottom": "3px"}
         )
         for con in recruitment_assessment.get("concerns", [])[:2]
     ]
     actions_list = [
         html.Li(
-            dmc.Text(act, size="xs", c="#CBD5E1", style={"lineHeight": 1.45}),
+            dmc.Text(act, size="xs", c="var(--scout-text-secondary)", style={"lineHeight": 1.45}),
             style={"marginBottom": "3px"}
         )
         for act in recruitment_assessment.get("scouting_actions", [])[:2]
     ]
 
     scouting_summary = html.Div([
-        dmc.Text(report_text, size="xs", c="#E2E8F0", style={"lineHeight": 1.6, "marginBottom": "10px"}),
+        dmc.Text(report_text, size="xs", c="var(--scout-text-primary)", style={"lineHeight": 1.6, "marginBottom": "10px"}),
 
         dmc.Grid([
             dmc.GridCol([
@@ -657,7 +674,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                 dmc.Text(
                     recruitment_assessment.get("disclaimer", ""),
                     size="9px",
-                    c="#64748B",
+                    c="var(--scout-text-muted)",
                     style={"fontStyle": "italic", "lineHeight": 1.35},
                     mt=6,
                 ),
@@ -752,7 +769,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                 dmc.Text(
                     f"Showing 6 primary production indicators prioritized for {subrole}. Switch to Analyst View in the header for all 15 advanced metrics and pAdj distributions.",
                     size="10.5px",
-                    c="#64748B",
+                    c="var(--scout-text-muted)",
                 ),
             ], gap="xs", align="center", mt="md"),
         ])

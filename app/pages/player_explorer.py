@@ -25,6 +25,7 @@ from app.utils.styling import (
     get_percentile_tier,
 )
 from app.utils.metric_definitions import get_sample_size_badge, SAMPLE_SIZE_THRESHOLD
+from app.utils.player_portraits import render_player_portrait
 
 dash.register_page(__name__, path="/player-explorer", name="Player Explorer", order=2)
 
@@ -128,7 +129,7 @@ layout = dmc.Container(
                         "item": {"border": "none", "backgroundColor": "transparent"},
                         "control": {
                             "padding": "6px 0px",
-                            "color": "#94A3B8",
+                            "color": "var(--scout-text-secondary)",
                             "&:hover": {"backgroundColor": "transparent"},
                         },
                         "panel": {"padding": "8px 0px 0px 0px"},
@@ -144,7 +145,7 @@ layout = dmc.Container(
                                 ),
                                 dmc.AccordionPanel(
                                     dmc.Box([
-                                        dmc.Divider(mb="sm", color="rgba(255, 255, 255, 0.06)"),
+                                        dmc.Divider(mb="sm", color="var(--scout-border-subtle)"),
                                         # Secondary Sorting & Screening Row
                                         dmc.Grid(
                                             [
@@ -521,10 +522,15 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
                 dmc.TableTr([
                     dmc.TableTd([
                         dmc.Group([
-                            dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
-                            *([sample_pill] if sample_pill else []),
-                        ], gap=4, align="center"),
-                        dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="var(--scout-text-muted)"),
+                            render_player_portrait(r["Player_Unique"], size=36, radius=4),
+                            dmc.Box([
+                                dmc.Group([
+                                    dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
+                                    *([sample_pill] if sample_pill else []),
+                                ], gap=4, align="center"),
+                                dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="var(--scout-text-muted)"),
+                            ]),
+                        ], gap="xs", align="center", wrap="nowrap"),
                     ]),
                     dmc.TableTd([
                         dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
@@ -615,9 +621,12 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
             dmc.TableTr([
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
-                        *([sample_pill] if sample_pill else []),
-                    ], gap=4, align="center"),
+                        render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                        dmc.Group([
+                            dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
+                            *([sample_pill] if sample_pill else []),
+                        ], gap=4, align="center"),
+                    ], gap="xs", align="center", wrap="nowrap"),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),

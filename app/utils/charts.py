@@ -36,7 +36,7 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
     """
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
     line_color = "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)"
 
@@ -126,7 +126,7 @@ def build_pizza_chart(player, height=400, theme="dark"):
     """
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
     line_color = "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)"
     wedge_border = "rgba(15, 23, 42, 0.18)" if is_light else "rgba(128, 128, 128, 0.25)"
@@ -262,7 +262,7 @@ def build_comparison_bars(players, height=380, theme="dark"):
     """
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.15)"
 
     categories = list(ATTRIBUTE_COLUMNS.keys())
@@ -319,7 +319,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
     """
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.15)"
     zeroline_color = "rgba(15, 23, 42, 0.12)" if is_light else "rgba(128, 128, 128, 0.20)"
     halo_color = "rgba(16, 185, 129, 0.18)" if is_light else "rgba(132, 204, 22, 0.22)"
@@ -407,7 +407,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                     ),
                     text=[f"  <b>{p_row['Player']}</b>"],
                     textposition="top right",
-                    textfont=dict(color=text_color, size=12, family="Inter, sans-serif"),
+                    textfont=dict(color=text_color, size=12, family="'Twemoji Country Flags', Inter, sans-serif"),
                     hoverinfo="text",
                     hovertext=(
                         f"<b>📍 LOCATED CANDIDATE: {p_row['Player']}</b><br>"
@@ -430,7 +430,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                 arrowcolor=pin_accent,
                 ax=35,
                 ay=-35,
-                font=dict(color=text_color, size=11, family="Inter, sans-serif"),
+                font=dict(color=text_color, size=11, family="'Twemoji Country Flags', Inter, sans-serif"),
                 bgcolor=card_bg,
                 bordercolor=pin_accent,
                 borderwidth=1.5,
@@ -479,7 +479,7 @@ def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420, theme="dar
     """
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
 
     categories = list(ATTRIBUTE_COLUMNS.keys())

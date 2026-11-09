@@ -243,7 +243,7 @@ def update_overview_top_players(position, attribute, scout_analyst_mode="scout",
     theme = theme or "dark"
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.12)"
 
     if not attribute or attribute not in ATTRIBUTE_COLUMNS:
@@ -278,7 +278,7 @@ def update_overview_top_players(position, attribute, scout_analyst_mode="scout",
         notice = dmc.Text(
             f"Rankings benchmarked strictly against other {pos_display.lower()} with ≥600 minutes played. Scores span 0 to 100 percentile.",
             size="xs",
-            c="var(--scout-text-secondary, #94A3B8)",
+            c="var(--scout-text-secondary)",
         )
 
     if filtered_df.empty:

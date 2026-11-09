@@ -120,7 +120,7 @@ layout = dmc.Container(
                         "item": {"border": "none", "backgroundColor": "transparent"},
                         "control": {
                             "padding": "6px 0px",
-                            "color": "#94A3B8",
+                            "color": "var(--scout-text-secondary)",
                             "&:hover": {"backgroundColor": "transparent"},
                         },
                         "panel": {"padding": "8px 0px 0px 0px"},
@@ -136,7 +136,7 @@ layout = dmc.Container(
                                 ),
                                 dmc.AccordionPanel(
                                     dmc.Box([
-                                        dmc.Divider(mb="sm", color="rgba(255, 255, 255, 0.06)"),
+                                        dmc.Divider(mb="sm", color="var(--scout-border-subtle)"),
                                         dmc.Grid(
                                             [
                                                 dmc.GridCol(
@@ -207,7 +207,7 @@ layout = dmc.Container(
             withBorder=True,
             radius="md",
             p="md",
-            style={"backgroundColor": "#0F172A", "borderColor": "rgba(255, 255, 255, 0.08)"},
+            style={"backgroundColor": "var(--scout-surface-primary)", "borderColor": "var(--scout-border)"},
         ),
 
         dmc.Space(h=15),
@@ -338,7 +338,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
         empty_fig.add_annotation(
             text="No players found matching the filter criteria.",
             showarrow=False,
-            font=dict(color="#64748B" if is_light else "#94A3B8", size=13),
+            font=dict(color="#475569" if is_light else "#CBD5E1", size=13),
             x=0.5,
             y=0.5,
             xref="paper",
@@ -358,7 +358,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
     # 4. Ranked Bar Chart
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#64748B" if is_light else "#94A3B8"
+    muted_color = "#475569" if is_light else "#CBD5E1"
     grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.10)"
 
     chart_height = max(380, min(800, len(chart_candidates) * 26 + 100))
@@ -506,7 +506,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
                     dmc.TableTd(dmc.Text(f"{padj_def:.2f}", size="xs", fw=600, style={"color": TEXT, "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                     dmc.TableTd(dmc.Text(f"{raw_def:.2f}", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                     dmc.TableTd(dmc.Text(f"{r.get('Won_per90', 0.0):.2f}", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
-                    dmc.TableTd(dmc.Text(f"{float(r.get('Won%', 0.0)):.1f}%", size="xs", fw=600, style={"color": ACCENT if float(r.get('Won%', 0.0)) >= 60 else "#94A3B8", "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                    dmc.TableTd(dmc.Text(f"{float(r.get('Won%', 0.0)):.1f}%", size="xs", fw=600, style={"color": ACCENT if float(r.get('Won%', 0.0)) >= 60 else "var(--scout-text-secondary)", "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 ]
             elif attr == "Creativity":
                 extra_cells = [
