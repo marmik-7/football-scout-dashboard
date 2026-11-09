@@ -398,7 +398,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                     x=[p_row["PC1"]],
                     y=[p_row["PC2"]],
                     mode="markers+text",
-                    name=f"{p_row['Player']}",
+                    name=f"📍 {p_row['Player']}",
                     marker=dict(
                         symbol="diamond",
                         color=pin_fill,
@@ -410,7 +410,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                     textfont=dict(color=text_color, size=12, family="Inter, sans-serif"),
                     hoverinfo="text",
                     hovertext=(
-                        f"<b>LOCATED CANDIDATE: {p_row['Player']}</b><br>"
+                        f"<b>📍 LOCATED CANDIDATE: {p_row['Player']}</b><br>"
                         f"Squad: {p_row['Squad']} • Pos: {p_row['Pos']} ({p_row.get('SubRole', 'N/A')})<br>"
                         f"Style Archetype: <b>{p_row.get('PlayingStyle_Name', 'Cluster')}</b><br>"
                         f"Coordinates: PC1={p_row['PC1']:.2f}, PC2={p_row['PC2']:.2f}"
@@ -422,7 +422,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
             fig.add_annotation(
                 x=p_row["PC1"],
                 y=p_row["PC2"],
-                text=f"<b>{p_row['Player']}</b>",
+                text=f"📍 <b>{p_row['Player']}</b>",
                 showarrow=True,
                 arrowhead=2,
                 arrowsize=1.0,

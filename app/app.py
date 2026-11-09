@@ -170,8 +170,8 @@ app.layout = dmc.MantineProvider(
                                     dmc.SegmentedControl(
                                         id="global-theme-toggle",
                                         data=[
-                                            {"label": "Dark", "value": "dark"},
-                                            {"label": "Light", "value": "light"},
+                                            {"label": "🌙", "value": "dark"},
+                                            {"label": "☀️", "value": "light"},
                                         ],
                                         value="dark",
                                         size="xs",
