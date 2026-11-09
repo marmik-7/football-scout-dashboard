@@ -22,20 +22,8 @@ CLUSTER_NAMES = {
     ("FW", 3): "Dynamic Inverted Creator",
 }
 
-# IOC / FIFA 3-letter country code to Flag emoji mapping
-COUNTRY_FLAGS = {
-    "ESP": "🇪🇸", "FRA": "🇫🇷", "GER": "🇩🇪", "ENG": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "ITA": "🇮🇹", "BRA": "🇧🇷",
-    "ARG": "🇦🇷", "NED": "🇳🇱", "POR": "🇵🇹", "BEL": "🇧🇪", "DEN": "🇩🇰", "MAR": "🇲🇦",
-    "CIV": "🇨🇮", "AUT": "🇦🇹", "SEN": "🇸🇳", "CRO": "🇭🇷", "NGA": "🇳🇬", "SWE": "🇸🇪",
-    "SUI": "🇨🇭", "ALG": "🇩🇿", "USA": "🇺🇸", "NOR": "🇳🇴", "GHA": "🇬🇭", "MLI": "🇲🇱",
-    "URU": "🇺🇾", "SRB": "🇷🇸", "JPN": "🇯🇵", "SCO": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "CMR": "🇨🇲", "COL": "🇨🇴",
-    "POL": "🇵🇱", "WAL": "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "IRL": "🇮🇪", "CZE": "🇨🇿", "GRE": "🇬🇷", "HUN": "🇭🇺",
-    "TUR": "🇹🇷", "GUI": "🇬🇳", "ALB": "🇦🇱", "CAN": "🇨🇦", "UKR": "🇺🇦", "SVN": "🇸🇮",
-    "SVK": "🇸🇰", "TUN": "🇹🇳", "KOR": "🇰🇷", "MEX": "🇲🇽", "CHI": "🇨🇱", "ECU": "🇪🇨",
-    "PAR": "🇵🇾", "ROU": "🇷🇴", "BIH": "🇧🇦", "GEO": "🇬🇪", "EGY": "🇪🇬", "BFA": "🇧🇫",
-    "COD": "🇨🇩", "GAB": "🇬🇦", "JAM": "🇯🇲", "AUS": "🇦🇺", "VEN": "🇻🇪", "KOS": "🇽🇰",
-    "MNE": "🇲🇪", "MKD": "🇲🇰", "NIR": "🇬🇧", "ISL": "🇮🇸", "FIN": "🇫🇮", "ISR": "🇮🇱",
-}
+# IOC / FIFA 3-letter country code mapping (clean text representation)
+COUNTRY_FLAGS = {}
 
 # Standard European Top 5 League mappings
 COMPETITION_NAMES = {
@@ -57,12 +45,11 @@ def clean_competition_name(comp_raw):
 
 def format_nation_flag(nation_code):
     """
-    Returns country code with its corresponding national flag emoji.
+    Returns clean 3-letter country code without emoji decoration.
     """
     if not nation_code or nation_code == "N/A":
         return "N/A"
-    flag = COUNTRY_FLAGS.get(str(nation_code).strip(), "🌐")
-    return f"{flag} {nation_code}"
+    return str(nation_code).strip()
 
 
 _CACHED_DF = None

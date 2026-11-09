@@ -138,7 +138,7 @@ layout = dmc.Container(
                             [
                                 dmc.AccordionControl(
                                     dmc.Group([
-                                        dmc.Badge("⚙ ADVANCED SCREENING", color="gray", variant="outline", size="xs"),
+                                        dmc.Text("Advanced Screening & Secondary Filters", size="xs", fw=600, c="var(--scout-text-secondary)"),
                                         dmc.Text("Club, Nationality, Sort Metric, Min Minutes & Compound Threshold Sliders", size="xs", c="dimmed"),
                                     ], gap="xs")
                                 ),
@@ -305,7 +305,7 @@ layout = dmc.Container(
             withBorder=True,
             radius="md",
             p="md",
-            style={"backgroundColor": "#0F172A", "borderColor": "rgba(255, 255, 255, 0.08)"},
+            style={"backgroundColor": "var(--scout-surface-primary)", "borderColor": "var(--scout-border)"},
         ),
 
         dmc.Space(h=15),
@@ -316,8 +316,7 @@ layout = dmc.Container(
                 dmc.Group(
                     [
                         dmc.Group([
-                            dmc.Badge("●", color="teal", variant="transparent", size="xs", p=0),
-                            dmc.Text(id="explorer-count-label", size="xs", fw=600, c=TEXT),
+                            dmc.Text(id="explorer-count-label", size="xs", fw=600, c="var(--scout-text-primary)"),
                         ], gap=6, align="center"),
                         dmc.Pagination(
                             id="explorer-pagination",
@@ -342,7 +341,7 @@ layout = dmc.Container(
                 # Bottom Pagination
                 dmc.Group(
                     [
-                        dmc.Text("Showing 15 candidate profiles per page", size="11px", c="#64748B"),
+                        dmc.Text("Showing 15 candidate profiles per page", size="11px", c="var(--scout-text-muted)"),
                         dmc.Pagination(
                             id="explorer-pagination-bottom",
                             total=1,
@@ -358,7 +357,7 @@ layout = dmc.Container(
             withBorder=True,
             radius="md",
             p="md",
-            style={"backgroundColor": "#0F172A", "borderColor": "rgba(255, 255, 255, 0.08)"},
+            style={"backgroundColor": "var(--scout-surface-primary)", "borderColor": "var(--scout-border)"},
         ),
     ],
     fluid=True,
@@ -370,7 +369,7 @@ layout = dmc.Container(
 # CALLBACKS
 # --------------------------------------------------
 
-# Sync top and bottom paginations
+# Sync top and bottom paginations bidirectionally
 @callback(
     Output("explorer-pagination-bottom", "value"),
     Output("explorer-pagination-bottom", "total"),
@@ -378,7 +377,18 @@ layout = dmc.Container(
     Input("explorer-pagination", "total"),
 )
 def sync_bottom_pagination(val, total):
-    return val, total
+    return val or 1, total or 1
+
+
+@callback(
+    Output("explorer-pagination", "value", allow_duplicate=True),
+    Input("explorer-pagination-bottom", "value"),
+    prevent_initial_call=True,
+)
+def sync_from_bottom(bottom_val):
+    if bottom_val is not None:
+        return bottom_val
+    return dash.no_update
 
 
 @callback(
@@ -511,21 +521,21 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
                 dmc.TableTr([
                     dmc.TableTd([
                         dmc.Group([
-                            dmc.Text(r["Player"], size="xs", fw=700, c="white"),
+                            dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
                             *([sample_pill] if sample_pill else []),
                         ], gap=4, align="center"),
-                        dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="#64748B"),
+                        dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="var(--scout-text-muted)"),
                     ]),
                     dmc.TableTd([
-                        dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
-                        dmc.Text(r.get("Comp_Clean", ""), size="10px", c="#64748B"),
+                        dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
+                        dmc.Text(r.get("Comp_Clean", ""), size="10px", c="var(--scout-text-muted)"),
                     ]),
                     dmc.TableTd([
                         dmc.Badge(r.get("SubRole", r["Pos"]), color=pos_badge_color, variant="light", size="xs"),
-                        dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="10px", c="#94A3B8", mt=2),
+                        dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="10px", c="var(--scout-text-secondary)", mt=2),
                     ]),
-                    dmc.TableTd(dmc.Text(f"{int(mins):,}m", size="xs", c="#64748B", style={"fontVariantNumeric": "tabular-nums"})),
-                    dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums", "textAlign": "center"})),
+                    dmc.TableTd(dmc.Text(f"{int(mins):,}m", size="xs", c="var(--scout-text-muted)", style={"fontVariantNumeric": "tabular-nums"})),
+                    dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="var(--scout-text-primary)", style={"fontVariantNumeric": "tabular-nums", "textAlign": "center"})),
                     dmc.TableTd(
                         dmc.Badge(
                             f"{top_attr} ({top_score:.1f}th pct)",
@@ -605,22 +615,22 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
             dmc.TableTr([
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], size="xs", fw=700, c="white"),
+                        dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
                         *([sample_pill] if sample_pill else []),
                     ], gap=4, align="center"),
                 ]),
                 dmc.TableTd([
-                    dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
-                    dmc.Text(r.get("Comp_Clean", ""), size="10px", c="#64748B"),
+                    dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
+                    dmc.Text(r.get("Comp_Clean", ""), size="10px", c="var(--scout-text-muted)"),
                 ]),
                 dmc.TableTd([
                     dmc.Badge(r["Pos"], color=pos_badge_color, variant="light", size="xs"),
-                    dmc.Text(r.get("SubRole", ""), size="10px", c="#64748B", mt=2),
+                    dmc.Text(r.get("SubRole", ""), size="10px", c="var(--scout-text-muted)", mt=2),
                 ]),
-                dmc.TableTd(dmc.Text(nat_display, size="xs", c="white")),
-                dmc.TableTd(dmc.Text(age_str, size="xs", c="white", style={"fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(f"{r['Min']:,}", size="xs", c="#64748B", style={"fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(nat_display, size="xs", c="var(--scout-text-primary)")),
+                dmc.TableTd(dmc.Text(age_str, size="xs", c="var(--scout-text-primary)", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Min']:,}", size="xs", c="var(--scout-text-muted)", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="var(--scout-text-primary)", style={"fontVariantNumeric": "tabular-nums"})),
 
                 dmc.TableTd(render_score(r['Finishing_Score'])),
                 dmc.TableTd(render_score(r['Creativity_Score'])),

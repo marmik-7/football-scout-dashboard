@@ -23,7 +23,7 @@ PLAYER_COMPARE_COLORS = [
 ]
 
 
-def build_radar_chart(players, include_position_avg=False, position_avg_scores=None, height=380):
+def build_radar_chart(players, include_position_avg=False, position_avg_scores=None, height=380, theme="dark"):
     """
     Builds a 7-dimensional radar chart for one or multiple players.
 
@@ -32,7 +32,14 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
         include_position_avg (bool): Whether to overlay the position peer average.
         position_avg_scores (dict): Dict of {attribute: score} for position average.
         height (int): Figure height.
+        theme (str): 'dark' or 'light'.
     """
+    is_light = (theme == "light")
+    text_color = "#0F172A" if is_light else "#F8FAFC"
+    muted_color = "#64748B" if is_light else "#94A3B8"
+    grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
+    line_color = "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)"
+
     categories = list(ATTRIBUTE_COLUMNS.keys())
     # Closed loop for radar chart
     categories_closed = categories + [categories[0]]
@@ -49,7 +56,7 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
                 theta=categories_closed,
                 mode="lines",
                 name="Position Peer Avg",
-                line=dict(color=MUTED, width=1.8, dash="dash"),
+                line=dict(color=muted_color, width=1.8, dash="dash"),
                 hoverinfo="r+theta+name",
             )
         )
@@ -75,22 +82,22 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
             )
         )
 
-    fig = style_figure(fig, height=height)
+    fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
         polar=dict(
-            bgcolor="rgba(15, 23, 42, 0.4)",
+            bgcolor="rgba(0, 0, 0, 0)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
                 dtick=25,
-                tickfont=dict(color=MUTED, size=9),
-                gridcolor=BORDER,
-                linecolor=BORDER,
+                tickfont=dict(color=muted_color, size=9),
+                gridcolor=grid_color,
+                linecolor=line_color,
             ),
             angularaxis=dict(
-                tickfont=dict(color=TEXT, size=11),
-                gridcolor=BORDER,
-                linecolor=BORDER,
+                tickfont=dict(color=text_color, size=11),
+                gridcolor=grid_color,
+                linecolor=line_color,
             ),
         ),
         legend=dict(
@@ -99,14 +106,14 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
             y=-0.22,
             xanchor="center",
             x=0.5,
-            font=dict(color=TEXT, size=11),
+            font=dict(color=text_color, size=11),
         ),
         margin=dict(l=40, r=40, t=30, b=45),
     )
     return fig
 
 
-def build_pizza_chart(player, height=400):
+def build_pizza_chart(player, height=400, theme="dark"):
     """
     Builds a StatsBomb/FBref-style 12-slice percentile pizza chart (polar bar chart).
     Each wedge has a uniform angular width (26.5 deg) and radial distance equal to
@@ -117,18 +124,25 @@ def build_pizza_chart(player, height=400):
       - Possession & Creation (Sky Blue #0EA5E9): xA/90, Key Passes/90, Prog Passes/90, Prog Carries/90
       - Defending & Physical (Pitch Lime #84CC16): pAdj Tackles/90, pAdj Interceptions/90, pAdj Clearances/90, Aerial Win %
     """
+    is_light = (theme == "light")
+    text_color = "#0F172A" if is_light else "#F8FAFC"
+    muted_color = "#64748B" if is_light else "#94A3B8"
+    grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
+    line_color = "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)"
+    wedge_border = "rgba(15, 23, 42, 0.18)" if is_light else "rgba(128, 128, 128, 0.25)"
+
     if player is None:
         fig = go.Figure()
         fig.add_annotation(
             text="Select a player to view the Percentile Pizza chart.",
             showarrow=False,
-            font=dict(color=MUTED, size=13),
+            font=dict(color=muted_color, size=13),
             x=0.5,
             y=0.5,
             xref="paper",
             yref="paper",
         )
-        return style_figure(fig, height=height)
+        return style_figure(fig, height=height, theme=theme)
 
     domains = [
         {
@@ -197,7 +211,7 @@ def build_pizza_chart(player, height=400):
                 theta=g_angles,
                 width=[26.5] * len(g_radii),
                 marker_color=group["color"],
-                marker_line_color="#101827",
+                marker_line_color=wedge_border,
                 marker_line_width=1.5,
                 opacity=0.88,
                 name=dom_name,
@@ -206,27 +220,27 @@ def build_pizza_chart(player, height=400):
             )
         )
 
-    fig = style_figure(fig, height=height)
+    fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
         polar=dict(
-            bgcolor="rgba(15, 23, 42, 0.4)",
+            bgcolor="rgba(0, 0, 0, 0)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
                 dtick=25,
-                tickfont=dict(color=MUTED, size=9),
-                gridcolor="rgba(255, 255, 255, 0.08)",
-                linecolor=BORDER,
+                tickfont=dict(color=muted_color, size=9),
+                gridcolor=grid_color,
+                linecolor=line_color,
             ),
             angularaxis=dict(
                 tickmode="array",
                 tickvals=angles,
                 ticktext=labels,
-                tickfont=dict(color=TEXT, size=9, weight=600),
+                tickfont=dict(color=text_color, size=9, weight=600),
                 rotation=90,
                 direction="clockwise",
-                gridcolor="rgba(255, 255, 255, 0.08)",
-                linecolor=BORDER,
+                gridcolor=grid_color,
+                linecolor=line_color,
             ),
         ),
         legend=dict(
@@ -235,17 +249,22 @@ def build_pizza_chart(player, height=400):
             y=-0.16,
             xanchor="center",
             x=0.5,
-            font=dict(color=TEXT, size=10),
+            font=dict(color=text_color, size=10),
         ),
         margin=dict(l=40, r=40, t=30, b=35),
     )
     return fig
 
 
-def build_comparison_bars(players, height=380):
+def build_comparison_bars(players, height=380, theme="dark"):
     """
     Builds a grouped bar chart comparing multiple players across the 7 attributes.
     """
+    is_light = (theme == "light")
+    text_color = "#0F172A" if is_light else "#F8FAFC"
+    muted_color = "#64748B" if is_light else "#94A3B8"
+    grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.15)"
+
     categories = list(ATTRIBUTE_COLUMNS.keys())
     fig = go.Figure()
 
@@ -267,18 +286,18 @@ def build_comparison_bars(players, height=380):
             )
         )
 
-    fig = style_figure(fig, height=height)
+    fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
         barmode="group",
         yaxis=dict(
             range=[0, 110],
-            title=dict(text="Percentile Score", font=dict(color=MUTED, size=11)),
-            gridcolor=BORDER,
-            tickfont=dict(color=MUTED),
+            title=dict(text="Percentile Score", font=dict(color=muted_color, size=11)),
+            gridcolor=grid_color,
+            tickfont=dict(color=muted_color),
         ),
         xaxis=dict(
-            gridcolor=BORDER,
-            tickfont=dict(color=TEXT, size=11),
+            gridcolor=grid_color,
+            tickfont=dict(color=text_color, size=11),
         ),
         legend=dict(
             orientation="h",
@@ -286,18 +305,28 @@ def build_comparison_bars(players, height=380):
             y=-0.25,
             xanchor="center",
             x=0.5,
-            font=dict(color=TEXT, size=11),
+            font=dict(color=text_color, size=11),
         ),
         margin=dict(l=40, r=25, t=30, b=55),
     )
     return fig
 
 
-def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_player=None, height=480):
+def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_player=None, height=480, theme="dark"):
     """
     Builds an interactive 2D PCA scatter plot colored by Playing Style clusters.
     Optionally highlights coordinates for a specific targeted player.
     """
+    is_light = (theme == "light")
+    text_color = "#0F172A" if is_light else "#F8FAFC"
+    muted_color = "#64748B" if is_light else "#94A3B8"
+    grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.15)"
+    zeroline_color = "rgba(15, 23, 42, 0.12)" if is_light else "rgba(128, 128, 128, 0.20)"
+    halo_color = "rgba(16, 185, 129, 0.18)" if is_light else "rgba(132, 204, 22, 0.22)"
+    pin_accent = "#10B981" if is_light else "#84CC16"
+    pin_fill = "#0F172A" if is_light else "#FFFFFF"
+    card_bg = "#FFFFFF" if is_light else "#1E293B"
+
     pos_df = df[df["Pos"] == pos].copy()
 
     # Create hover text
@@ -334,7 +363,7 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                     color=color,
                     size=size,
                     opacity=opacity,
-                    line=dict(color="#101827", width=0.5),
+                    line=dict(color="#FFFFFF" if is_light else "#101827", width=0.5),
                 ),
                 text=cluster_df["Hover_Text"],
                 hoverinfo="text",
@@ -355,9 +384,9 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                     name="Target Halo",
                     marker=dict(
                         symbol="circle",
-                        color="rgba(132, 204, 22, 0.22)",
+                        color=halo_color,
                         size=28,
-                        line=dict(color="#84CC16", width=2),
+                        line=dict(color=pin_accent, width=2),
                     ),
                     hoverinfo="skip",
                     showlegend=False,
@@ -369,19 +398,19 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                     x=[p_row["PC1"]],
                     y=[p_row["PC2"]],
                     mode="markers+text",
-                    name=f"📍 {p_row['Player']}",
+                    name=f"{p_row['Player']}",
                     marker=dict(
                         symbol="diamond",
-                        color="#FFFFFF",
+                        color=pin_fill,
                         size=14,
-                        line=dict(color="#84CC16", width=2.5),
+                        line=dict(color=pin_accent, width=2.5),
                     ),
                     text=[f"  <b>{p_row['Player']}</b>"],
                     textposition="top right",
-                    textfont=dict(color="#FFFFFF", size=12, family="Inter, sans-serif"),
+                    textfont=dict(color=text_color, size=12, family="Inter, sans-serif"),
                     hoverinfo="text",
                     hovertext=(
-                        f"<b>📍 LOCATED CANDIDATE: {p_row['Player']}</b><br>"
+                        f"<b>LOCATED CANDIDATE: {p_row['Player']}</b><br>"
                         f"Squad: {p_row['Squad']} • Pos: {p_row['Pos']} ({p_row.get('SubRole', 'N/A')})<br>"
                         f"Style Archetype: <b>{p_row.get('PlayingStyle_Name', 'Cluster')}</b><br>"
                         f"Coordinates: PC1={p_row['PC1']:.2f}, PC2={p_row['PC2']:.2f}"
@@ -398,38 +427,38 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
                 arrowhead=2,
                 arrowsize=1.0,
                 arrowwidth=2,
-                arrowcolor="#84CC16",
+                arrowcolor=pin_accent,
                 ax=35,
                 ay=-35,
-                font=dict(color="#FFFFFF", size=11, family="Inter, sans-serif"),
-                bgcolor="#1E293B",
-                bordercolor="#84CC16",
+                font=dict(color=text_color, size=11, family="Inter, sans-serif"),
+                bgcolor=card_bg,
+                bordercolor=pin_accent,
                 borderwidth=1.5,
                 borderpad=4,
                 opacity=0.95,
             )
 
-    fig = style_figure(fig, height=height)
+    fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
         title=dict(
             text=f"2D PCA Projection — {pos} Tactical Clusters",
-            font=dict(color=TEXT, size=15),
+            font=dict(color=text_color, size=15),
             subtitle=dict(
                 text="Mathematical dimensionality reduction preserving multi-dimensional distance. Clusters reflect observed feature distributions.",
-                font=dict(color=MUTED, size=11),
+                font=dict(color=muted_color, size=11),
             ),
         ),
         xaxis=dict(
-            title=dict(text="Principal Component 1 (PC1) — Primary Variance Axis", font=dict(color=MUTED, size=11)),
-            gridcolor=BORDER,
-            zerolinecolor=BORDER,
-            tickfont=dict(color=MUTED),
+            title=dict(text="Principal Component 1 (PC1) — Primary Variance Axis", font=dict(color=muted_color, size=11)),
+            gridcolor=grid_color,
+            zerolinecolor=zeroline_color,
+            tickfont=dict(color=muted_color),
         ),
         yaxis=dict(
-            title=dict(text="Principal Component 2 (PC2) — Secondary Variance Axis", font=dict(color=MUTED, size=11)),
-            gridcolor=BORDER,
-            zerolinecolor=BORDER,
-            tickfont=dict(color=MUTED),
+            title=dict(text="Principal Component 2 (PC2) — Secondary Variance Axis", font=dict(color=muted_color, size=11)),
+            gridcolor=grid_color,
+            zerolinecolor=zeroline_color,
+            tickfont=dict(color=muted_color),
         ),
         legend=dict(
             orientation="h",
@@ -437,17 +466,22 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
             y=-0.28,
             xanchor="center",
             x=0.5,
-            font=dict(color=TEXT, size=11),
+            font=dict(color=text_color, size=11),
         ),
         margin=dict(l=40, r=25, t=55, b=65),
     )
     return fig
 
 
-def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420):
+def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420, theme="dark"):
     """
     Builds an overlaid radar chart comparing the 4 tactical cluster profiles for a position.
     """
+    is_light = (theme == "light")
+    text_color = "#0F172A" if is_light else "#F8FAFC"
+    muted_color = "#64748B" if is_light else "#94A3B8"
+    grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
+
     categories = list(ATTRIBUTE_COLUMNS.keys())
     categories_closed = categories + [categories[0]]
 
@@ -485,20 +519,20 @@ def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420):
             )
         )
 
-    fig = style_figure(fig, height=height)
+    fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
         polar=dict(
-            bgcolor="rgba(15, 23, 42, 0.4)",
+            bgcolor="rgba(0, 0, 0, 0)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
                 dtick=25,
-                tickfont=dict(color=MUTED, size=9),
-                gridcolor=BORDER,
+                tickfont=dict(color=muted_color, size=9),
+                gridcolor=grid_color,
             ),
             angularaxis=dict(
-                tickfont=dict(color=TEXT, size=11),
-                gridcolor=BORDER,
+                tickfont=dict(color=text_color, size=11),
+                gridcolor=grid_color,
             ),
         ),
         legend=dict(
@@ -507,7 +541,7 @@ def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420):
             y=-0.25,
             xanchor="center",
             x=0.5,
-            font=dict(color=TEXT, size=11),
+            font=dict(color=text_color, size=11),
         ),
         margin=dict(l=40, r=40, t=30, b=55),
     )

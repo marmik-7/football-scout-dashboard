@@ -119,7 +119,7 @@ def layout(player=None, **kwargs):
                                 [
                                     dmc.AccordionControl(
                                         dmc.Group([
-                                            dmc.Badge("⚙ ADVANCED SCOUTING SCOPE", color="gray", variant="outline", size="xs"),
+                                            dmc.Text("Advanced Scope & Candidate Filters", size="xs", fw=600, c="var(--scout-text-secondary)"),
                                             dmc.Text("Sub-Role, League Scope, Club Filter & Results Depth", size="xs", c="dimmed"),
                                         ], gap="xs")
                                     ),
@@ -261,9 +261,11 @@ def layout(player=None, **kwargs):
     Input("similar-age-filter", "value"),
     Input("similar-top-n", "value"),
     Input("scout-analyst-mode", "data"),
+    Input("theme-store", "data"),
 )
-def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, comp_filter, max_age, top_n, scout_analyst_mode="scout"):
+def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, comp_filter, max_age, top_n, scout_analyst_mode="scout", theme="dark"):
     scout_analyst_mode = scout_analyst_mode or "scout"
+    theme = theme or "dark"
     ref_player = get_player_by_name(ref_name)
     if ref_player is None:
         ref_player = get_player_by_name(DEFAULT_PLAYER)
@@ -299,7 +301,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                                 dmc.Text("REFERENCE BENCHMARK", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.8px"}),
                                 *([ref_sample_badge] if ref_sample_badge else []),
                             ], justify="space-between", align="center"),
-                            dmc.Title(ref_player["Player"], order=3, c="white", mt=2, style={"fontSize": "18px"}),
+                            dmc.Title(ref_player["Player"], order=3, c="var(--scout-text-primary)", mt=2, style={"fontSize": "18px"}),
                             dmc.Group(
                                 [
                                     dmc.Badge(ref_player["Pos"], color=ref_pos_color, variant="filled", size="xs"),
@@ -313,7 +315,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                             dmc.Text(f"Tactical Style: {ref_player.get('PlayingStyle_Name', 'Specialist')}", size="xs", style={"color": ACCENT}, mt=4),
                         ],
                         style={
-                            "backgroundColor": "#0D131F",
+                            "backgroundColor": "var(--scout-surface-secondary)",
                             "border": f"1px solid {BORDER}",
                             "borderLeft": f"3px solid {ACCENT}",
                             "borderRadius": "4px",
@@ -332,7 +334,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                                 ], gap="xs", align="center"),
                                 dmc.Badge(f"{best_sim_pct:.1f}% SIMILARITY", color="emerald", variant="filled", size="sm"),
                             ], justify="space-between"),
-                            dmc.Title(best_match["Player"], order=3, c="white", mt=2, style={"fontSize": "18px"}),
+                            dmc.Title(best_match["Player"], order=3, c="var(--scout-text-primary)", mt=2, style={"fontSize": "18px"}),
                             dmc.Group(
                                 [
                                     dmc.Badge(best_match["Pos"], color=match_pos_color, variant="filled", size="xs"),
@@ -347,7 +349,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                             dmc.Text(f"Succession Horizon: {sim_explanation.get('succession_note', '')}", size="xs", c="cyan", mt=4),
                         ],
                         style={
-                            "backgroundColor": "#0D131F",
+                            "backgroundColor": "var(--scout-surface-secondary)",
                             "border": f"1px solid {BORDER}",
                             "borderLeft": "3px solid #38BDF8",
                             "borderRadius": "4px",
@@ -372,9 +374,9 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
     # 2. Radar Chart (Reference vs Top Match)
     if not sim_results.empty:
         compare_players = [ref_player, sim_results.iloc[0]]
-        radar_fig = build_radar_chart(players=compare_players, height=370)
+        radar_fig = build_radar_chart(players=compare_players, height=370, theme=theme)
     else:
-        radar_fig = build_radar_chart(players=[ref_player], height=370)
+        radar_fig = build_radar_chart(players=[ref_player], height=370, theme=theme)
 
     # 3. Methodology & Explainable Drivers of Similarity
     shared_items = [
@@ -399,15 +401,15 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
         dmc.Text("THE 3 DRIVERS OF SIMILARITY (#1 CANDIDATE)", size="10px", fw=800, c="teal", style={"letterSpacing": "0.8px"}, mb=6),
 
         # Driver 1: Shared Core Strengths
-        dmc.Text("🎯 Strongest Shared Tactical Attributes:", size="10.5px", fw=700, c="#10B981", mt=4),
+        dmc.Text("Strongest Shared Tactical Attributes:", size="10.5px", fw=700, c="#10B981", mt=4),
         html.Ul(shared_items, style={"paddingLeft": "16px", "margin": "4px 0"}),
 
         # Driver 2: Key Differences
-        dmc.Text("⚖️ Key Tactical Differences & Variance:", size="10.5px", fw=700, c="#F59E0B", mt=6),
+        dmc.Text("Key Tactical Differences & Variance:", size="10.5px", fw=700, c="#F59E0B", mt=6),
         html.Ul(diff_items, style={"paddingLeft": "16px", "margin": "4px 0"}),
 
         # Driver 3: Succession & Role Suitability
-        dmc.Text("⏳ Succession & Positional Compatibility:", size="10.5px", fw=700, c="#38BDF8", mt=6),
+        dmc.Text("Succession & Positional Compatibility:", size="10.5px", fw=700, c="#38BDF8", mt=6),
         dmc.Text(
             f"Role Relationship: {sim_explanation.get('positional_compatibility', 'N/A')}. {sim_explanation.get('succession_note', '')}",
             size="xs",
@@ -491,7 +493,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
 
         # Match Tier
         if sim_pct >= 95.0:
-            tier_badge = dmc.Badge("Direct Twin", color="emerald", variant="filled", size="xs")
+            tier_badge = dmc.Badge("Direct Twin", color="emerald", variant="light", size="xs")
         elif sim_pct >= 88.0:
             tier_badge = dmc.Badge("Strong Match", color="cyan", variant="light", size="xs")
         else:
@@ -506,13 +508,13 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], size="xs", fw=600, c="white"),
+                        dmc.Text(r["Player"], size="xs", fw=600, c="var(--scout-text-primary)"),
                         *([sample_pill] if sample_pill else []),
                     ], gap=4, align="center"),
                     dmc.Text(f"Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
-                    dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
+                    dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
                     dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
@@ -542,13 +544,13 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], size="xs", fw=600, c="white"),
+                        dmc.Text(r["Player"], size="xs", fw=600, c="var(--scout-text-primary)"),
                         *([sample_pill] if sample_pill else []),
                     ], gap=4, align="center"),
                     dmc.Text(f"Age {r.get('Age', '-')} • {int(mins):,} mins", size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
-                    dmc.Text(r["Squad"], size="xs", fw=500, c="white"),
+                    dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
                     dmc.Text(r.get("Comp_Clean", ""), size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([

@@ -188,9 +188,11 @@ def layout(player1=None, player2=None, **kwargs):
     Input("compare-metric-mode", "value"),
     Input("compare-delta-toggle", "checked"),
     Input("scout-analyst-mode", "data"),
+    Input("theme-store", "data"),
 )
-def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True, scout_analyst_mode="scout"):
+def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True, scout_analyst_mode="scout", theme="dark"):
     scout_analyst_mode = scout_analyst_mode or "scout"
+    theme = theme or "dark"
     if not selected_names or len(selected_names) < 2:
         warning_msg = dmc.Alert(
             "Please select at least 2 players (up to 4) to generate the comparison matrix.",
@@ -203,13 +205,13 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         empty_fig.add_annotation(
             text="Select 2 to 4 players to view comparison charts.",
             showarrow=False,
-            font=dict(color=MUTED, size=13),
+            font=dict(color="#64748B" if theme == "light" else "#94A3B8", size=13),
             x=0.5,
             y=0.5,
             xref="paper",
             yref="paper",
         )
-        empty_fig.update_layout(paper_bgcolor=PANEL, plot_bgcolor=PANEL)
+        empty_fig = style_figure(empty_fig, height=370, theme=theme)
         return warning_msg, empty_fig, empty_fig, html.Div(), html.Div()
 
     players = [get_player_by_name(name) for name in selected_names if get_player_by_name(name) is not None]
@@ -261,9 +263,9 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 dmc.Group([
                     dmc.Text("EXECUTIVE HEAD-TO-HEAD RECRUITMENT VERDICT", size="10.5px", fw=800, c="teal", style={"letterSpacing": "0.8px"}),
                     dmc.Badge(
-                        "👤 SCOUT VIEW" if scout_analyst_mode == "scout" else "🔬 ANALYST VIEW",
+                        "SCOUT VIEW" if scout_analyst_mode == "scout" else "ANALYST VIEW",
                         color="teal" if scout_analyst_mode == "scout" else "indigo",
-                        variant="filled",
+                        variant="light",
                         size="xs",
                     ),
                 ], gap="xs"),
@@ -274,16 +276,16 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 dmc.GridCol([
                     dmc.Group([
                         html.Span("●", style={"color": PLAYER_COMPARE_COLORS[0], "fontSize": "13px"}),
-                        dmc.Text(f"Baseline Starter Advantage: {p1['Player']}", size="xs", fw=700, c="white"),
+                        dmc.Text(f"Baseline Starter Advantage: {p1['Player']}", size="xs", fw=700, c="var(--scout-text-primary)"),
                     ], gap="xs"),
-                    dmc.Text(f"Superior production in: {p1_edge_str}.", size="11px", c="#CBD5E1", mt=2),
+                    dmc.Text(f"Superior production in: {p1_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
                 ], span={"base": 12, "md": 6}),
                 dmc.GridCol([
                     dmc.Group([
                         html.Span("●", style={"color": PLAYER_COMPARE_COLORS[1], "fontSize": "13px"}),
                         dmc.Text(f"Target Alternative Advantage: {p2['Player']}", size="xs", fw=700, c="#38BDF8"),
                     ], gap="xs"),
-                    dmc.Text(f"Superior production in: {p2_edge_str}.", size="11px", c="#CBD5E1", mt=2),
+                    dmc.Text(f"Superior production in: {p2_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
                 ], span={"base": 12, "md": 6}),
             ], gap="sm"),
 
@@ -292,12 +294,12 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 f"Recruitment Trade-off: Selecting {p2['Player']} over {p1['Player']} represents a strategic choice between {alt_tradeoff} vs {primary_tradeoff}. "
                 "Review match video to confirm whether the stylistic profile aligns with squad tactical requirements.",
                 size="11px",
-                c="#94A3B8",
+                c="var(--scout-text-muted)",
                 style={"fontStyle": "italic", "lineHeight": 1.4},
             ),
         ],
         style={
-            "backgroundColor": "#090D14",
+            "backgroundColor": "var(--scout-surface-secondary)",
             "border": f"1px solid {BORDER}",
             "borderLeft": "3px solid #10B981",
             "borderRadius": "5px",
@@ -328,14 +330,14 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         pos = list(positions)[0]
         pos_name = {"DF": "Defenders", "MF": "Midfielders", "FW": "Forwards"}.get(pos, pos)
         cross_pos_warning = dmc.Text(
-            f"✓ Homogeneous Cohort: All candidates belong to {pos_name}. Scores are directly comparable on identical position-relative percentile scales.",
+            f"Homogeneous Cohort: All candidates belong to {pos_name}. Scores are directly comparable on identical position-relative percentile scales.",
             size="xs",
             c="dimmed",
         )
 
     # 2. Charts
-    radar_fig = build_radar_chart(players=players, height=370)
-    bar_fig = build_comparison_bars(players=players, height=370)
+    radar_fig = build_radar_chart(players=players, height=370, theme=theme)
+    bar_fig = build_comparison_bars(players=players, height=370, theme=theme)
 
     # 3. Statistical Comparison Table
     table_headers = [dmc.TableTh("METRIC / DIMENSION", style={"color": TEXT, "width": "220px", "fontSize": "10px", "letterSpacing": "0.6px"})]
@@ -347,7 +349,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 dmc.Box([
                     dmc.Group([
                         html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
-                        dmc.Text(p["Player"], fw=700, c="white", size="xs"),
+                        dmc.Text(p["Player"], fw=700, c="var(--scout-text-primary)", size="xs"),
                     ], gap="xs"),
                     dmc.Group([
                         role_badge,
@@ -366,7 +368,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         for i, p in enumerate(players):
             raw_val = values_fn(p)
             if is_header:
-                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=600, c="white", size="xs", style={"fontVariantNumeric": "tabular-nums"})))
+                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=600, c="var(--scout-text-primary)", size="xs", style={"fontVariantNumeric": "tabular-nums"})))
             elif is_percentile or is_numeric:
                 try:
                     num = float(raw_val)
@@ -389,14 +391,14 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                         tier_info = get_percentile_tier(num)
                         val_span = dmc.Text(f"{num:.1f}", fw=700, size="xs", style={"color": tier_info["color"], "fontVariantNumeric": "tabular-nums"})
                     else:
-                        val_span = dmc.Text(f"{num:.{precision}f}" if precision > 0 else f"{int(round(num))}", fw=600, size="xs", c="white", style={"fontVariantNumeric": "tabular-nums"})
+                        val_span = dmc.Text(f"{num:.{precision}f}" if precision > 0 else f"{int(round(num))}", fw=600, size="xs", c="var(--scout-text-primary)", style={"fontVariantNumeric": "tabular-nums"})
 
                     content = dmc.Group([val_span, delta_badge] if delta_badge else [val_span], gap="xs", align="center")
                     cells.append(dmc.TableTd(content))
                 except (ValueError, TypeError):
-                    cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, size="xs", c="white")))
+                    cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, size="xs", c="var(--scout-text-primary)")))
             else:
-                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, size="xs", c="white")))
+                cells.append(dmc.TableTd(dmc.Text(str(raw_val), fw=400, size="xs", c="var(--scout-text-primary)")))
         return dmc.TableTr(cells)
 
     rows = [
@@ -468,13 +470,13 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
         value="matrix" if scout_analyst_mode == "analyst" else None,
         styles={
             "item": {
-                "backgroundColor": "#090D14",
+                "backgroundColor": "var(--scout-surface-secondary)",
                 "border": f"1px solid {BORDER}",
                 "borderRadius": "4px",
                 "marginTop": "10px",
             },
             "control": {
-                "color": "white",
+                "color": "var(--scout-text-primary)",
                 "padding": "10px 14px",
             },
             "panel": {
@@ -487,7 +489,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 [
                     dmc.AccordionControl(
                         dmc.Group([
-                            dmc.Text("Comprehensive Statistical Delta Matrix & Volume Breakdown (15 Metrics)", fw=700, size="xs", c="white"),
+                            dmc.Text("Comprehensive Statistical Delta Matrix & Volume Breakdown (15 Metrics)", fw=700, size="xs", c="var(--scout-text-primary)"),
                             dmc.Badge(
                                 "ANALYST MATRIX (OPEN)" if scout_analyst_mode == "analyst" else "PROGRESSIVE DISCLOSURE",
                                 color="indigo" if scout_analyst_mode == "analyst" else "teal",
@@ -516,7 +518,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 [
                     dmc.Group([
                         html.Span("●", style={"color": color, "fontSize": "14px", "lineHeight": 1}),
-                        dmc.Text(p["Player"], fw=700, c="white", size="sm"),
+                        dmc.Text(p["Player"], fw=700, c="var(--scout-text-primary)", size="sm"),
                     ], gap="xs"),
                     dmc.Text(f"{p['Squad']} • {p['Pos']} • {p.get('SubRole', '')} • {p.get('PlayingStyle_Name', 'Specialist')}", size="10px", c="dimmed", mt=2),
                     dmc.Divider(my="xs", color=BORDER),

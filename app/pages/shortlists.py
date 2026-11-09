@@ -30,9 +30,9 @@ all_player_names = get_all_player_names()
 unique_subroles = get_unique_subroles()
 
 PRIORITY_TIERS = [
-    {"label": "★ A-List Target (Priority 1)", "value": "A-List Target", "color": "red"},
-    {"label": "◆ Primary Alternative (Priority 2)", "value": "Primary Alternative", "color": "cyan"},
-    {"label": "● Monitor / Development (Priority 3)", "value": "Monitor / Development", "color": "orange"},
+    {"label": "A-List Target (Priority 1)", "value": "A-List Target", "color": "red"},
+    {"label": "Primary Alternative (Priority 2)", "value": "Primary Alternative", "color": "cyan"},
+    {"label": "Monitor / Development (Priority 3)", "value": "Monitor / Development", "color": "orange"},
 ]
 
 TIER_COLORS = {
@@ -56,7 +56,7 @@ def layout():
                 id="shortlist-add-modal",
                 title=dmc.Group([
                     dmc.Badge("SHORTLIST", color="emerald", variant="filled", size="xs"),
-                    dmc.Text("Add Candidate to Recruitment Pipeline", size="sm", fw=700, c="white"),
+                    dmc.Text("Add Candidate to Recruitment Pipeline", size="sm", fw=700, style={"color": TEXT}),
                 ], gap="xs"),
                 opened=False,
                 centered=True,
@@ -176,7 +176,7 @@ def layout():
                                         size="xs",
                                         variant="outline",
                                         color="gray",
-                                        style={"color": "#E2E8F0", "borderColor": BORDER},
+                                        style={"color": TEXT, "borderColor": BORDER},
                                     ),
                                     dcc.Download(id="shortlist-download-csv"),
                                 ], gap="xs"),
@@ -309,15 +309,15 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
                 span={"base": 12, "sm": 6, "lg": 3},
             ),
             dmc.GridCol(
-                create_metric_card("★ A-List Targets", a_list, "Priority 1 primary transfer targets", color="red"),
+                create_metric_card("A-List Targets", a_list, "Priority 1 primary transfer targets", color="red"),
                 span={"base": 12, "sm": 6, "lg": 3},
             ),
             dmc.GridCol(
-                create_metric_card("◆ Primary Alternatives", prim_alt, "Priority 2 backup succession options", color="cyan"),
+                create_metric_card("Primary Alternatives", prim_alt, "Priority 2 backup succession options", color="cyan"),
                 span={"base": 12, "sm": 6, "lg": 3},
             ),
             dmc.GridCol(
-                create_metric_card("● Monitor / Development", monitor, "Priority 3 developmental watchlist", color="orange"),
+                create_metric_card("Monitor / Development", monitor, "Priority 3 developmental watchlist", color="orange"),
                 span={"base": 12, "sm": 6, "lg": 3},
             ),
         ],
@@ -405,13 +405,13 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
             dmc.TableTr([
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(p_name, fw=700, size="xs", c="white"),
+                        dmc.Text(p_name, fw=700, size="xs", style={"color": TEXT}),
                         *([sample_pill] if sample_pill else []),
                     ], gap=4, align="center"),
                     dmc.Text(f"Added {entry.get('added_at', '2024-25 Season')} • {p.get('Nation_Display', p['Nation_Clean'])}", size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
-                    dmc.Text(p["Squad"], size="xs", fw=500, c="white"),
+                    dmc.Text(p["Squad"], size="xs", fw=500, style={"color": TEXT}),
                     dmc.Text(p.get("Comp_Clean", "Big 5"), size="10px", c="dimmed"),
                 ]),
                 dmc.TableTd([
@@ -421,7 +421,7 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
                 dmc.TableTd(dmc.Text(f"Age {p['Age']} ({int(mins):,}m)", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
                 dmc.TableTd(tier_badge),
                 dmc.TableTd(
-                    dmc.Text(notes, size="xs", c="#CBD5E1", style={"lineHeight": 1.45, "maxWidth": "300px"})
+                    dmc.Text(notes, size="xs", style={"color": TEXT, "lineHeight": 1.45, "maxWidth": "300px"})
                 ),
                 dmc.TableTd(
                     dmc.Group([
@@ -436,7 +436,7 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
                             style={"textDecoration": "none", "color": "#94A3B8"},
                         ),
                         dmc.Button(
-                            "✕",
+                            "Remove",
                             id={"type": "shortlist-remove-btn", "index": p_name},
                             size="xs",
                             variant="subtle",

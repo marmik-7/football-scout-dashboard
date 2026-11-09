@@ -156,7 +156,7 @@ layout = dmc.Container(
                     "marginBottom": "12px",
                 },
                 "control": {
-                    "color": "white",
+                    "color": TEXT,
                     "padding": "12px 18px",
                 },
                 "panel": {
@@ -169,8 +169,8 @@ layout = dmc.Container(
                     [
                         dmc.AccordionControl(
                             dmc.Group([
-                                dmc.Text("Cluster Attribute Means Matrix", fw=700, size="sm", c="white"),
-                                dmc.Badge("RAW MATHEMATICAL MEANS", color="indigo", variant="light", size="xs"),
+                                dmc.Text("Cluster Attribute Means Matrix", fw=700, size="sm", style={"color": TEXT}),
+                                dmc.Badge("Reference Matrix", color="gray", variant="light", size="xs"),
                                 dmc.Text("Mean percentile scores across all 7 tactical dimensions for each identified cluster", size="xs", c="dimmed"),
                             ], gap="xs")
                         ),
@@ -216,9 +216,11 @@ def update_locator_dropdown(pos):
     Input("styles-cluster-select", "value"),
     Input("styles-player-locator", "value"),
     Input("scout-analyst-mode", "data"),
+    Input("theme-store", "data"),
 )
-def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_analyst_mode="scout"):
+def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_analyst_mode="scout", theme="dark"):
     scout_analyst_mode = scout_analyst_mode or "scout"
+    theme = theme or "dark"
     if not pos:
         pos = "FW"
 
@@ -265,12 +267,12 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
                             ], gap=6),
                             dmc.Text(f"{c_count} players ({c_pct:.1f}%)", size="10px", c="dimmed", style={"fontVariantNumeric": "tabular-nums"}),
                         ], justify="space-between"),
-                        dmc.Title(c_name, order=4, c="white", mt=4, style={"fontSize": "15px"}),
-                        dmc.Text(traits_str, size="10px", c="#CBD5E1", mt=4),
-                        dmc.Text(anchors_str, size="9.5px", c="#94A3B8", mt=2, lineClamp=1),
+                        dmc.Title(c_name, order=4, c="var(--scout-text-primary)", mt=4, style={"fontSize": "15px"}),
+                        dmc.Text(traits_str, size="10px", c="var(--scout-text-secondary)", mt=4),
+                        dmc.Text(anchors_str, size="9.5px", c="var(--scout-text-muted)", mt=2, lineClamp=1),
                     ],
                     style={
-                        "backgroundColor": "#0D131F",
+                        "backgroundColor": "var(--scout-surface-secondary)",
                         "border": f"1px solid {color if is_selected else BORDER}",
                         "borderTop": f"2px solid {color}",
                         "borderRadius": "4px",
@@ -286,9 +288,9 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
             dmc.Group([
                 dmc.Text(f"EMPIRICAL {pos} TACTICAL ARCHETYPES (DATA-SUPPORTED)", size="10.5px", fw=800, c="teal", style={"letterSpacing": "0.8px"}),
                 dmc.Badge(
-                    "👤 SCOUT VIEW" if scout_analyst_mode == "scout" else "🔬 ANALYST VIEW",
+                    "SCOUT VIEW" if scout_analyst_mode == "scout" else "ANALYST VIEW",
                     color="teal" if scout_analyst_mode == "scout" else "indigo",
-                    variant="filled",
+                    variant="light",
                     size="xs",
                 ),
             ], justify="space-between", align="center", mb="xs"),
@@ -296,12 +298,12 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
                 f"The 4 {pos} playing styles below are derived through unsupervised K-Means clustering across 7 standardized match dimensions. "
                 "Archetypes describe observed feature distributions and tactical roles directly from match event data, without imposing artificial axis definitions.",
                 size="11px",
-                c="#CBD5E1",
+                c="var(--scout-text-secondary)",
                 style={"lineHeight": 1.45},
             ),
         ],
         style={
-            "backgroundColor": "#0D131F",
+            "backgroundColor": "var(--scout-surface-secondary)",
             "border": f"1px solid {BORDER}",
             "borderLeft": "3px solid #10B981",
             "borderRadius": "4px",
@@ -322,10 +324,11 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
         selected_cluster=cluster_filter,
         highlight_player=locator_player,
         height=420,
+        theme=theme,
     )
 
     # 3. Cluster DNA Radar
-    radar_fig = build_cluster_dna_radar(summary_df, pos=pos, height=400)
+    radar_fig = build_cluster_dna_radar(summary_df, pos=pos, height=400, theme=theme)
 
     # 4. Cluster Summary Means Table
     thead_summary = dmc.TableThead(
@@ -358,10 +361,10 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
                 dmc.TableTd(
                     dmc.Group([
                         html.Span("●", style={"color": color, "fontSize": "12px", "lineHeight": 1}),
-                        dmc.Text(f"Cluster {c_id}", size="xs", fw=600, c="white"),
+                        dmc.Text(f"Cluster {c_id}", size="xs", fw=600, style={"color": TEXT}),
                     ], gap=6)
                 ),
-                dmc.TableTd(dmc.Text(r["Cluster_Name"], fw=600, size="xs", c="white")),
+                dmc.TableTd(dmc.Text(r["Cluster_Name"], fw=600, size="xs", style={"color": TEXT})),
                 dmc.TableTd(dmc.Text(str(int(r["Player_Count"])), size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
                 fmt_cell(r["Finishing"]),
                 fmt_cell(r["Creativity"]),
@@ -418,7 +421,7 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
             dmc.TableTr([
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], fw=600, size="xs", c="white"),
+                        dmc.Text(r["Player"], fw=600, size="xs", style={"color": TEXT}),
                         *([sample_pill] if sample_pill else []),
                     ], gap=4, align="center"),
                 ]),
@@ -427,7 +430,7 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
                     dmc.Badge(r.get("PlayingStyle_Name", f"Cluster {c_id}"), color="gray", variant="light", size="xs")
                 ),
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}m", size="xs", c="dimmed", style={"fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="white", style={"fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, style={"color": TEXT, "fontVariantNumeric": "tabular-nums"})),
                 dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),

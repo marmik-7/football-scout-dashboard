@@ -79,7 +79,7 @@ def layout(player=None, **kwargs):
                             dmc.Group(
                                 [
                                     dmc.Button(
-                                        "★ Bookmark Target",
+                                        "Bookmark Target",
                                         id="profile-open-shortlist-btn",
                                         variant="filled",
                                         color="emerald",
@@ -125,7 +125,7 @@ def layout(player=None, **kwargs):
                 id="profile-shortlist-modal",
                 title=dmc.Group([
                     dmc.Badge("SHORTLIST", color="emerald", variant="filled", size="xs"),
-                    dmc.Text("Add Candidate to Recruitment Pipeline", size="sm", fw=700, c="white"),
+                    dmc.Text("Add Candidate to Recruitment Pipeline", size="sm", fw=700, style={"color": TEXT}),
                 ], gap="xs"),
                 opened=False,
                 centered=True,
@@ -133,14 +133,14 @@ def layout(player=None, **kwargs):
                 styles={"content": {"backgroundColor": PANEL, "borderColor": BORDER}},
                 children=[
                     dmc.Box([
-                        dmc.Text(id="profile-modal-player-title", fw=600, size="sm", c="white", mb="xs"),
+                        dmc.Text(id="profile-modal-player-title", fw=600, size="sm", style={"color": TEXT}, mb="xs"),
                         dmc.Select(
                             id="profile-modal-tier",
                             label="Recruitment Priority Tier",
                             data=[
-                                {"label": "★ A-List Target (Priority 1)", "value": "A-List Target"},
-                                {"label": "◆ Primary Alternative (Priority 2)", "value": "Primary Alternative"},
-                                {"label": "● Monitor / Development (Priority 3)", "value": "Monitor / Development"},
+                                {"label": "A-List Target (Priority 1)", "value": "A-List Target"},
+                                {"label": "Primary Alternative (Priority 2)", "value": "Primary Alternative"},
+                                {"label": "Monitor / Development (Priority 3)", "value": "Monitor / Development"},
                             ],
                             value="A-List Target",
                             allowDeselect=False,
@@ -224,13 +224,13 @@ def layout(player=None, **kwargs):
                 value=["production"],
                 styles={
                     "item": {
-                        "backgroundColor": PANEL,
-                        "border": f"1px solid {BORDER}",
+                        "backgroundColor": "var(--scout-surface-primary)",
+                        "border": "1px solid var(--scout-border)",
                         "borderRadius": "6px",
                         "marginBottom": "12px",
                     },
                     "control": {
-                        "color": "white",
+                        "color": "var(--scout-text-primary)",
                         "padding": "12px 18px",
                     },
                     "panel": {
@@ -243,7 +243,7 @@ def layout(player=None, **kwargs):
                         [
                             dmc.AccordionControl(
                                 dmc.Group([
-                                    dmc.Text("Season Match Production Statistics", fw=700, size="sm", c="white"),
+                                    dmc.Text("Season Match Production Statistics", fw=700, size="sm", c="var(--scout-text-primary)"),
                                     dmc.Badge("PRODUCTION MATRIX", color="teal", variant="light", size="xs"),
                                     dmc.Text("Key volume, rates, and role-tailored indicators (2024–25)", size="xs", c="dimmed"),
                                 ], gap="xs")
@@ -275,7 +275,7 @@ def layout(player=None, **kwargs):
                         [
                             dmc.AccordionControl(
                                 dmc.Group([
-                                    dmc.Text("Positional Percentile Spectrum & Benchmarks", fw=700, size="sm", c="white"),
+                                    dmc.Text("Positional Percentile Spectrum & Benchmarks", fw=700, size="sm", c="var(--scout-text-primary)"),
                                     dmc.Badge("7-DIMENSIONAL SPECTRUM", color="blue", variant="light", size="xs"),
                                     dmc.Text("Detailed trait scores and +/- deviation against position cohort average", size="xs", c="dimmed"),
                                 ], gap="xs")
@@ -285,6 +285,51 @@ def layout(player=None, **kwargs):
                             ),
                         ],
                         value="attributes",
+                    ),
+
+                    # ACCORDION 3: DATA QUALITY & PROVENANCE VERIFICATION (LAYER 4)
+                    dmc.AccordionItem(
+                        [
+                            dmc.AccordionControl(
+                                dmc.Group([
+                                    dmc.Text("Data Quality & Provenance Verification", fw=700, size="sm", c="var(--scout-text-primary)"),
+                                    dmc.Badge("DATA AUDIT & PROVENANCE", color="teal", variant="light", size="xs"),
+                                    dmc.Text("Sample size validation, Opta event coverage, and analytical confidence", size="xs", c="dimmed"),
+                                ], gap="xs")
+                            ),
+                            dmc.AccordionPanel(
+                                dmc.Grid(
+                                    [
+                                        dmc.GridCol(
+                                            dmc.Box([
+                                                dmc.Text("SAMPLE SIZE INTEGRITY", size="10px", fw=700, c="var(--scout-text-muted)"),
+                                                dmc.Text("Standard Threshold Validation", size="xs", fw=600, c="var(--scout-text-primary)", mt=2),
+                                                dmc.Text("Rate metrics qualified against the 900-minute benchmark for statistical reliability.", size="10px", c="var(--scout-text-secondary)", mt=2),
+                                            ], style={"padding": "10px 12px", "backgroundColor": "var(--scout-surface-secondary)", "borderRadius": "4px", "border": "1px solid var(--scout-border)"}),
+                                            span={"base": 12, "sm": 4},
+                                        ),
+                                        dmc.GridCol(
+                                            dmc.Box([
+                                                dmc.Text("DATA PROVENANCE & LEAGUE COVERAGE", size="10px", fw=700, c="var(--scout-text-muted)"),
+                                                dmc.Text("Opta / FBref 2024–25 Event Stream", size="xs", fw=600, c="var(--scout-text-primary)", mt=2),
+                                                dmc.Text("European Big 5 league match events with possession adjustment (pAdj).", size="10px", c="var(--scout-text-secondary)", mt=2),
+                                            ], style={"padding": "10px 12px", "backgroundColor": "var(--scout-surface-secondary)", "borderRadius": "4px", "border": "1px solid var(--scout-border)"}),
+                                            span={"base": 12, "sm": 4},
+                                        ),
+                                        dmc.GridCol(
+                                            dmc.Box([
+                                                dmc.Text("ANALYTICAL CONFIDENCE", size="10px", fw=700, c="var(--scout-text-muted)"),
+                                                dmc.Text("Peer Cohort Benchmarking", size="xs", fw=600, c="#10B981", mt=2),
+                                                dmc.Text("Standardized percentile ranks computed strictly within positional peer groups.", size="10px", c="var(--scout-text-secondary)", mt=2),
+                                            ], style={"padding": "10px 12px", "backgroundColor": "var(--scout-surface-secondary)", "borderRadius": "4px", "border": "1px solid var(--scout-border)"}),
+                                            span={"base": 12, "sm": 4},
+                                        ),
+                                    ],
+                                    gap="sm",
+                                )
+                            ),
+                        ],
+                        value="data_quality",
                     ),
                 ],
             ),
@@ -314,9 +359,11 @@ def layout(player=None, **kwargs):
     Input("profile-metric-mode", "value"),
     Input("profile-chart-type-toggle", "value"),
     Input("scout-analyst-mode", "data"),
+    Input("theme-store", "data"),
 )
-def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza", scout_analyst_mode="scout"):
+def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza", scout_analyst_mode="scout", theme="dark"):
     scout_analyst_mode = scout_analyst_mode or "scout"
+    theme = theme or "dark"
     player = get_player_by_name(selected_name)
     if player is None:
         player = get_player_by_name(DEFAULT_PLAYER)
@@ -355,7 +402,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                     dmc.Box([
                         dmc.Group(
                             [
-                                dmc.Title(name, order=2, c="white", style={"fontSize": "22px", "fontWeight": 700}),
+                                dmc.Title(name, order=2, c="var(--scout-text-primary)", style={"fontSize": "22px", "fontWeight": 700}),
                                 dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="sm"),
                                 dmc.Badge(subrole, color="cyan", variant="light", size="sm"),
                                 *([sample_badge] if sample_badge else []),
@@ -366,7 +413,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                         ),
                         dmc.Group(
                             [
-                                dmc.Text(club, size="xs", fw=600, c="white"),
+                                dmc.Text(club, size="xs", fw=600, c="var(--scout-text-primary)"),
                                 dmc.Text("•", c="dimmed"),
                                 dmc.Text(nation, size="xs", c="dimmed"),
                                 dmc.Text("•", c="dimmed"),
@@ -381,16 +428,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                     ]),
                     dmc.Box(
                         [
-                            dmc.Group([
-                                dmc.Badge(
-                                    "👤 SCOUT VIEW" if scout_analyst_mode == "scout" else "🔬 ANALYST VIEW",
-                                    color="teal" if scout_analyst_mode == "scout" else "indigo",
-                                    variant="filled",
-                                    size="xs",
-                                    style={"fontWeight": 700},
-                                ),
-                                dmc.Badge(style_name, color="emerald", variant="outline", size="sm"),
-                            ], gap="xs", justify="flex-end"),
+                            dmc.Badge(style_name, color="emerald", variant="light", size="sm"),
                             dmc.Text("PLAYING STYLE DNA", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.8px"}, mt=4),
                         ],
                         style={"textAlign": "right"},
@@ -417,6 +455,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             include_position_avg=True,
             position_avg_scores=pos_avgs,
             height=400,
+            theme=theme,
         )
         chart_note = dmc.Text(
             "7-Dimensional Scouting Radar: Dashed line represents position cohort baseline (50.0).",
@@ -425,7 +464,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             mt=4,
         )
     else:
-        chart_fig = build_pizza_chart(player, height=400)
+        chart_fig = build_pizza_chart(player, height=400, theme=theme)
         if scout_analyst_mode == "scout":
             chart_note = dmc.Text(
                 "12-Slice Percentile Pizza: Radial wedge length indicates percentile rank (0–100) vs positional cohort.",
@@ -464,7 +503,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                     dmc.Group(
                         [
                             dmc.Group([
-                                dmc.Text(attr, size="xs", fw=600, c="white"),
+                                dmc.Text(attr, size="xs", fw=600, c="var(--scout-text-primary)"),
                                 dmc.Badge(status, color=bar_color, variant="light", size="xs"),
                             ], gap="xs"),
                             dmc.Group(
@@ -624,8 +663,8 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                 ),
             ],
             style={
-                "backgroundColor": "#090D14",
-                "border": "1px solid rgba(16, 185, 129, 0.2)",
+                "backgroundColor": "var(--scout-surface-secondary)",
+                "border": "1px solid var(--scout-accent-border)",
                 "borderRadius": "5px",
                 "padding": "10px 14px",
                 "marginTop": "6px",
@@ -691,12 +730,12 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                 dmc.Box(
                     [
                         dmc.Text(label.upper(), size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
-                        dmc.Text(str(val), size="sm", fw=700, c="white", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
+                        dmc.Text(str(val), size="sm", fw=700, c="var(--scout-text-primary)", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
                         dmc.Text(desc, size="10px", c="dimmed", mt=1, lineClamp=1),
                     ],
                     style={
-                        "backgroundColor": "#0D131F",
-                        "border": f"1px solid {BORDER}",
+                        "backgroundColor": "var(--scout-surface-secondary)",
+                        "border": "1px solid var(--scout-border)",
                         "borderRadius": "4px",
                         "padding": "10px 12px",
                     },
@@ -776,12 +815,12 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                 dmc.Box(
                     [
                         dmc.Text(label.upper(), size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
-                        dmc.Text(str(val), size="sm", fw=700, c="white", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
+                        dmc.Text(str(val), size="sm", fw=700, c="var(--scout-text-primary)", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
                         dmc.Text(desc, size="10px", c="dimmed", mt=1),
                     ],
                     style={
-                        "backgroundColor": "#0D131F",
-                        "border": f"1px solid {BORDER}",
+                        "backgroundColor": "var(--scout-surface-secondary)",
+                        "border": "1px solid var(--scout-border)",
                         "borderRadius": "4px",
                         "padding": "8px 10px",
                     },
@@ -860,7 +899,7 @@ def save_profile_to_shortlist(n_clicks=None, player_name=None, tier=None, notes=
     current_data = current_data or []
     updated = save_candidate_to_store(current_data, player_name, tier, notes)
     feedback = dmc.Alert(
-        f"✓ Successfully bookmarked {player_name} to {tier}.",
+        f"Successfully bookmarked {player_name} to {tier}.",
         color="emerald",
         variant="light",
         radius="sm",
