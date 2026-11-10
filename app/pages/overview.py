@@ -21,6 +21,7 @@ from app.utils.styling import (
     create_section_card,
     style_figure,
 )
+from app.utils.player_portraits import render_player_portrait
 
 dash.register_page(__name__, path="/", name="Overview", order=1)
 
@@ -100,8 +101,13 @@ layout = dmc.Container(
                                     dmc.Badge("Breakthrough", color="cyan", variant="light", size="xs"),
                                     dmc.Text("U-21 Winger", size="10px", c="var(--scout-text-muted)"),
                                 ], justify="space-between"),
-                                dmc.Text("Lamine Yamal", size="sm", fw=700, c="var(--scout-text-primary)", mt=6),
-                                dmc.Text("Barcelona • La Liga • Age 17", size="xs", c="var(--scout-text-secondary)"),
+                                dmc.Group([
+                                    render_player_portrait("Lamine Yamal", size=36, radius=6),
+                                    dmc.Box([
+                                        dmc.Text("Lamine Yamal", size="sm", fw=700, c="var(--scout-text-primary)"),
+                                        dmc.Text("Barcelona • La Liga • Age 17", size="xs", c="var(--scout-text-secondary)"),
+                                    ]),
+                                ], gap="xs", align="center", mt=6),
                                 dmc.Text("96.1th pct Creativity, elite 1v1 take-on volume and box entries.", size="xs", c="var(--scout-text-secondary)", mt=4),
                                 dcc.Link(
                                     dmc.Button("Open Dossier →", size="xs", variant="subtle", color="cyan", p=0, mt=8),
@@ -125,8 +131,13 @@ layout = dmc.Container(
                                     dmc.Badge("Clinical Target", color="emerald", variant="light", size="xs"),
                                     dmc.Text("Center Forward", size="10px", c="var(--scout-text-muted)"),
                                 ], justify="space-between"),
-                                dmc.Text("Erling Haaland", size="sm", fw=700, c="var(--scout-text-primary)", mt=6),
-                                dmc.Text("Manchester City • Premier League • Age 24", size="xs", c="var(--scout-text-secondary)"),
+                                dmc.Group([
+                                    render_player_portrait("Erling Haaland", size=36, radius=6),
+                                    dmc.Box([
+                                        dmc.Text("Erling Haaland", size="sm", fw=700, c="var(--scout-text-primary)"),
+                                        dmc.Text("Manchester City • Premier League • Age 24", size="xs", c="var(--scout-text-secondary)"),
+                                    ]),
+                                ], gap="xs", align="center", mt=6),
                                 dmc.Text("0.85 Gls/90, 98.4th pct Finishing, unmatched box gravity.", size="xs", c="var(--scout-text-secondary)", mt=4),
                                 dcc.Link(
                                     dmc.Button("Open Dossier →", size="xs", variant="subtle", color="emerald", p=0, mt=8),
@@ -150,8 +161,13 @@ layout = dmc.Container(
                                     dmc.Badge("Defensive Anchor", color="blue", variant="light", size="xs"),
                                     dmc.Text("Center-Back", size="10px", c="var(--scout-text-muted)"),
                                 ], justify="space-between"),
-                                dmc.Text("William Saliba", size="sm", fw=700, c="var(--scout-text-primary)", mt=6),
-                                dmc.Text("Arsenal • Premier League • Age 23", size="xs", c="var(--scout-text-secondary)"),
+                                dmc.Group([
+                                    render_player_portrait("William Saliba", size=36, radius=6),
+                                    dmc.Box([
+                                        dmc.Text("William Saliba", size="sm", fw=700, c="var(--scout-text-primary)"),
+                                        dmc.Text("Arsenal • Premier League • Age 23", size="xs", c="var(--scout-text-secondary)"),
+                                    ]),
+                                ], gap="xs", align="center", mt=6),
                                 dmc.Text("97.2th pct Ball Retention, 93.8% pass accuracy, recovery speed.", size="xs", c="var(--scout-text-secondary)", mt=4),
                                 dcc.Link(
                                     dmc.Button("Open Dossier →", size="xs", variant="subtle", color="blue", p=0, mt=8),
@@ -235,12 +251,17 @@ layout = dmc.Container(
     Output("overview-limitation-notice", "children"),
     Input("overview-position-select", "value"),
     Input("overview-attribute-select", "value"),
-    Input("scout-analyst-mode", "data"),
     Input("theme-store", "data"),
 )
-def update_overview_top_players(position, attribute, scout_analyst_mode="scout", theme="dark"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_overview_top_players(position, attribute, theme="dark", *args, **kwargs):
+    # Support backward compatibility if someone passes (pos, attr, scout_analyst_mode, theme)
+    if args and isinstance(args[0], str) and args[0] in ["dark", "light"]:
+        theme = args[0]
+    elif theme not in ["dark", "light"] and args:
+        theme = args[0]
     theme = theme or "dark"
+    if theme not in ["dark", "light"]:
+        theme = "dark"
     is_light = (theme == "light")
     text_color = "#0F172A" if is_light else "#F8FAFC"
     muted_color = "#475569" if is_light else "#CBD5E1"
@@ -344,7 +365,7 @@ def update_overview_top_players(position, attribute, scout_analyst_mode="scout",
             categoryarray=top_players["Player_Unique"].tolist(),
             automargin=True,
         ),
-        margin=dict(l=150, r=35, t=45, b=35),
+        margin=dict(l=155, r=35, t=45, b=35),
     )
 
     return fig, notice

@@ -55,14 +55,14 @@
     --scout-surface-elevated: #FFFFFF;
     --scout-surface-hover: rgba(15, 23, 42, 0.04);
     
-    --scout-border: rgba(15, 23, 42, 0.10);
+    --scout-border: rgba(15, 23, 42, 0.09);
     --scout-border-subtle: rgba(15, 23, 42, 0.05);
-    --scout-border-hover: rgba(15, 23, 42, 0.20);
+    --scout-border-hover: rgba(15, 23, 42, 0.18);
     --scout-border-focus: #059669;
 
     --scout-text-primary: #0F172A;
     --scout-text-secondary: #334155;
-    --scout-text-muted: #475569;
+    --scout-text-muted: #64748B;
     --mantine-color-dimmed: #334155;
     
     --scout-accent: #059669;
@@ -70,11 +70,11 @@
     --scout-accent-dim: rgba(5, 150, 105, 0.10);
     --scout-accent-border: rgba(5, 150, 105, 0.24);
 
-    --scout-table-header-bg: rgba(241, 245, 249, 0.97);
-    --scout-table-row-hover: rgba(15, 23, 42, 0.035);
-    --scout-input-bg: #FFFFFF;
-    --scout-dropdown-bg: rgba(255, 255, 255, 0.99);
-    --scout-scrollbar-thumb: rgba(15, 23, 42, 0.20);
+    --scout-table-header-bg: #F1F5F9;
+    --scout-table-row-hover: rgba(15, 23, 42, 0.025);
+    --scout-input-bg: #F8FAFC;
+    --scout-dropdown-bg: #FFFFFF;
+    --scout-scrollbar-thumb: rgba(15, 23, 42, 0.18);
 }
 
 /* Global Reset & Base */
@@ -224,12 +224,29 @@ p, span, div {
     background-color: var(--scout-surface-primary) !important;
     border: 1px solid var(--scout-border) !important;
     border-radius: 6px !important;
-    box-shadow: none !important;
     transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Card-root,
+[data-mantine-color-scheme="dark"] .scout-card {
+    box-shadow: none !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Card-root,
+[data-mantine-color-scheme="light"] .scout-card {
+    background-color: #FFFFFF !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03) !important;
 }
 
 .mantine-Card-root:hover, .scout-card:hover {
     border-color: var(--scout-border-hover) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Card-root:hover,
+[data-mantine-color-scheme="light"] .scout-card:hover {
+    border-color: rgba(15, 23, 42, 0.16) !important;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04) !important;
 }
 
 /* Buttons Micro-Interactions */
@@ -262,7 +279,32 @@ p, span, div {
     height: 34px !important;
     min-height: 34px !important;
     padding: 0 10px !important;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Select-input,
+[data-mantine-color-scheme="light"] .mantine-TextInput-input,
+[data-mantine-color-scheme="light"] .mantine-MultiSelect-input,
+[data-mantine-color-scheme="light"] .mantine-Textarea-input {
+    background-color: #F8FAFC !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    color: #0F172A !important;
+}
+
+.mantine-Select-input:hover,
+.mantine-TextInput-input:hover,
+.mantine-MultiSelect-input:hover,
+.mantine-Textarea-input:hover {
+    border-color: var(--scout-border-hover) !important;
+    background-color: var(--scout-surface-hover) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Select-input:hover,
+[data-mantine-color-scheme="light"] .mantine-TextInput-input:hover,
+[data-mantine-color-scheme="light"] .mantine-MultiSelect-input:hover,
+[data-mantine-color-scheme="light"] .mantine-Textarea-input:hover {
+    border-color: rgba(15, 23, 42, 0.22) !important;
+    background-color: #F1F5F9 !important;
 }
 
 .mantine-Select-input::placeholder,
@@ -284,8 +326,99 @@ p, span, div {
 .mantine-MultiSelect-input:focus,
 .mantine-Textarea-input:focus {
     border-color: var(--scout-accent) !important;
+    background-color: var(--scout-input-bg) !important;
     box-shadow: 0 0 0 1px var(--scout-accent), 0 0 12px rgba(16, 185, 129, 0.12) !important;
     outline: none !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Select-input:focus,
+[data-mantine-color-scheme="light"] .mantine-TextInput-input:focus,
+[data-mantine-color-scheme="light"] .mantine-MultiSelect-input:focus,
+[data-mantine-color-scheme="light"] .mantine-Textarea-input:focus {
+    background-color: #FFFFFF !important;
+    border-color: var(--scout-accent) !important;
+    box-shadow: 0 0 0 1px var(--scout-accent), 0 0 8px rgba(5, 150, 105, 0.18) !important;
+}
+
+/* Inputs with Left Section Icons */
+.scout-search-input .mantine-TextInput-input,
+.scout-search-input .mantine-Select-input,
+.scout-search-input .mantine-MultiSelect-input,
+.mantine-Select-input[data-with-left-section="true"],
+.mantine-TextInput-input[data-with-left-section="true"],
+.mantine-MultiSelect-input[data-with-left-section="true"],
+.mantine-TextInput-wrapper:has(.mantine-TextInput-section[data-position="left"]) .mantine-TextInput-input,
+.mantine-Select-wrapper:has(.mantine-Select-section[data-position="left"]) .mantine-Select-input,
+.mantine-MultiSelect-wrapper:has(.mantine-MultiSelect-section[data-position="left"]) .mantine-MultiSelect-input {
+    padding-left: 36px !important;
+}
+
+.mantine-TextInput-section[data-position="left"],
+.mantine-Select-section[data-position="left"],
+.mantine-MultiSelect-section[data-position="left"] {
+    width: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+}
+
+/* Prominent Global Command Search Bar */
+.scout-header-search {
+    flex: 1 1 360px;
+    max-width: 560px;
+}
+
+.scout-header-search .mantine-Select-input {
+    height: 38px !important;
+    min-height: 38px !important;
+    font-size: 13px !important;
+    padding-left: 38px !important;
+    padding-right: 36px !important;
+    background-color: var(--scout-surface-secondary) !important;
+    border: 1px solid var(--scout-border-hover) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+
+.scout-header-search .mantine-Select-input:hover {
+    border-color: var(--scout-accent) !important;
+    background-color: var(--scout-surface-hover) !important;
+}
+
+.scout-header-search .mantine-Select-input:focus {
+    border-color: var(--scout-accent) !important;
+    background-color: var(--scout-input-bg) !important;
+    box-shadow: 0 0 0 1px var(--scout-accent), 0 0 14px rgba(16, 185, 129, 0.18) !important;
+}
+
+.scout-header-search .mantine-Select-input::placeholder {
+    color: var(--scout-text-muted) !important;
+    font-size: 12.5px !important;
+}
+
+.scout-header-search .mantine-Select-section[data-position="left"] {
+    width: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.scout-header-search .mantine-Select-section[data-position="right"] {
+    width: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.scout-header-search .mantine-Kbd-root {
+    background-color: var(--scout-surface-primary) !important;
+    border: 1px solid var(--scout-border) !important;
+    color: var(--scout-text-muted) !important;
+    font-size: 10px !important;
+    padding: 1px 5px !important;
+    border-radius: 3px !important;
 }
 
 /* Input Labels */
@@ -344,6 +477,104 @@ p, span, div {
     border-radius: 4px !important;
 }
 
+/* Select / MultiSelect Close & Clear Buttons */
+.mantine-CloseButton-root {
+    color: var(--scout-text-muted) !important;
+    border-radius: 4px !important;
+    transition: all 0.15s ease !important;
+}
+
+.mantine-CloseButton-root:hover {
+    background-color: var(--scout-surface-hover) !important;
+    color: var(--scout-text-primary) !important;
+}
+
+.mantine-Combobox-empty,
+.mantine-Select-empty {
+    color: var(--scout-text-muted) !important;
+    font-size: 12px !important;
+    padding: 10px !important;
+    text-align: center !important;
+}
+
+/* Screening Threshold Sliders */
+.mantine-Slider-track {
+    background-color: var(--scout-surface-secondary) !important;
+    height: 5px !important;
+}
+
+.mantine-Slider-bar {
+    background-color: var(--scout-accent) !important;
+    height: 5px !important;
+}
+
+.mantine-Slider-thumb {
+    border: 2px solid var(--scout-accent) !important;
+    background-color: #FFFFFF !important;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.4) !important;
+    width: 14px !important;
+    height: 14px !important;
+    cursor: grab !important;
+}
+
+.mantine-Slider-thumb:active {
+    cursor: grabbing !important;
+}
+
+.mantine-Slider-mark {
+    background-color: var(--scout-border-hover) !important;
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+}
+
+.mantine-Slider-markLabel {
+    color: var(--scout-text-muted) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    margin-top: 4px !important;
+}
+
+/* Seamless, Borderless Filter Accordions (Eliminates awkward box-in-a-box frames) */
+.mantine-Accordion-root {
+    border: none !important;
+    background: transparent !important;
+    width: 100% !important;
+}
+
+.mantine-Accordion-item,
+.mantine-Accordion-item[data-active] {
+    border: none !important;
+    background: transparent !important;
+    margin: 4px 0 0 0 !important;
+}
+
+.mantine-Accordion-control {
+    background: transparent !important;
+    border: none !important;
+    padding: 6px 4px !important;
+    border-radius: 6px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.mantine-Accordion-control:hover {
+    background-color: var(--scout-surface-hover) !important;
+}
+
+.mantine-Accordion-chevron {
+    color: var(--scout-accent) !important;
+    width: 15px !important;
+    height: 15px !important;
+}
+
+.mantine-Accordion-panel {
+    padding: 4px 0 0 0 !important;
+}
+
+.mantine-Accordion-content {
+    padding: 0 !important;
+}
+
 /* Modern Edge-to-Edge Data Grid Tables */
 table {
     border-collapse: separate !important;
@@ -370,6 +601,12 @@ thead th {
     color: var(--scout-text-secondary) !important;
 }
 
+[data-mantine-color-scheme="light"] thead th {
+    background-color: #F8FAFC !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+    color: #475569 !important;
+}
+
 td {
     border-bottom: 1px solid var(--scout-border-subtle) !important;
     border-top: none !important;
@@ -381,8 +618,32 @@ td {
     transition: background-color 0.1s ease !important;
 }
 
+[data-mantine-color-scheme="light"] td {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+    color: #0F172A !important;
+}
+
 tr:hover td {
     background-color: var(--scout-table-row-hover) !important;
+}
+
+[data-mantine-color-scheme="light"] tr:hover td {
+    background-color: rgba(15, 23, 42, 0.025) !important;
+}
+
+/* Interactive Candidate Dossier Links */
+.scout-player-link {
+    text-decoration: none !important;
+    color: inherit !important;
+    display: inline-block;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.scout-player-link:hover .scout-candidate-name {
+    color: var(--scout-accent) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
 }
 
 /* Segmented Control (Pill Switcher) */
@@ -393,10 +654,21 @@ tr:hover td {
     border-radius: 5px !important;
 }
 
+[data-mantine-color-scheme="light"] .mantine-SegmentedControl-root {
+    background-color: #F1F5F9 !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
 .mantine-SegmentedControl-indicator {
     background-color: var(--scout-surface-secondary) !important;
     border-radius: 4px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-SegmentedControl-indicator {
+    background-color: #FFFFFF !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10), 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+    border: 1px solid rgba(15, 23, 42, 0.06) !important;
 }
 
 .mantine-SegmentedControl-label {
@@ -406,8 +678,16 @@ tr:hover td {
     padding: 4px 10px !important;
 }
 
+[data-mantine-color-scheme="light"] .mantine-SegmentedControl-label {
+    color: #475569 !important;
+}
+
 .mantine-SegmentedControl-label[data-active="true"] {
     color: var(--scout-text-primary) !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-SegmentedControl-label[data-active="true"] {
+    color: #0F172A !important;
 }
 
 /* Badges */
@@ -484,28 +764,6 @@ tr:hover td {
     border-radius: 6px !important;
 }
 
-/* Accordion Styling */
-.mantine-Accordion-item {
-    background-color: var(--scout-surface-primary) !important;
-    border: 1px solid var(--scout-border) !important;
-    border-radius: 6px !important;
-    margin-bottom: 8px !important;
-}
-
-.mantine-Accordion-control {
-    color: var(--scout-text-primary) !important;
-    padding: 10px 14px !important;
-    border-radius: 6px !important;
-}
-
-.mantine-Accordion-control:hover {
-    background-color: var(--scout-surface-hover) !important;
-}
-
-.mantine-Accordion-panel {
-    padding: 0 14px 14px 14px !important;
-}
-
 /* Minimalist Scrollbars */
 ::-webkit-scrollbar {
     width: 5px;
@@ -524,3 +782,45 @@ tr:hover td {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--scout-border-hover);
 }
+
+/* =========================================================================
+   SCOUT Premium Player Portrait Styling
+   ========================================================================= */
+.scout-portrait {
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    background-color: var(--scout-surface-secondary, #1E293B) !important;
+    border: 1px solid var(--scout-border, rgba(255, 255, 255, 0.08)) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.10) !important;
+    display: block !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+[data-mantine-color-scheme="light"] .scout-portrait {
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Subtle interactive elevation when inside linked player names */
+.scout-player-link:hover .scout-portrait {
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+/* Dossier Hero Portrait (115px) */
+.scout-portrait-hero {
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    background-color: var(--scout-surface-secondary, #1E293B) !important;
+    border: 2px solid var(--scout-border, rgba(255, 255, 255, 0.12)) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.16) !important;
+    border-radius: 10px !important;
+    display: block !important;
+}
+
+[data-mantine-color-scheme="light"] .scout-portrait-hero {
+    border: 2px solid rgba(15, 23, 42, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+

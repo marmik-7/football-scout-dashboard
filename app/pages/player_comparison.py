@@ -16,6 +16,7 @@ from app.utils.styling import (
     create_page_header,
     create_section_card,
     get_percentile_tier,
+    style_figure,
 )
 from app.utils.charts import build_radar_chart, build_comparison_bars, PLAYER_COMPARE_COLORS
 from app.utils.player_portraits import render_player_portrait
@@ -61,21 +62,71 @@ def layout(player1=None, player2=None, **kwargs):
 
             # CANDIDATE SELECTION PANEL
             create_section_card(
-                dmc.Box([
-                    dmc.MultiSelect(
-                        id="compare-players-select",
-                        label="Selected Evaluation Cohort (2 to 4 Players)",
-                        placeholder="Search and add up to 4 candidates...",
-                        data=[{"label": name, "value": name} for name in all_player_names],
-                        value=initial_values,
-                        searchable=True,
-                        maxValues=4,
-                        clearable=False,
-                    ),
-                    dmc.Text("First player acts as the baseline starter. Subsequent candidates display relative +/- differentials.", size="10px", c="dimmed", mt=6),
-                ]),
+                dmc.Grid(
+                    [
+                        dmc.GridCol(
+                            dmc.Box([
+                                dmc.MultiSelect(
+                                    id="compare-players-select",
+                                    label="Selected Evaluation Cohort (2 to 4 Players)",
+                                    placeholder="Search candidates by name (e.g. Haaland, Mbappé, Saka, Wirtz)...",
+                                    data=[{"label": name, "value": name} for name in all_player_names],
+                                    value=initial_values,
+                                    searchable=True,
+                                    maxValues=4,
+                                    clearable=True,
+                                    leftSection=html.Img(
+                                        src="/assets/search.svg",
+                                        alt="Search",
+                                        style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                                    ),
+                                    leftSectionPointerEvents="none",
+                                    className="scout-search-input",
+                                ),
+                                dmc.Group([
+                                    dmc.Text("POPULAR BENCHMARKS:", size="10px", fw=700, c="var(--scout-text-muted)", style={"letterSpacing": "0.5px"}),
+                                    dmc.Badge("Haaland vs Mbappé", size="xs", variant="outline", color="teal"),
+                                    dmc.Badge("Saka vs Foden", size="xs", variant="outline", color="cyan"),
+                                    dmc.Badge("Saliba vs Gabriel", size="xs", variant="outline", color="blue"),
+                                    dmc.Badge("Rodri vs Rice", size="xs", variant="outline", color="indigo"),
+                                ], gap=6, mt=8),
+                            ]),
+                            span={"base": 12, "md": 7, "lg": 8},
+                        ),
+                        dmc.GridCol(
+                            dmc.Box(
+                                [
+                                    dmc.Group([
+                                        dmc.Badge("STARTER BASELINE: PLAYER 1", color="teal", variant="light", size="xs"),
+                                        dmc.Badge("COMPARATOR: PLAYERS 2–4", color="indigo", variant="light", size="xs"),
+                                    ], gap=6, mb=6),
+                                    dmc.Text(
+                                        "First candidate establishes the benchmark percentile footprint. Additional candidates display relative +/- production differentials across all 7 dimensions.",
+                                        size="11.5px",
+                                        c="var(--scout-text-secondary)",
+                                        style={"lineHeight": 1.45},
+                                    ),
+                                ],
+                                style={
+                                    "backgroundColor": "var(--scout-surface-secondary)",
+                                    "border": "1px solid var(--scout-border)",
+                                    "borderRadius": "6px",
+                                    "padding": "12px 14px",
+                                    "height": "100%",
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "justifyContent": "center",
+                                },
+                            ),
+                            span={"base": 12, "md": 5, "lg": 4},
+                        ),
+                    ],
+                    gap="md",
+                    align="stretch",
+                ),
                 title="Candidate Selection",
                 subtitle="Configure the head-to-head evaluation cohort across clubs and leagues",
+                extra_header=dmc.Badge("2 TO 4 CANDIDATES", color="teal", variant="light", size="xs"),
             ),
 
             dmc.Space(h=14),
@@ -188,11 +239,10 @@ def layout(player1=None, player2=None, **kwargs):
     Input("compare-players-select", "value"),
     Input("compare-metric-mode", "value"),
     Input("compare-delta-toggle", "checked"),
-    Input("scout-analyst-mode", "data"),
     Input("theme-store", "data"),
 )
-def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True, scout_analyst_mode="scout", theme="dark"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_comparison_views(selected_names, metric_mode="per90", show_deltas=True, theme="dark", **kwargs):
+    scout_analyst_mode = kwargs.get("scout_analyst_mode", "scout")
     theme = theme or "dark"
     if not selected_names or len(selected_names) < 2:
         warning_msg = dmc.Alert(
@@ -217,7 +267,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
 
     players = [get_player_by_name(name) for name in selected_names if get_player_by_name(name) is not None]
     if len(players) < 2:
-        return html.Div(), go.Figure(), go.Figure(), html.Div(), html.Div()
+        return warning_msg, empty_fig, empty_fig, html.Div(), html.Div()
 
     # 1. Executive Head-to-Head Recruitment Verdict
     p1 = players[0]
@@ -264,8 +314,8 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                 dmc.Group([
                     dmc.Text("EXECUTIVE HEAD-TO-HEAD RECRUITMENT VERDICT", size="10.5px", fw=800, c="teal", style={"letterSpacing": "0.8px"}),
                     dmc.Badge(
-                        "SCOUT VIEW" if scout_analyst_mode == "scout" else "ANALYST VIEW",
-                        color="teal" if scout_analyst_mode == "scout" else "indigo",
+                        "ANALYST VIEW" if scout_analyst_mode == "analyst" else "HEAD-TO-HEAD",
+                        color="indigo" if scout_analyst_mode == "analyst" else "teal",
                         variant="light",
                         size="xs",
                     ),
@@ -292,7 +342,7 @@ def update_comparison_views(selected_names, metric_mode="per90", show_deltas=Tru
                         dmc.Box([
                             dmc.Group([
                                 html.Span("●", style={"color": PLAYER_COMPARE_COLORS[1], "fontSize": "13px"}),
-                                dmc.Text(f"Target Alternative Advantage: {p2['Player']}", size="xs", fw=700, c="#38BDF8"),
+                                dmc.Text(f"Target Alternative Advantage: {p2['Player']}", size="xs", fw=700, c=PLAYER_COMPARE_COLORS[1]),
                             ], gap="xs"),
                             dmc.Text(f"Superior production in: {p2_edge_str}.", size="11px", c="var(--scout-text-secondary)", mt=2),
                         ]),
@@ -617,5 +667,6 @@ def export_comparison_csv(n_clicks, selected_names, metric_mode):
             "pAdj_Defending_per90": round(float(p.get("Tkl_pAdj_per90", 0.0) + p.get("Int_pAdj_per90", 0.0)), 2),
         })
     df_exp = pd.DataFrame(rows_data)
-    ref_name = players[0]["Player"].replace(" ", "_")
+    import re
+    ref_name = re.sub(r'[^\w\-]', '_', players[0]["Player"].replace(" ", "_"))
     return dcc.send_data_frame(df_exp.to_csv, f"scout_comparison_{ref_name}_matrix.csv", index=False)

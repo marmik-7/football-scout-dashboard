@@ -84,7 +84,7 @@ def run_full_scout_test_suite():
         comp_filter="ALL",
         max_age="ALL",
         top_n=5,
-        scout_analyst_mode="scout",
+        local_view_mode="scout",
     )
     assert res_sim_scout[0] is not None
     assert res_sim_scout[1] is not None
@@ -101,7 +101,7 @@ def run_full_scout_test_suite():
         comp_filter="ALL",
         max_age="ALL",
         top_n=5,
-        scout_analyst_mode="analyst",
+        local_view_mode="analyst",
     )
     assert "ANALYST METHODOLOGY & MATHEMATICAL FORMULATION" in str(res_sim_analyst[2])
     print("PASS: Similar Players Page Callback & Explainable Similarity")
@@ -116,7 +116,7 @@ def run_full_scout_test_suite():
         depth=10,
         order="desc",
         squad="ALL",
-        scout_analyst_mode="scout",
+        local_view_mode="scout",
     )
     assert res_rank_scout[0] is not None
     assert res_rank_scout[1] is not None
@@ -134,7 +134,7 @@ def run_full_scout_test_suite():
         depth=10,
         order="desc",
         squad="ALL",
-        scout_analyst_mode="analyst",
+        local_view_mode="analyst",
     )
     assert "TACTICAL DNA" in str(res_rank_analyst[2])
     print("PASS: Player Rankings Callback & Production Columns")
@@ -155,7 +155,7 @@ def run_full_scout_test_suite():
         sec_attr="NONE",
         sec_score=0,
         page=1,
-        scout_analyst_mode="scout",
+        local_view_mode="scout",
     )
     assert table_scout is not None
     table_scout_str = str(table_scout)
@@ -177,7 +177,7 @@ def run_full_scout_test_suite():
         sec_attr="NONE",
         sec_score=0,
         page=1,
-        scout_analyst_mode="analyst",
+        local_view_mode="analyst",
     )
     assert table_analyst is not None
     table_analyst_str = str(table_analyst)
@@ -420,14 +420,93 @@ def run_full_scout_test_suite():
     badge_high = get_sample_size_badge(1800)
     assert badge_high is None
 
-    # Verify layout contains scout-analyst-mode store and global-view-toggle
+    # Verify local analytical architecture & progressive disclosure controls
     layout_str = str(main_app.layout)
-    assert "scout-analyst-mode" in layout_str
-    assert "global-view-toggle" in layout_str
-    print("PASS: Metric Definitions & Global View Infrastructure")
+    assert "global-view-toggle" not in layout_str, "Obsolete global-view-toggle found in header layout!"
+    assert "scout-analyst-mode" not in layout_str, "Obsolete scout-analyst-mode store found in layout!"
+
+    # Verify local contextual controls across recruitment modules
+    explorer_layout = str(get_layout(player_explorer))
+    assert "explorer-view-mode" in explorer_layout, "Missing local explorer-view-mode control in Player Explorer!"
+
+    rankings_layout = str(get_layout(player_rankings))
+    assert "rankings-view-mode" in rankings_layout, "Missing local rankings-view-mode control in Player Rankings!"
+
+    similar_layout = str(get_layout(similar_players))
+    assert "similar-view-mode" in similar_layout, "Missing local similar-view-mode control in Similar Players!"
+
+    print("PASS: Metric Definitions & Local Analytical Infrastructure")
+
+    # =========================================================================
+    # TEST 14: Player Portrait System & Fallback Hardening
+    # =========================================================================
+    print("\n=== TEST 14: Player Portrait System & Fallback Hardening ===")
+    from app.utils.player_portraits import (
+        reload_metadata,
+        get_player_portrait_url,
+        get_player_image_metadata,
+        render_player_portrait,
+        PLACEHOLDER_URL,
+    )
+    import numpy as np
+
+    reload_metadata()
+
+    # 1. Identity disambiguation: Juventus vs Manchester City
+    juv_url = get_player_portrait_url("Nicolás González (Juventus)")
+    mc_url = get_player_portrait_url("Nicolás González (Manchester City)")
+    bare_url = get_player_portrait_url("Nicolás González")
+    assert juv_url == "/assets/players/nicolás_gonzález.jpg", f"Juventus player received unexpected URL: {juv_url}"
+    assert mc_url == PLACEHOLDER_URL, f"Manchester City player must receive placeholder, got: {mc_url}"
+    assert bare_url == PLACEHOLDER_URL, f"Ambiguous bare name must receive placeholder, got: {bare_url}"
+
+    # 2. Unambiguous players (with and without club suffix)
+    yamal_club_url = get_player_portrait_url("Lamine Yamal (Barcelona)")
+    yamal_url = get_player_portrait_url("Lamine Yamal")
+    assert yamal_club_url == "/assets/players/lamine_yamal.jpg"
+    assert yamal_url == "/assets/players/lamine_yamal.jpg"
+
+    # 3. Missing player and invalid inputs
+    assert get_player_portrait_url("Non Existent Player 999") == PLACEHOLDER_URL
+    assert get_player_portrait_url(None) == PLACEHOLDER_URL
+    assert get_player_portrait_url("") == PLACEHOLDER_URL
+    assert get_player_portrait_url(np.nan) == PLACEHOLDER_URL
+    assert get_player_portrait_url(12345) == PLACEHOLDER_URL
+
+    # 4. Component rendering: dimensions, fallbackSrc, attributes
+    portrait_comp = render_player_portrait("Nicolás González (Juventus)", size=40, radius=6)
+    comp_json = portrait_comp.to_plotly_json()
+    props = comp_json["props"]
+    assert props["src"] == "/assets/players/nicolás_gonzález.jpg"
+    assert props["fallbackSrc"] == PLACEHOLDER_URL
+    assert props["w"] == 40
+    assert props["h"] == 40
+    assert props["radius"] == 6
+    assert props["fit"] == "cover"
+    assert props["className"] == "scout-portrait"
+    assert props["style"]["objectPosition"] == "center 20%"
+    assert "Nicolás González" in props["attributes"]["title"]
+
+    # Hero portrait rendering check (size >= 80)
+    hero_comp = render_player_portrait("Lamine Yamal", size=115, radius=8)
+    hero_props = hero_comp.to_plotly_json()["props"]
+    assert hero_props["className"] == "scout-portrait-hero"
+    assert hero_props["style"]["objectPosition"] == "center 20%"
+
+    # 5. Fallback portrait rendering
+    fallback_comp = render_player_portrait("Nicolás González (Manchester City)", size=32, radius=4)
+    fb_props = fallback_comp.to_plotly_json()["props"]
+    assert fb_props["src"] == PLACEHOLDER_URL
+    assert fb_props["fallbackSrc"] == PLACEHOLDER_URL
+    assert fb_props["className"] == "scout-portrait"
+
+    print(" - Identity collision resolved: Nicolás González (Juventus) verified, Manchester City guarded with fallback")
+    print(" - Safe client-side fallbackSrc wired and verified for render_player_portrait")
+    print(" - Input resilience confirmed across None, empty, NaN, and numeric inputs")
+    print("PASS: Player Portrait System & Fallback Hardening")
 
     print("\n========================================================")
-    print("ALL 13 UNIT AND INTEGRATION TEST SUITES PASSED PERFECTLY!")
+    print("ALL 14 UNIT AND INTEGRATION TEST SUITES PASSED PERFECTLY!")
     print("========================================================")
 
 

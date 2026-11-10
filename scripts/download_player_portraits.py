@@ -49,7 +49,8 @@ REJECT_PAGE_KEYWORDS = [
 
 FOOTBALL_KEYWORDS = [
     "football", "soccer", "futbol", "futebol", "calciatore", "fußball",
-    "fussball", "joueur de football", "association football"
+    "fussball", "joueur de football", "association football", "futbolista",
+    "footballeur", "fußballspieler", "fussballspieler"
 ]
 
 NON_FOOTBALL_SPORTS = [
@@ -95,6 +96,12 @@ COMMON_ALIASES = {
     "Igor": "Igor Julio",
     "Marlon": "Marlon Santos",
     "Kaio Jorge": "Kaio Jorge",
+    "Nicolás Paz": "Nico Paz",
+    "Javi Puado": "Javier Puado",
+    "Catena": "Alejandro Catena",
+    "Sergi": "Sergi Gómez",
+    "Kiké": "Kike García",
+    "Alfon": "Alfonso González",
 }
 
 
@@ -197,10 +204,11 @@ def name_matches_title(player_name, target_text):
     if len(p_tokens) == 1:
         return list(p_tokens)[0] in t_tokens
 
-    # Multi-word: player's surname (last token) MUST be present
-    last_token = list(player_name.split())[-1].lower()
-    last_clean = fold_ascii(last_token)
-    if last_clean not in t_tokens:
+    # Multi-word: player's primary surname tokens must overlap with target tokens
+    last_word_tokens = norm_tokens(player_name.split()[-1])
+    if not last_word_tokens.intersection(t_tokens):
+        if fold_ascii(player_name.lower()) in fold_ascii(target_text.lower()):
+            return True
         return False
 
     # At least 2 tokens (or all tokens if 2) must match
@@ -261,7 +269,7 @@ def resolve_via_wikidata(name, squad="", born=0):
     squad_first = squad.split(",")[0].strip() if squad else ""
     is_mononym = len(name.split()) == 1
 
-    if is_mononym and squad_first:
+    if squad_first:
         queries.append(f"{name} {squad_first}")
 
     folded = fold_ascii(name)
@@ -330,12 +338,16 @@ def resolve_via_wikipedia(name, squad="", born=0):
 
     wp_queries = []
     if alias:
+        wp_queries.append(alias)
         wp_queries.append(f"{alias} footballer")
     if is_mononym and squad_first:
+        wp_queries.append(f"{name} {squad_first}")
         wp_queries.append(f"{name} {squad_first} footballer")
+    wp_queries.append(name)
     wp_queries.append(f"{name} footballer")
     folded = fold_ascii(name)
     if folded != name:
+        wp_queries.append(folded)
         wp_queries.append(f"{folded} footballer")
 
     for wq in wp_queries:
@@ -513,7 +525,7 @@ def process_player(row, metadata, total_count, current_idx):
 
     with WRITE_LOCK:
         metadata[p_unique] = meta_entry
-        if p_name != p_unique:
+        if p_name == p_unique:
             metadata[p_name] = meta_entry
 
     return {

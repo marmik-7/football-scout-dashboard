@@ -22,6 +22,8 @@ from app.utils.styling import (
     create_section_card,
     get_percentile_tier,
 )
+from app.utils.metric_definitions import SAMPLE_SIZE_THRESHOLD
+from app.utils.player_portraits import render_player_portrait
 
 dash.register_page(__name__, path="/shortlists", name="Shortlists", order=8)
 
@@ -72,6 +74,13 @@ def layout():
                             value=all_player_names[0] if all_player_names else None,
                             searchable=True,
                             allowDeselect=False,
+                            leftSection=html.Img(
+                                src="/assets/search.svg",
+                                alt="Search",
+                                style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                            ),
+                            leftSectionPointerEvents="none",
+                            className="scout-search-input",
                             mb="sm",
                         ),
                         dmc.Select(
@@ -113,21 +122,28 @@ def layout():
                             dmc.GridCol(
                                 dmc.TextInput(
                                     id="shortlist-search",
-                                    placeholder="Search saved candidates or clubs...",
-                                    size="xs",
+                                    label="Search Watchlist",
+                                    placeholder="Filter by candidate or club...",
                                     debounce=200,
+                                    leftSection=html.Img(
+                                        src="/assets/search.svg",
+                                        alt="Search",
+                                        style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                                    ),
+                                    leftSectionPointerEvents="none",
+                                    className="scout-search-input",
                                 ),
                                 span={"base": 12, "sm": 6, "md": 3},
                             ),
                             dmc.GridCol(
                                 dmc.Select(
                                     id="shortlist-filter-tier",
-                                    placeholder="Priority Tier",
+                                    label="Priority Tier",
+                                    placeholder="All Priority Tiers",
                                     data=[{"label": "All Priority Tiers", "value": "ALL"}] + [
                                         {"label": t["label"], "value": t["value"]} for t in PRIORITY_TIERS
                                     ],
                                     value="ALL",
-                                    size="xs",
                                     allowDeselect=False,
                                 ),
                                 span={"base": 12, "sm": 6, "md": 3},
@@ -135,7 +151,8 @@ def layout():
                             dmc.GridCol(
                                 dmc.Select(
                                     id="shortlist-filter-pos",
-                                    placeholder="Position Group",
+                                    label="Position Group",
+                                    placeholder="All Positions",
                                     data=[
                                         {"label": "All Positions", "value": "ALL"},
                                         {"label": "Defenders (DF)", "value": "DF"},
@@ -143,7 +160,6 @@ def layout():
                                         {"label": "Forwards (FW)", "value": "FW"},
                                     ],
                                     value="ALL",
-                                    size="xs",
                                     allowDeselect=False,
                                 ),
                                 span={"base": 12, "sm": 6, "md": 2},
@@ -151,12 +167,12 @@ def layout():
                             dmc.GridCol(
                                 dmc.Select(
                                     id="shortlist-filter-subrole",
-                                    placeholder="Tactical Sub-Role",
+                                    label="Tactical Sub-Role",
+                                    placeholder="All Sub-Roles",
                                     data=[{"label": "All Sub-Roles", "value": "ALL"}] + [
                                         {"label": s, "value": s} for s in unique_subroles
                                     ],
                                     value="ALL",
-                                    size="xs",
                                     allowDeselect=False,
                                 ),
                                 span={"base": 12, "sm": 6, "md": 2},
@@ -166,25 +182,23 @@ def layout():
                                     dmc.Button(
                                         "+ Add Target",
                                         id="shortlist-open-add-btn",
-                                        size="xs",
                                         variant="filled",
                                         color="emerald",
                                     ),
                                     dmc.Button(
                                         "Export CSV",
                                         id="shortlist-export-btn",
-                                        size="xs",
                                         variant="outline",
                                         color="gray",
                                         style={"color": TEXT, "borderColor": BORDER},
                                     ),
                                     dcc.Download(id="shortlist-download-csv"),
-                                ], gap="xs"),
+                                ], gap="xs", justify="flex-end", style={"height": "100%", "alignItems": "flex-end", "paddingBottom": "2px"}),
                                 span={"base": 12, "sm": 12, "md": 2},
                             ),
                         ],
                         gap="sm",
-                        align="center",
+                        align="flex-end",
                     ),
                 ]),
                 title="Pipeline Filters & Actions",
@@ -390,7 +404,7 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
         p_name = p["Player"]
         tier = entry.get("tier", "A-List Target")
         tier_color = TIER_COLORS.get(tier, "emerald")
-        tier_badge = dmc.Badge(tier, color=tier_color, variant="filled", size="xs")
+        tier_badge = dmc.Badge(tier, color=tier_color, variant="light", size="xs")
 
         pos_badge_color = "blue" if p["Pos"] == "DF" else "emerald" if p["Pos"] == "MF" else "orange"
         notes = entry.get("notes", "No notes recorded.")
@@ -399,16 +413,26 @@ def update_shortlist_view(shortlist_data, search, filter_tier, filter_pos, filte
         profile_url = f"/player-profile?player={p['Player_Unique']}"
         compare_url = f"/player-comparison?player1={p['Player_Unique']}"
 
-        sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px", "marginLeft": "4px"}) if mins < 900 else None
+        sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px", "marginLeft": "4px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
 
         rows.append(
             dmc.TableTr([
                 dmc.TableTd([
-                    dmc.Group([
-                        dmc.Text(p_name, fw=700, size="xs", style={"color": TEXT}),
-                        *([sample_pill] if sample_pill else []),
-                    ], gap=4, align="center"),
-                    dmc.Text(f"Added {entry.get('added_at', '2024-25 Season')} • {p.get('Nation_Display', p['Nation_Clean'])}", size="10px", c="dimmed"),
+                    dcc.Link(
+                        dmc.Group([
+                            render_player_portrait(p["Player_Unique"], size=32, radius=4),
+                            dmc.Box([
+                                dmc.Group([
+                                    dmc.Text(p_name, fw=700, size="xs", style={"color": TEXT}, className="scout-candidate-name"),
+                                    *([sample_pill] if sample_pill else []),
+                                ], gap=4, align="center"),
+                                dmc.Text(f"Added {entry.get('added_at', '2024-25 Season')} • {p.get('Nation_Display', p['Nation_Clean'])}", size="10px", c="dimmed"),
+                            ]),
+                        ], gap="xs", align="center", wrap="nowrap"),
+                        href=profile_url,
+                        style={"textDecoration": "none", "color": "inherit"},
+                        className="scout-player-link",
+                    ),
                 ]),
                 dmc.TableTd([
                     dmc.Text(p["Squad"], size="xs", fw=500, style={"color": TEXT}),

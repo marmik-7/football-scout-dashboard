@@ -20,6 +20,7 @@ from app.utils.styling import (
 )
 from app.utils.charts import build_pca_cluster_scatter, build_cluster_dna_radar
 from app.utils.metric_definitions import get_sample_size_badge, SAMPLE_SIZE_THRESHOLD
+from app.utils.player_portraits import render_player_portrait
 
 dash.register_page(__name__, path="/playing-styles", name="Playing Styles", order=6)
 
@@ -31,13 +32,14 @@ summary_df = load_cluster_summary()
 # PAGE LAYOUT
 # --------------------------------------------------
 
-layout = dmc.Container(
-    [
-        create_page_header(
-            title="Tactical Playing Styles",
-            subtitle="Unsupervised machine learning archetypes. Spatial 2D projection and cluster DNA via K-Means clustering and PCA.",
-            badge_text="TACTICAL ARCHETYPES",
-        ),
+def layout():
+    return dmc.Container(
+        [
+            create_page_header(
+                title="Tactical Playing Styles",
+                subtitle="Unsupervised machine learning archetypes. Spatial 2D projection and cluster DNA via K-Means clustering and PCA.",
+                badge_text="TACTICAL ARCHETYPES",
+            ),
 
         # POSITION AND CLUSTER CONTROLS
         create_section_card(
@@ -85,6 +87,13 @@ layout = dmc.Container(
                             value="NONE",
                             searchable=True,
                             clearable=True,
+                            leftSection=html.Img(
+                                src="/assets/search.svg",
+                                alt="Search",
+                                style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                            ),
+                            leftSectionPointerEvents="none",
+                            className="scout-search-input",
                         ),
                         span={"base": 12, "md": 4},
                     ),
@@ -111,7 +120,7 @@ layout = dmc.Container(
                             id="styles-pca-scatter",
                             config={"displayModeBar": False},
                             responsive=True,
-                            style={"height": "430px", "width": "100%"},
+                            style={"height": "400px", "width": "100%"},
                         ),
                         title="Principal Component Analysis (PCA)",
                         subtitle="2D projection of player attribute space highlighting spatial archetype clusters",
@@ -124,7 +133,7 @@ layout = dmc.Container(
                             id="styles-dna-radar",
                             config={"displayModeBar": False},
                             responsive=True,
-                            style={"height": "430px", "width": "100%"},
+                            style={"height": "400px", "width": "100%"},
                         ),
                         title="Tactical DNA Archetype Radar",
                         subtitle="Comparative mean fingerprint profiles across the 4 positional clusters",
@@ -215,12 +224,17 @@ def update_locator_dropdown(pos):
     Input("styles-pos-select", "value"),
     Input("styles-cluster-select", "value"),
     Input("styles-player-locator", "value"),
-    Input("scout-analyst-mode", "data"),
     Input("theme-store", "data"),
 )
-def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_analyst_mode="scout", theme="dark"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_playing_styles(pos, cluster_filter, locator_player="NONE", theme="dark", scout_analyst_mode="scout", *args, **kwargs):
+    # Support backward compatibility if called with positional scout_analyst_mode
+    if args and isinstance(args[0], str) and args[0] in ["dark", "light"]:
+        theme = args[0]
+    elif theme not in ["dark", "light"] and args:
+        theme = args[0]
     theme = theme or "dark"
+    if theme not in ["dark", "light"]:
+        theme = "dark"
     if not pos:
         pos = "FW"
 
@@ -288,8 +302,8 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
             dmc.Group([
                 dmc.Text(f"EMPIRICAL {pos} TACTICAL ARCHETYPES (DATA-SUPPORTED)", size="10.5px", fw=800, c="teal", style={"letterSpacing": "0.8px"}),
                 dmc.Badge(
-                    "SCOUT VIEW" if scout_analyst_mode == "scout" else "ANALYST VIEW",
-                    color="teal" if scout_analyst_mode == "scout" else "indigo",
+                    "ANALYST VIEW" if scout_analyst_mode == "analyst" else f"{pos} CLUSTERS",
+                    color="indigo" if scout_analyst_mode == "analyst" else "teal",
                     variant="light",
                     size="xs",
                 ),
@@ -323,7 +337,7 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
         pos=pos,
         selected_cluster=cluster_filter,
         highlight_player=locator_player,
-        height=420,
+        height=400,
         theme=theme,
     )
 
@@ -353,8 +367,8 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
 
         def fmt_cell(val):
             v = float(val)
-            c = ACCENT if v >= 65 else "#38BDF8" if v >= 50 else "#F59E0B" if v >= 35 else "#EF4444"
-            return dmc.TableTd(dmc.Text(f"{v:.1f}", fw=600, size="xs", style={"color": c, "fontVariantNumeric": "tabular-nums", "textAlign": "right"}))
+            tier = get_percentile_tier(v)
+            return dmc.TableTd(dmc.Text(f"{v:.1f}", fw=600, size="xs", style={"color": tier["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"}))
 
         summary_rows.append(
             dmc.TableTr([
@@ -404,6 +418,8 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
             dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
         ])
     )
@@ -421,9 +437,14 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
             dmc.TableTr([
                 dmc.TableTd([
                     dmc.Group([
-                        dmc.Text(r["Player"], fw=600, size="xs", style={"color": TEXT}),
-                        *([sample_pill] if sample_pill else []),
-                    ], gap=4, align="center"),
+                        render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                        dmc.Box([
+                            dmc.Group([
+                                dmc.Text(r["Player"], fw=600, size="xs", style={"color": TEXT}),
+                                *([sample_pill] if sample_pill else []),
+                            ], gap=4, align="center"),
+                        ]),
+                    ], gap="xs", align="center", wrap="nowrap"),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", c="var(--scout-text-primary)"),
@@ -439,6 +460,8 @@ def update_playing_styles(pos, cluster_filter, locator_player="NONE", scout_anal
                 dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r.get('BallSecurity_Score', 50.0):.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r.get('BallSecurity_Score', 50.0))["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r.get('Aerial_Score', 50.0):.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r.get('Aerial_Score', 50.0))["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
                 dmc.TableTd(
                     dcc.Link(
                         dmc.Button("Dossier →", size="xs", variant="subtle", color="emerald"),

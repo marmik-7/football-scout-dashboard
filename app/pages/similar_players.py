@@ -66,6 +66,13 @@ def layout(player=None, **kwargs):
                                     value=initial_player,
                                     searchable=True,
                                     allowDeselect=False,
+                                    leftSection=html.Img(
+                                        src="/assets/search.svg",
+                                        alt="Search",
+                                        style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                                    ),
+                                    leftSectionPointerEvents="none",
+                                    className="scout-search-input",
                                 ),
                                 span={"base": 12, "sm": 6, "md": 5},
                             ),
@@ -106,27 +113,29 @@ def layout(player=None, **kwargs):
 
                     # Layer 2: Progressive Disclosure for Secondary Filters
                     dmc.Accordion(
-                        styles={
-                            "item": {"border": "none", "backgroundColor": "transparent"},
-                            "control": {
-                                "padding": "6px 0px",
-                                "color": "var(--scout-text-secondary)",
-                                "&:hover": {"backgroundColor": "transparent"},
-                            },
-                            "panel": {"padding": "8px 0px 0px 0px"},
-                        },
+                        value="advanced",
                         children=[
                             dmc.AccordionItem(
                                 [
                                     dmc.AccordionControl(
-                                        dmc.Group([
-                                            dmc.Text("Advanced Scope & Candidate Filters", size="xs", fw=600, c="var(--scout-text-secondary)"),
-                                            dmc.Text("Sub-Role, League Scope, Club Filter & Results Depth", size="xs", c="dimmed"),
-                                        ], gap="xs")
+                                        dmc.Group(
+                                            [
+                                                dmc.Group(
+                                                    [
+                                                        dmc.Text("ADVANCED SCOPE & CANDIDATE FILTERS", size="11px", fw=700, c="var(--scout-text-primary)", style={"letterSpacing": "0.6px"}),
+                                                        dmc.Badge("4 FILTERS", size="xs", variant="light", color="teal"),
+                                                    ],
+                                                    gap="xs",
+                                                ),
+                                                dmc.Text("Sub-Role, League Scope, Club Screening & Results Depth", size="xs", c="var(--scout-text-muted)"),
+                                            ],
+                                            justify="space-between",
+                                            w="100%",
+                                        )
                                     ),
                                     dmc.AccordionPanel(
                                         dmc.Box([
-                                            dmc.Divider(mb="sm", color="var(--scout-border-subtle)"),
+                                            dmc.Divider(my="xs", color="var(--scout-border-subtle)"),
                                             dmc.Grid(
                                                 [
                                                     dmc.GridCol(
@@ -139,7 +148,7 @@ def layout(player=None, **kwargs):
                                                             value="ALL",
                                                             allowDeselect=False,
                                                         ),
-                                                        span={"base": 12, "sm": 6, "md": 4},
+                                                        span={"base": 12, "sm": 6, "md": 3},
                                                     ),
                                                     dmc.GridCol(
                                                         dmc.Select(
@@ -151,7 +160,20 @@ def layout(player=None, **kwargs):
                                                             value="ALL",
                                                             allowDeselect=False,
                                                         ),
-                                                        span={"base": 12, "sm": 6, "md": 4},
+                                                        span={"base": 12, "sm": 6, "md": 3},
+                                                    ),
+                                                    dmc.GridCol(
+                                                        dmc.Select(
+                                                            id="similar-club-filter",
+                                                            label="Candidate Club",
+                                                            data=[{"label": "All Clubs", "value": "ALL"}] + [
+                                                                {"label": s, "value": s} for s in unique_squads
+                                                            ],
+                                                            value="ALL",
+                                                            searchable=True,
+                                                            allowDeselect=False,
+                                                        ),
+                                                        span={"base": 12, "sm": 6, "md": 3.5},
                                                     ),
                                                     dmc.GridCol(
                                                         dmc.Select(
@@ -166,20 +188,7 @@ def layout(player=None, **kwargs):
                                                             value=10,
                                                             allowDeselect=False,
                                                         ),
-                                                        span={"base": 12, "sm": 6, "md": 4},
-                                                    ),
-                                                    dmc.GridCol(
-                                                        dmc.Select(
-                                                            id="similar-club-filter",
-                                                            label="Candidate Club",
-                                                            data=[{"label": "All Clubs", "value": "ALL"}] + [
-                                                                {"label": s, "value": s} for s in unique_squads
-                                                            ],
-                                                            value="ALL",
-                                                            searchable=True,
-                                                            allowDeselect=False,
-                                                        ),
-                                                        span={"base": 12, "md": 12},
+                                                        span={"base": 12, "sm": 6, "md": 2.5},
                                                     ),
                                                 ],
                                                 gap="sm",
@@ -194,6 +203,7 @@ def layout(player=None, **kwargs):
                 ]),
                 title="Similarity Query Parameters",
                 subtitle="Configure the target reference benchmark and candidate filtering criteria",
+                extra_header=dmc.Badge("7D COSINE BENCHMARK", color="teal", variant="light", size="xs"),
             ),
 
             dmc.Space(h=16),
@@ -235,7 +245,25 @@ def layout(player=None, **kwargs):
 
             # SIMILAR PLAYERS LEADERBOARD TABLE
             create_section_card(
-                html.Div(id="similar-table-container", style={"overflowX": "auto"}),
+                html.Div([
+                    dmc.Group([
+                        dmc.Text("CANDIDATE TABLE SCOPE", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}),
+                        dmc.SegmentedControl(
+                            id="similar-view-mode",
+                            data=[
+                                {"label": "Recruitment Matches (7 Col)", "value": "scout"},
+                                {"label": "7D Vector Scores Matrix (15 Col)", "value": "analyst"},
+                            ],
+                            value="scout",
+                            size="xs",
+                            color="teal",
+                            persistence=True,
+                            persistence_type="local",
+                            style={"fontWeight": 600},
+                        ),
+                    ], justify="space-between", align="center", mb="sm"),
+                    html.Div(id="similar-table-container", style={"overflowX": "auto"}),
+                ]),
                 title="Top Statistical Twins",
                 subtitle="Ranked candidate cohort with similarity indices, positional percentiles, and direct dossier navigation",
             ),
@@ -261,11 +289,11 @@ def layout(player=None, **kwargs):
     Input("similar-comp-filter", "value"),
     Input("similar-age-filter", "value"),
     Input("similar-top-n", "value"),
-    Input("scout-analyst-mode", "data"),
     Input("theme-store", "data"),
+    Input("similar-view-mode", "value"),
 )
-def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, comp_filter, max_age, top_n, scout_analyst_mode="scout", theme="dark"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, comp_filter, max_age, top_n, theme="dark", local_view_mode="scout", **kwargs):
+    effective_mode = "analyst" if (local_view_mode == "analyst" or kwargs.get("scout_analyst_mode") == "analyst") else "scout"
     theme = theme or "dark"
     ref_player = get_player_by_name(ref_name)
     if ref_player is None:
@@ -339,7 +367,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                                     dmc.Text("#1 STATISTICAL TWIN", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.8px"}),
                                     *([match_sample_badge] if match_sample_badge else []),
                                 ], gap="xs", align="center"),
-                                dmc.Badge(f"{best_sim_pct:.1f}% SIMILARITY", color="emerald", variant="filled", size="sm"),
+                                dmc.Badge(f"{best_sim_pct:.1f}% SIMILARITY", color="emerald", variant="light", size="sm"),
                             ], justify="space-between"),
                             dmc.Group([
                                 render_player_portrait(best_match["Player_Unique"], size=44, radius=6),
@@ -347,7 +375,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                                     dmc.Title(best_match["Player"], order=3, c="var(--scout-text-primary)", style={"fontSize": "18px"}),
                                     dmc.Group(
                                         [
-                                            dmc.Badge(best_match["Pos"], color=match_pos_color, variant="filled", size="xs"),
+                                            dmc.Badge(best_match["Pos"], color=match_pos_color, variant="light", size="xs"),
                                             dmc.Badge(best_match.get("SubRole", "Specialist"), color="cyan", variant="light", size="xs"),
                                             dmc.Badge(sim_explanation.get("positional_compat_level", "Direct"), color="teal" if sim_explanation.get("positional_compat_level") == "Direct" else "orange", variant="outline", size="xs"),
                                             dmc.Text(f"{best_match.get('Nation_Display', best_match['Nation_Clean'])} • {best_match['Squad']} • {best_match.get('Comp_Clean', 'Big 5')}", size="xs", c="dimmed"),
@@ -364,7 +392,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
                         style={
                             "backgroundColor": "var(--scout-surface-secondary)",
                             "border": f"1px solid {BORDER}",
-                            "borderLeft": "3px solid #38BDF8",
+                            "borderLeft": "3px solid var(--scout-accent-light, #38BDF8)",
                             "borderRadius": "4px",
                             "padding": "12px 16px",
                         },
@@ -431,7 +459,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
         ),
     ]
 
-    if scout_analyst_mode == "analyst":
+    if effective_mode == "analyst":
         methodology_children.extend([
             dmc.Divider(my="xs", color=BORDER),
             dmc.Text("ANALYST METHODOLOGY & MATHEMATICAL FORMULATION", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}, mb=4),
@@ -456,7 +484,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
         )
         return banner, radar_fig, methodology, table_container
 
-    if scout_analyst_mode == "scout":
+    if effective_mode == "scout":
         thead = dmc.TableThead(
             dmc.TableTr([
                 dmc.TableTh("RANK", style={"color": TEXT, "width": "50px", "fontSize": "10px", "letterSpacing": "0.6px"}),
@@ -516,7 +544,7 @@ def update_similar_players(ref_name, pos_filter, subrole_filter, club_filter, co
 
         sample_pill = dmc.Badge(f"{int(mins)}m (Low)", color="orange", variant="outline", size="xs", style={"fontSize": "8.5px", "height": "14px", "padding": "0 3px", "marginLeft": "4px"}) if mins < SAMPLE_SIZE_THRESHOLD else None
 
-        if scout_analyst_mode == "scout":
+        if effective_mode == "scout":
             row_cells = [
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([

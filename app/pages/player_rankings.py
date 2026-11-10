@@ -27,6 +27,7 @@ from app.utils.styling import (
     get_percentile_tier,
 )
 from app.utils.metric_definitions import get_sample_size_badge, SAMPLE_SIZE_THRESHOLD
+from app.utils.player_portraits import render_player_portrait
 
 dash.register_page(__name__, path="/player-rankings", name="Rankings", order=7)
 
@@ -50,8 +51,8 @@ layout = dmc.Container(
         ),
 
         # FILTER AND RANKING CONTROLS (LAYER 1 + LAYER 2 PROGRESSIVE DISCLOSURE)
-        dmc.Card(
-            [
+        create_section_card(
+            dmc.Box([
                 # Primary Command Row: Focused strictly on Dimension, Position, Sub-Role & Depth
                 dmc.Grid(
                     [
@@ -66,7 +67,7 @@ layout = dmc.Container(
                                 value="Finishing",
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 4},
+                            span={"base": 12, "sm": 6, "md": 3.5},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -91,9 +92,10 @@ layout = dmc.Container(
                                     {"label": s, "value": s} for s in unique_subroles
                                 ],
                                 value="ALL",
+                                searchable=True,
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 3},
+                            span={"base": 12, "sm": 6, "md": 3.5},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -114,29 +116,33 @@ layout = dmc.Container(
                     gap="sm",
                 ),
 
+                dmc.Space(h=10),
+
                 # Progressive Disclosure: Secondary Geographic, Age & Club Filters (Layer 2)
                 dmc.Accordion(
-                    styles={
-                        "item": {"border": "none", "backgroundColor": "transparent"},
-                        "control": {
-                            "padding": "6px 0px",
-                            "color": "var(--scout-text-secondary)",
-                            "&:hover": {"backgroundColor": "transparent"},
-                        },
-                        "panel": {"padding": "8px 0px 0px 0px"},
-                    },
+                    value="advanced",
                     children=[
                         dmc.AccordionItem(
                             [
                                 dmc.AccordionControl(
-                                    dmc.Group([
-                                        dmc.Text("Advanced Scope & Filters", size="xs", fw=600, c="var(--scout-text-secondary)"),
-                                        dmc.Text("League, Age Bracket, Club Screening & Sort Order", size="xs", c="dimmed"),
-                                    ], gap="xs")
+                                    dmc.Group(
+                                        [
+                                            dmc.Group(
+                                                [
+                                                    dmc.Text("ADVANCED SCOPE & FILTERS", size="11px", fw=700, c="var(--scout-text-primary)", style={"letterSpacing": "0.6px"}),
+                                                    dmc.Badge("4 FILTERS", size="xs", variant="light", color="teal"),
+                                                ],
+                                                gap="xs",
+                                            ),
+                                            dmc.Text("League, Age Bracket, Club Screening & Sort Order", size="xs", c="var(--scout-text-muted)"),
+                                        ],
+                                        justify="space-between",
+                                        w="100%",
+                                    )
                                 ),
                                 dmc.AccordionPanel(
                                     dmc.Box([
-                                        dmc.Divider(mb="sm", color="var(--scout-border-subtle)"),
+                                        dmc.Divider(my="xs", color="var(--scout-border-subtle)"),
                                         dmc.Grid(
                                             [
                                                 dmc.GridCol(
@@ -147,6 +153,7 @@ layout = dmc.Container(
                                                             {"label": c, "value": c} for c in unique_competitions
                                                         ],
                                                         value="ALL",
+                                                        searchable=True,
                                                         allowDeselect=False,
                                                     ),
                                                     span={"base": 12, "sm": 6, "md": 3},
@@ -178,7 +185,7 @@ layout = dmc.Container(
                                                         searchable=True,
                                                         allowDeselect=False,
                                                     ),
-                                                    span={"base": 12, "sm": 6, "md": 3.5},
+                                                    span={"base": 12, "sm": 6, "md": 3},
                                                 ),
                                                 dmc.GridCol(
                                                     dmc.Select(
@@ -191,7 +198,7 @@ layout = dmc.Container(
                                                         value="desc",
                                                         allowDeselect=False,
                                                     ),
-                                                    span={"base": 12, "sm": 6, "md": 2.5},
+                                                    span={"base": 12, "sm": 6, "md": 3},
                                                 ),
                                             ],
                                             gap="sm",
@@ -203,19 +210,18 @@ layout = dmc.Container(
                         )
                     ],
                 ),
-            ],
-            withBorder=True,
-            radius="md",
-            p="md",
-            style={"backgroundColor": "var(--scout-surface-primary)", "borderColor": "var(--scout-border)"},
+            ]),
+            title="Leaderboard Query Parameters",
+            subtitle="Rank candidates across high-dimensional scouting percentiles and tactical sub-roles",
+            extra_header=dmc.Badge("GLOBAL PERCENTILES", color="teal", variant="light", size="xs"),
         ),
 
-        dmc.Space(h=15),
+        dmc.Space(h=16),
 
         # WARNING / ANALYTICAL NOTICE CONTAINER
         html.Div(id="rankings-notice-container"),
 
-        dmc.Space(h=15),
+        dmc.Space(h=16),
 
         # RANKED BAR CHART
         create_section_card(
@@ -228,11 +234,29 @@ layout = dmc.Container(
             subtitle="Percentile score distribution of top-ranked candidates",
         ),
 
-        dmc.Space(h=20),
+        dmc.Space(h=16),
 
         # LEADERBOARD TABLE
         create_section_card(
-            html.Div(id="rankings-table-container", style={"overflowX": "auto"}),
+            html.Div([
+                dmc.Group([
+                    dmc.Text("LEADERBOARD COLUMNS", size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.6px"}),
+                    dmc.SegmentedControl(
+                        id="rankings-view-mode",
+                        data=[
+                            {"label": "Role Production Metrics (Default)", "value": "scout"},
+                            {"label": "Complete 7D Attribute Matrix", "value": "analyst"},
+                        ],
+                        value="scout",
+                        size="xs",
+                        color="teal",
+                        persistence=True,
+                        persistence_type="local",
+                        style={"fontWeight": 600},
+                    ),
+                ], justify="space-between", align="center", mb="sm"),
+                html.Div(id="rankings-table-container", style={"overflowX": "auto"}),
+            ]),
             title="Statistical Leaderboard Matrix",
             subtitle="Candidate records, empirical scores, and multidimensional profile",
         ),
@@ -258,11 +282,11 @@ layout = dmc.Container(
     Input("rankings-depth", "value"),
     Input("rankings-order", "value"),
     Input("rankings-squad", "value"),
-    Input("scout-analyst-mode", "data"),
     Input("theme-store", "data"),
+    Input("rankings-view-mode", "value"),
 )
-def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, scout_analyst_mode="scout", theme="dark"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, theme="dark", local_view_mode="scout", **kwargs):
+    effective_mode = "analyst" if (local_view_mode == "analyst" or kwargs.get("scout_analyst_mode") == "analyst") else "scout"
     theme = theme or "dark"
     if not attr or attr not in ATTRIBUTE_COLUMNS:
         attr = "Finishing"
@@ -288,7 +312,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
             style={
                 "backgroundColor": "rgba(245, 158, 11, 0.05)",
                 "borderColor": "rgba(245, 158, 11, 0.20)",
-                "color": "#F8FAFC",
+                "color": "var(--scout-text-primary, #F8FAFC)",
                 "fontSize": "12px",
             },
         )
@@ -410,11 +434,11 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
             categoryarray=chart_candidates["Player_Unique"].tolist(),
             automargin=True,
         ),
-        margin=dict(l=160, r=35, t=50, b=35),
+        margin=dict(l=155, r=35, t=50, b=35),
     )
 
     # 5. Leaderboard Table
-    if scout_analyst_mode == "scout":
+    if effective_mode == "scout":
         # Role-tailored and dimension-specific production columns
         if attr == "Finishing":
             extra_headers = [
@@ -459,7 +483,7 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
                 dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
                 dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
                 dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-                dmc.TableTh(f"{attr.upper()} SCORE", style={"color": "#10B981", "fontWeight": "700", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+                dmc.TableTh(f"{attr.upper()} SCORE {'▲' if order == 'asc' else '▼'}", style={"color": "#10B981", "fontWeight": "700", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
                 *extra_headers,
                 dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
             ])
@@ -527,11 +551,21 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
                 dmc.TableTr([
                     dmc.TableTd(rank_badge),
                     dmc.TableTd([
-                        dmc.Group([
-                            dmc.Text(r["Player"], fw=700, size="xs", style={"color": TEXT}),
-                            *([sample_pill] if sample_pill else []),
-                        ], gap=4, align="center"),
-                        dmc.Text(f"{r.get('Nation_Display', r['Nation_Clean'])} • Age {r.get('Age', '-')}", size="10px", c="dimmed"),
+                        dcc.Link(
+                            dmc.Group([
+                                render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                                dmc.Box([
+                                    dmc.Group([
+                                        dmc.Text(r["Player"], fw=700, size="xs", style={"color": TEXT}, className="scout-candidate-name"),
+                                        *([sample_pill] if sample_pill else []),
+                                    ], gap=4, align="center"),
+                                    dmc.Text(f"{r.get('Nation_Display', r['Nation_Clean'])} • Age {r.get('Age', '-')}", size="10px", c="dimmed"),
+                                ]),
+                            ], gap="xs", align="center", wrap="nowrap"),
+                            href=profile_url,
+                            style={"textDecoration": "none", "color": "inherit"},
+                            className="scout-player-link",
+                        ),
                     ]),
                     dmc.TableTd([
                         dmc.Text(r["Squad"], size="xs", fw=500, style={"color": TEXT}),
@@ -574,13 +608,15 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
             dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh(f"{attr.upper()} SCORE", style={"color": "#10B981", "fontWeight": "700", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh(f"{attr.upper()} SCORE {'▲' if order == 'asc' else '▼'}", style={"color": "#10B981", "fontWeight": "700", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("TACTICAL DNA", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
+            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
             dmc.TableTh("ACTION", style={"color": TEXT, "textAlign": "center", "fontSize": "10px", "letterSpacing": "0.6px"}),
         ])
     )
@@ -609,11 +645,21 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
             dmc.TableTr([
                 dmc.TableTd(rank_badge),
                 dmc.TableTd([
-                    dmc.Group([
-                        dmc.Text(r["Player"], fw=700, size="xs", style={"color": TEXT}),
-                        *([sample_pill] if sample_pill else []),
-                    ], gap=4, align="center"),
-                    dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="dimmed"),
+                    dcc.Link(
+                        dmc.Group([
+                            render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                            dmc.Box([
+                                dmc.Group([
+                                    dmc.Text(r["Player"], fw=700, size="xs", style={"color": TEXT}, className="scout-candidate-name"),
+                                    *([sample_pill] if sample_pill else []),
+                                ], gap=4, align="center"),
+                                dmc.Text(f"Age {r.get('Age', '-')}", size="10px", c="dimmed"),
+                            ]),
+                        ], gap="xs", align="center", wrap="nowrap"),
+                        href=profile_url,
+                        style={"textDecoration": "none", "color": "inherit"},
+                        className="scout-player-link",
+                    ),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, style={"color": TEXT}),
@@ -628,11 +674,13 @@ def update_rankings(pos, subrole, attr, comp, age_group, depth, order, squad, sc
                 dmc.TableTd(dmc.Text(f"{target_score:.1f}", size="xs", fw=700, style={"color": tier["color"], "fontVariantNumeric": "tabular-nums"})),
                 dmc.TableTd(dmc.Text(r.get("PlayingStyle_Name", "Specialist"), size="xs", c="dimmed")),
 
-                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
-                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums"})),
+                dmc.TableTd(dmc.Text(f"{r['Finishing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Finishing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Creativity_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Creativity_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Passing_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Passing_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Progression_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Progression_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r['Defending_Score']:.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r['Defending_Score'])["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r.get('BallSecurity_Score', 0.0):.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r.get('BallSecurity_Score', 0.0))["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
+                dmc.TableTd(dmc.Text(f"{r.get('Aerial_Score', 0.0):.1f}", size="xs", fw=600, style={"color": get_percentile_tier(r.get('Aerial_Score', 0.0))["color"], "fontVariantNumeric": "tabular-nums", "textAlign": "right"})),
 
                 dmc.TableTd(
                     dcc.Link(

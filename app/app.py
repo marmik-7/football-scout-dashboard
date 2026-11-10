@@ -55,7 +55,7 @@ NAV_CATEGORIES = [
         "category": "WORKSPACE",
         "items": [
             {"label": "Overview", "path": "/", "id": "nav-overview"},
-            {"label": "Player Discovery", "path": "/player-explorer", "id": "nav-explorer"},
+            {"label": "Player Explorer", "path": "/player-explorer", "id": "nav-explorer"},
             {"label": "Player Dossiers", "path": "/player-profile", "id": "nav-profile"},
             {"label": "Comparison", "path": "/player-comparison", "id": "nav-comparison"},
             {"label": "Similar Players", "path": "/similar-players", "id": "nav-similar"},
@@ -96,11 +96,6 @@ app.layout = dmc.MantineProvider(
             data="dark",
         ),
         dcc.Store(
-            id="scout-analyst-mode",
-            storage_type="local",
-            data="scout",
-        ),
-        dcc.Store(
             id="scout-shortlists",
             storage_type="local",
             data=[
@@ -137,7 +132,7 @@ app.layout = dmc.MantineProvider(
                                     html.Img(
                                         src="/assets/logo.svg",
                                         alt="SCOUT Logo",
-                                        style={"width": "22px", "height": "22px", "display": "block", "borderRadius": "5px"},
+                                        style={"width": "24px", "height": "24px", "display": "block", "borderRadius": "5px"},
                                     ),
                                     dmc.Text("SCOUT", fw=800, size="sm", style={"letterSpacing": "1.2px", "color": "var(--scout-text-primary)"}),
                                     dmc.Badge(
@@ -145,9 +140,9 @@ app.layout = dmc.MantineProvider(
                                         color="teal",
                                         variant="light",
                                         size="xs",
-                                        style={"fontSize": "9px", "height": "16px", "padding": "0 5px", "borderRadius": "3px"}
+                                        style={"fontSize": "8.5px", "height": "15px", "padding": "0 4px", "borderRadius": "3px"}
                                     ),
-                                    dmc.Text("|", c="var(--scout-border)", visibleFrom="sm"),
+                                    dmc.Text("|", c="var(--scout-border-hover)", visibleFrom="sm"),
                                     dmc.Text(
                                         "RECRUITMENT INTELLIGENCE",
                                         fw=600,
@@ -161,34 +156,29 @@ app.layout = dmc.MantineProvider(
                                 align="center",
                             ),
 
-                            # GLOBAL COMMAND SEARCH
+                            # GLOBAL COMMAND SEARCH (PROMINENT RECRUITMENT SEARCH)
                             dmc.Select(
                                 id="header-global-search",
-                                placeholder="Search candidate dossier (e.g. Saliba, Haaland)...",
+                                placeholder="Search 1,692 player dossiers (e.g. Saliba, Haaland, Wirtz)...",
                                 data=[{"label": name, "value": name} for name in all_players],
                                 searchable=True,
-                                w={"base": 180, "sm": 280, "md": 360},
-                                size="xs",
                                 clearable=True,
+                                size="sm",
+                                leftSection=html.Img(
+                                    src="/assets/search.svg",
+                                    alt="Search",
+                                    style={"width": "16px", "height": "16px", "display": "block"},
+                                ),
+                                leftSectionPointerEvents="none",
+                                rightSection=dmc.Kbd("/", size="xs"),
+                                rightSectionPointerEvents="none",
+                                className="scout-header-search",
+                                w={"base": 140, "xs": 190, "sm": 320, "md": 460, "lg": 560},
                             ),
 
                             dmc.Group(
                                 [
-                                    # View Mode Switcher
-                                    dmc.SegmentedControl(
-                                        id="global-view-toggle",
-                                        data=[
-                                            {"label": "Scout", "value": "scout"},
-                                            {"label": "Analyst", "value": "analyst"},
-                                        ],
-                                        value="scout",
-                                        size="xs",
-                                        color="teal",
-                                        persistence=True,
-                                        persistence_type="local",
-                                        style={"fontWeight": 600},
-                                    ),
-                                    # Theme Switcher
+                                    # Theme Switcher (Dark / Light)
                                     dmc.SegmentedControl(
                                         id="global-theme-toggle",
                                         data=[
@@ -203,21 +193,25 @@ app.layout = dmc.MantineProvider(
                                         style={"fontWeight": 600},
                                     ),
                                     # Pipeline Shortlist Badge Link
-                                    dcc.Link(
-                                        dmc.Badge(
-                                            id="header-shortlist-badge",
-                                            children="Pipeline: 2",
-                                            color="teal",
-                                            variant="light",
-                                            size="sm",
-                                            style={"cursor": "pointer", "fontSize": "10.5px", "fontWeight": 600}
+                                    dmc.Box(
+                                        dcc.Link(
+                                            dmc.Badge(
+                                                id="header-shortlist-badge",
+                                                children="Pipeline: 2",
+                                                color="teal",
+                                                variant="light",
+                                                size="sm",
+                                                style={"cursor": "pointer", "fontSize": "10.5px", "fontWeight": 600}
+                                            ),
+                                            href="/shortlists",
+                                            style={"textDecoration": "none"},
                                         ),
-                                        href="/shortlists",
-                                        style={"textDecoration": "none"},
+                                        visibleFrom="sm",
                                     ),
                                 ],
                                 gap="xs",
                                 align="center",
+                                wrap="nowrap",
                             ),
                         ],
                         justify="space-between",
@@ -229,24 +223,6 @@ app.layout = dmc.MantineProvider(
                 # SIDEBAR NAVIGATION
                 dmc.AppShellNavbar(
                     [
-                        # Brand Header in Sidebar
-                        dmc.Group([
-                            html.Img(
-                                src="/assets/logo.svg",
-                                alt="SCOUT Logo",
-                                style={"width": "26px", "height": "26px", "display": "block", "borderRadius": "6px"},
-                            ),
-                            dmc.Box([
-                                dmc.Group([
-                                    dmc.Text("SCOUT", fw=800, size="sm", style={"letterSpacing": "1px", "color": "var(--scout-text-primary)"}),
-                                    dmc.Badge("PRO", color="teal", variant="light", size="xs", style={"fontSize": "8px", "height": "15px", "padding": "0 4px"}),
-                                ], gap=6, align="center"),
-                                dmc.Text("Recruitment Intelligence", size="10px", c="var(--scout-text-muted)"),
-                            ]),
-                        ], gap="xs", align="center", mb="xs", px=4),
-
-                        dmc.Divider(my="xs", color="var(--scout-border-subtle)"),
-
                         # Categorized Nav Items (Linear Style)
                         html.Div(
                             [
@@ -281,7 +257,7 @@ app.layout = dmc.MantineProvider(
                                     html.Span(className="scout-live-dot"),
                                     dmc.Text("Live Intelligence Cohort", size="11px", fw=600, style={"color": "var(--scout-text-primary)"}),
                                 ], gap=8, align="center"),
-                                dmc.Text("1,692 qualified players (≥600m)", size="10px", style={"color": "var(--scout-text-muted)"}, mt=3),
+                                dmc.Text(f"{len(all_players):,} qualified players (≥600m)", size="10px", style={"color": "var(--scout-text-muted)"}, mt=3),
                                 dmc.Text("Engine: pAdj • 7 Sub-Roles • K-Means", size="9px", style={"color": "var(--scout-text-muted)"}, mt=1),
                             ],
                             style={
@@ -391,15 +367,6 @@ def jump_to_player_profile(selected_name):
 def update_header_shortlist_badge(shortlist_data):
     count = len(shortlist_data) if isinstance(shortlist_data, list) else 0
     return f"Pipeline: {count}"
-
-
-# Callback to synchronize global view mode (Scout View vs Analyst View)
-@app.callback(
-    Output("scout-analyst-mode", "data"),
-    Input("global-view-toggle", "value"),
-)
-def update_scout_analyst_mode(selected_mode):
-    return selected_mode or "scout"
 
 
 # Callback to synchronize global theme (Dark vs Light)

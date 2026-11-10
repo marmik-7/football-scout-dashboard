@@ -13,15 +13,15 @@ THEME_TOKENS = {
         "bg_surface_primary": "#111827",
         "bg_surface_secondary": "#1E293B",
         "bg_surface_elevated": "#1E293B",
-        "border_hairline": "rgba(255, 255, 255, 0.08)",
-        "border_subtle": "rgba(255, 255, 255, 0.04)",
+        "border_hairline": "rgba(255, 255, 255, 0.10)",
+        "border_subtle": "rgba(255, 255, 255, 0.05)",
         "border_focus": "#10B981",
         "text_primary": "#F8FAFC",
         "text_secondary": "#CBD5E1",
         "text_muted": "#94A3B8",
         "accent_emerald": "#10B981",
-        "accent_emerald_dim": "rgba(16, 185, 129, 0.12)",
-        "accent_emerald_border": "rgba(16, 185, 129, 0.25)",
+        "accent_emerald_dim": "rgba(16, 185, 129, 0.14)",
+        "accent_emerald_border": "rgba(16, 185, 129, 0.28)",
         "card_bg": "#111827",
     },
     "light": {
@@ -29,15 +29,15 @@ THEME_TOKENS = {
         "bg_surface_primary": "#FFFFFF",
         "bg_surface_secondary": "#F1F5F9",
         "bg_surface_elevated": "#FFFFFF",
-        "border_hairline": "rgba(15, 23, 42, 0.08)",
-        "border_subtle": "rgba(15, 23, 42, 0.04)",
+        "border_hairline": "rgba(15, 23, 42, 0.09)",
+        "border_subtle": "rgba(15, 23, 42, 0.05)",
         "border_focus": "#059669",
         "text_primary": "#0F172A",
         "text_secondary": "#334155",
-        "text_muted": "#475569",
+        "text_muted": "#64748B",
         "accent_emerald": "#059669",
-        "accent_emerald_dim": "rgba(5, 150, 105, 0.08)",
-        "accent_emerald_border": "rgba(5, 150, 105, 0.20)",
+        "accent_emerald_dim": "rgba(5, 150, 105, 0.10)",
+        "accent_emerald_border": "rgba(5, 150, 105, 0.24)",
         "card_bg": "#FFFFFF",
     },
 }
@@ -46,14 +46,14 @@ THEME_TOKENS = {
 BG = "var(--scout-bg, #080C12)"
 PANEL = "var(--scout-surface-primary, #111827)"
 PANEL_ALT = "var(--scout-surface-secondary, #1E293B)"
-BORDER = "var(--scout-border, rgba(255, 255, 255, 0.08))"
-BORDER_SUBTLE = "var(--scout-border-subtle, rgba(255, 255, 255, 0.04))"
+BORDER = "var(--scout-border, rgba(255, 255, 255, 0.10))"
+BORDER_SUBTLE = "var(--scout-border-subtle, rgba(255, 255, 255, 0.05))"
 TEXT = "var(--scout-text-primary, #F8FAFC)"
 MUTED = "var(--scout-text-secondary, #CBD5E1)"
 SUBTLE = "var(--scout-text-muted, #94A3B8)"
 ACCENT = "var(--scout-accent, #10B981)"
-ACCENT_BG = "var(--scout-accent-dim, rgba(16, 185, 129, 0.12))"
-ACCENT_BORDER = "var(--scout-accent-border, rgba(16, 185, 129, 0.25))"
+ACCENT_BG = "var(--scout-accent-dim, rgba(16, 185, 129, 0.14))"
+ACCENT_BORDER = "var(--scout-accent-border, rgba(16, 185, 129, 0.28))"
 
 # Positional and cluster accents
 POSITION_COLORS = {

@@ -50,8 +50,8 @@ layout = dmc.Container(
         ),
 
         # COMMAND FILTER TOOLBAR
-        dmc.Card(
-            [
+        create_section_card(
+            dmc.Box([
                 # Primary Command Row
                 dmc.Grid(
                     [
@@ -59,10 +59,17 @@ layout = dmc.Container(
                             dmc.TextInput(
                                 id="explorer-search",
                                 label="Search Player",
-                                placeholder="Type candidate name...",
+                                placeholder="Filter candidate by name (e.g. Saka, Saliba, Wirtz)...",
                                 debounce=300,
+                                leftSection=html.Img(
+                                    src="/assets/search.svg",
+                                    alt="Search",
+                                    style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                                ),
+                                leftSectionPointerEvents="none",
+                                className="scout-search-input",
                             ),
-                            span={"base": 12, "sm": 6, "md": 3},
+                            span={"base": 12, "sm": 6, "md": 3.5},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -87,6 +94,7 @@ layout = dmc.Container(
                                     {"label": s, "value": s} for s in unique_subroles
                                 ],
                                 value="ALL",
+                                searchable=True,
                                 allowDeselect=False,
                             ),
                             span={"base": 12, "sm": 6, "md": 2.5},
@@ -99,9 +107,10 @@ layout = dmc.Container(
                                     {"label": c, "value": c} for c in unique_competitions
                                 ],
                                 value="ALL",
+                                searchable=True,
                                 allowDeselect=False,
                             ),
-                            span={"base": 12, "sm": 6, "md": 2.5},
+                            span={"base": 12, "sm": 6, "md": 2},
                         ),
                         dmc.GridCol(
                             dmc.Select(
@@ -123,29 +132,33 @@ layout = dmc.Container(
                     gap="sm",
                 ),
 
+                dmc.Space(h=10),
+
                 # Progressive Disclosure: Secondary & Compound Filters Accordion (Layer 2)
                 dmc.Accordion(
-                    styles={
-                        "item": {"border": "none", "backgroundColor": "transparent"},
-                        "control": {
-                            "padding": "6px 0px",
-                            "color": "var(--scout-text-secondary)",
-                            "&:hover": {"backgroundColor": "transparent"},
-                        },
-                        "panel": {"padding": "8px 0px 0px 0px"},
-                    },
+                    value="advanced",
                     children=[
                         dmc.AccordionItem(
                             [
                                 dmc.AccordionControl(
-                                    dmc.Group([
-                                        dmc.Text("Advanced Screening & Secondary Filters", size="xs", fw=600, c="var(--scout-text-secondary)"),
-                                        dmc.Text("Club, Nationality, Sort Metric, Min Minutes & Compound Threshold Sliders", size="xs", c="dimmed"),
-                                    ], gap="xs")
+                                    dmc.Group(
+                                        [
+                                            dmc.Group(
+                                                [
+                                                    dmc.Text("ADVANCED SCREENING & DUAL THRESHOLDS", size="11px", fw=700, c="var(--scout-text-primary)", style={"letterSpacing": "0.6px"}),
+                                                    dmc.Badge("8 PARAMETERS", size="xs", variant="light", color="teal"),
+                                                ],
+                                                gap="xs",
+                                            ),
+                                            dmc.Text("Club, Nationality, Sort Metric, Min Minutes & Compound Dual-Threshold Filters", size="xs", c="var(--scout-text-muted)"),
+                                        ],
+                                        justify="space-between",
+                                        w="100%",
+                                    )
                                 ),
                                 dmc.AccordionPanel(
                                     dmc.Box([
-                                        dmc.Divider(mb="sm", color="var(--scout-border-subtle)"),
+                                        dmc.Divider(my="xs", color="var(--scout-border-subtle)"),
                                         # Secondary Sorting & Screening Row
                                         dmc.Grid(
                                             [
@@ -167,6 +180,7 @@ layout = dmc.Container(
                                                             {"label": "Age", "value": "Age"},
                                                         ],
                                                         value="Finishing_Score",
+                                                        searchable=True,
                                                         allowDeselect=False,
                                                     ),
                                                     span={"base": 12, "sm": 6, "md": 3},
@@ -214,83 +228,125 @@ layout = dmc.Container(
                                             gap="sm",
                                         ),
 
-                                        dmc.Space(h=10),
+                                        dmc.Space(h=12),
 
-                                        # Tertiary Threshold Sliders Row
+                                        # Tertiary Threshold Pods: Perfectly Balanced 6 + 6 Symmetry
                                         dmc.Grid(
                                             [
+                                                # Pod 1: Sample Volume & Primary Score Benchmark
                                                 dmc.GridCol(
-                                                    dmc.Box([
-                                                        dmc.Text("Minimum Minutes", size="11px", fw=600, c=SUBTLE, mb=4),
-                                                        dmc.Slider(
-                                                            id="explorer-min-minutes",
-                                                            min=600,
-                                                            max=3000,
-                                                            step=100,
-                                                            value=600,
-                                                            marks=[
-                                                                {"value": 600, "label": "600m"},
-                                                                {"value": 1500, "label": "1500m"},
-                                                                {"value": 2500, "label": "2500m"},
-                                                            ],
-                                                            color="teal",
-                                                            size="xs",
-                                                        ),
-                                                    ]),
-                                                    span={"base": 12, "sm": 6, "md": 3},
-                                                ),
-                                                dmc.GridCol(
-                                                    dmc.Box([
-                                                        dmc.Text("Min Score (Primary Metric)", size="11px", fw=600, c=SUBTLE, mb=4),
-                                                        dmc.Slider(
-                                                            id="explorer-min-score",
-                                                            min=0,
-                                                            max=90,
-                                                            step=5,
-                                                            value=0,
-                                                            marks=[
-                                                                {"value": 0, "label": "0"},
-                                                                {"value": 50, "label": "50"},
-                                                                {"value": 80, "label": "80"},
-                                                            ],
-                                                            color="teal",
-                                                            size="xs",
-                                                        ),
-                                                    ]),
-                                                    span={"base": 12, "sm": 6, "md": 3},
-                                                ),
-                                                dmc.GridCol(
-                                                    dmc.Select(
-                                                        id="explorer-sec-attr",
-                                                        label="Compound Secondary Attribute",
-                                                        data=[{"label": "None (No Secondary Filter)", "value": "NONE"}] + [
-                                                            {"label": name, "value": col}
-                                                            for name, col in ATTRIBUTE_COLUMNS.items()
+                                                    dmc.Box(
+                                                        [
+                                                            dmc.Group([
+                                                                dmc.Text("SAMPLE VOLUME & PRIMARY BENCHMARK", size="10.5px", fw=700, c="var(--scout-text-secondary)", style={"letterSpacing": "0.5px"}),
+                                                                dmc.Badge("VOLUME", size="xs", variant="outline", color="teal"),
+                                                            ], justify="space-between", mb="xs"),
+                                                            dmc.Grid([
+                                                                dmc.GridCol(
+                                                                    dmc.Box([
+                                                                        dmc.Text("MINIMUM MINUTES", size="10px", fw=600, c="var(--scout-text-muted)", style={"letterSpacing": "0.5px"}, mb=4),
+                                                                        dmc.Slider(
+                                                                            id="explorer-min-minutes",
+                                                                            min=600,
+                                                                            max=3000,
+                                                                            step=100,
+                                                                            value=600,
+                                                                            marks=[
+                                                                                {"value": 600, "label": "600m"},
+                                                                                {"value": 1500, "label": "1500m"},
+                                                                                {"value": 2500, "label": "2500m"},
+                                                                            ],
+                                                                            color="teal",
+                                                                            size="xs",
+                                                                        ),
+                                                                    ]),
+                                                                    span={"base": 12, "sm": 6},
+                                                                ),
+                                                                dmc.GridCol(
+                                                                    dmc.Box([
+                                                                        dmc.Text("MIN PRIMARY SCORE", size="10px", fw=600, c="var(--scout-text-muted)", style={"letterSpacing": "0.5px"}, mb=4),
+                                                                        dmc.Slider(
+                                                                            id="explorer-min-score",
+                                                                            min=0,
+                                                                            max=90,
+                                                                            step=5,
+                                                                            value=0,
+                                                                            marks=[
+                                                                                {"value": 0, "label": "0"},
+                                                                                {"value": 50, "label": "50"},
+                                                                                {"value": 80, "label": "80"},
+                                                                            ],
+                                                                            color="teal",
+                                                                            size="xs",
+                                                                        ),
+                                                                    ]),
+                                                                    span={"base": 12, "sm": 6},
+                                                                ),
+                                                            ], gap="sm"),
                                                         ],
-                                                        value="NONE",
-                                                        allowDeselect=False,
+                                                        style={
+                                                            "backgroundColor": "var(--scout-surface-secondary)",
+                                                            "border": "1px solid var(--scout-border)",
+                                                            "borderRadius": "6px",
+                                                            "padding": "12px 14px",
+                                                        },
                                                     ),
-                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                    span={"base": 12, "md": 6},
                                                 ),
+
+                                                # Pod 2: Compound Secondary Attribute & Score Benchmark
                                                 dmc.GridCol(
-                                                    dmc.Box([
-                                                        dmc.Text("Min Score (Secondary Metric)", size="11px", fw=600, c=SUBTLE, mb=4),
-                                                        dmc.Slider(
-                                                            id="explorer-sec-score",
-                                                            min=0,
-                                                            max=90,
-                                                            step=5,
-                                                            value=0,
-                                                            marks=[
-                                                                {"value": 0, "label": "0"},
-                                                                {"value": 50, "label": "50"},
-                                                                {"value": 80, "label": "80"},
-                                                            ],
-                                                            color="teal",
-                                                            size="xs",
-                                                        ),
-                                                    ]),
-                                                    span={"base": 12, "sm": 6, "md": 3},
+                                                    dmc.Box(
+                                                        [
+                                                            dmc.Group([
+                                                                dmc.Text("COMPOUND SECONDARY ATTRIBUTE", size="10.5px", fw=700, c="var(--scout-text-secondary)", style={"letterSpacing": "0.5px"}),
+                                                                dmc.Badge("DUAL SCREEN", size="xs", variant="outline", color="cyan"),
+                                                            ], justify="space-between", mb="xs"),
+                                                            dmc.Grid([
+                                                                dmc.GridCol(
+                                                                    dmc.Select(
+                                                                        id="explorer-sec-attr",
+                                                                        label="Secondary Attribute",
+                                                                        data=[{"label": "None (No Secondary Filter)", "value": "NONE"}] + [
+                                                                            {"label": name, "value": col}
+                                                                            for name, col in ATTRIBUTE_COLUMNS.items()
+                                                                        ],
+                                                                        value="NONE",
+                                                                        searchable=True,
+                                                                        allowDeselect=False,
+                                                                    ),
+                                                                    span={"base": 12, "sm": 6},
+                                                                ),
+                                                                dmc.GridCol(
+                                                                    dmc.Box([
+                                                                        dmc.Text("MIN SECONDARY SCORE", size="10px", fw=600, c="var(--scout-text-muted)", style={"letterSpacing": "0.5px"}, mb=4),
+                                                                        dmc.Slider(
+                                                                            id="explorer-sec-score",
+                                                                            min=0,
+                                                                            max=90,
+                                                                            step=5,
+                                                                            value=0,
+                                                                            marks=[
+                                                                                {"value": 0, "label": "0"},
+                                                                                {"value": 50, "label": "50"},
+                                                                                {"value": 80, "label": "80"},
+                                                                            ],
+                                                                            color="teal",
+                                                                            size="xs",
+                                                                        ),
+                                                                    ]),
+                                                                    span={"base": 12, "sm": 6},
+                                                                ),
+                                                            ], gap="sm", align="flex-end"),
+                                                        ],
+                                                        style={
+                                                            "backgroundColor": "var(--scout-surface-secondary)",
+                                                            "border": "1px solid var(--scout-border)",
+                                                            "borderRadius": "6px",
+                                                            "padding": "12px 14px",
+                                                        },
+                                                    ),
+                                                    span={"base": 12, "md": 6},
                                                 ),
                                             ],
                                             gap="sm",
@@ -302,11 +358,10 @@ layout = dmc.Container(
                         )
                     ],
                 ),
-            ],
-            withBorder=True,
-            radius="md",
-            p="md",
-            style={"backgroundColor": "var(--scout-surface-primary)", "borderColor": "var(--scout-border)"},
+            ]),
+            title="Recruitment Cohort Screening",
+            subtitle="Filter and screen 1,692 qualified candidates across tactical sub-roles, leagues, and compound statistical thresholds",
+            extra_header=dmc.Badge("COHORT SCREENING", color="teal", variant="light", size="xs"),
         ),
 
         dmc.Space(h=15),
@@ -319,13 +374,28 @@ layout = dmc.Container(
                         dmc.Group([
                             dmc.Text(id="explorer-count-label", size="xs", fw=600, c="var(--scout-text-primary)"),
                         ], gap=6, align="center"),
-                        dmc.Pagination(
-                            id="explorer-pagination",
-                            total=1,
-                            value=1,
-                            color="teal",
-                            size="xs",
-                        ),
+                        dmc.Group([
+                            dmc.SegmentedControl(
+                                id="explorer-view-mode",
+                                data=[
+                                    {"label": "Recruitment (6 Col)", "value": "scout"},
+                                    {"label": "7D Attribute Matrix (14 Col)", "value": "analyst"},
+                                ],
+                                value="scout",
+                                size="xs",
+                                color="teal",
+                                persistence=True,
+                                persistence_type="local",
+                                style={"fontWeight": 600},
+                            ),
+                            dmc.Pagination(
+                                id="explorer-pagination",
+                                total=1,
+                                value=1,
+                                color="teal",
+                                size="xs",
+                            ),
+                        ], gap="sm", align="center"),
                     ],
                     justify="space-between",
                     align="center",
@@ -410,10 +480,10 @@ def sync_from_bottom(bottom_val):
     Input("explorer-sec-attr", "value"),
     Input("explorer-sec-score", "value"),
     Input("explorer-pagination", "value"),
-    Input("scout-analyst-mode", "data"),
+    Input("explorer-view-mode", "value"),
 )
-def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset, sort_attr, sort_order, min_min, min_score, sec_attr, sec_score, page, scout_analyst_mode="scout"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset, sort_attr, sort_order, min_min, min_score, sec_attr, sec_score, page, local_view_mode="scout", **kwargs):
+    effective_mode = "analyst" if (local_view_mode == "analyst" or kwargs.get("scout_analyst_mode") == "analyst") else "scout"
     filtered = df.copy()
 
     # Search filter
@@ -487,17 +557,34 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
     else:
         count_text = f"Showing {start_idx + 1}–{end_idx} of {total_matching} matching players"
 
+    sort_arrow = " ▲" if ascending else " ▼"
+
+    def col_header(label, col_key, align="left"):
+        is_active = (sort_attr == col_key)
+        th_label = f"{label}{sort_arrow}" if is_active else label
+        th_style = {
+            "color": "#10B981" if is_active else TEXT,
+            "fontSize": "10px",
+            "letterSpacing": "0.6px",
+            "fontWeight": "700" if is_active else "600",
+        }
+        if align != "left":
+            th_style["textAlign"] = align
+        return dmc.TableTh(th_label, style=th_style)
+
     # SCOUT VIEW: Streamlined, high-signal recruitment table
-    if scout_analyst_mode == "scout":
+    if effective_mode == "scout":
+        mins_label = f"MINUTES{sort_arrow}" if sort_attr == "Min" else "MINUTES"
+        ga_label = f"G+A{sort_arrow}" if sort_attr in ["Gls", "Ast", "G-xG"] else "G+A"
+        asset_label = f"PRIMARY SCOUTING ASSET{sort_arrow}" if "Score" in str(sort_attr) else "PRIMARY SCOUTING ASSET"
         thead = dmc.TableThead(
             dmc.TableTr([
                 dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
                 dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
                 dmc.TableTh("ROLE & STYLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-                dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-                dmc.TableTh("G+A", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
-                dmc.TableTh("PRIMARY SCOUTING ASSET", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-                dmc.TableTh("ACTION", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
+                dmc.TableTh(mins_label, style={"color": "#10B981" if sort_attr == "Min" else TEXT, "fontWeight": "700" if sort_attr == "Min" else "600", "fontSize": "10px", "letterSpacing": "0.6px"}),
+                dmc.TableTh(ga_label, style={"color": "#10B981" if sort_attr in ["Gls", "Ast", "G-xG"] else TEXT, "fontWeight": "700" if sort_attr in ["Gls", "Ast", "G-xG"] else "600", "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
+                dmc.TableTh(asset_label, style={"color": "#10B981" if "Score" in str(sort_attr) else TEXT, "fontWeight": "700" if "Score" in str(sort_attr) else "600", "fontSize": "10px", "letterSpacing": "0.6px"}),
             ])
         )
         rows = []
@@ -521,16 +608,21 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
             rows.append(
                 dmc.TableTr([
                     dmc.TableTd([
-                        dmc.Group([
-                            render_player_portrait(r["Player_Unique"], size=36, radius=4),
-                            dmc.Box([
-                                dmc.Group([
-                                    dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
-                                    *([sample_pill] if sample_pill else []),
-                                ], gap=4, align="center"),
-                                dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="var(--scout-text-muted)"),
-                            ]),
-                        ], gap="xs", align="center", wrap="nowrap"),
+                        dcc.Link(
+                            dmc.Group([
+                                render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                                dmc.Box([
+                                    dmc.Group([
+                                        dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)", className="scout-candidate-name"),
+                                        *([sample_pill] if sample_pill else []),
+                                    ], gap=4, align="center"),
+                                    dmc.Text(f"{nat_display} • Age {age_str}", size="10px", c="var(--scout-text-muted)"),
+                                ]),
+                            ], gap="xs", align="center", wrap="nowrap"),
+                            href=profile_url,
+                            style={"textDecoration": "none", "color": "inherit"},
+                            className="scout-player-link",
+                        ),
                     ]),
                     dmc.TableTd([
                         dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
@@ -550,16 +642,20 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
                             size="xs",
                         )
                     ),
-                    dmc.TableTd(
-                        dcc.Link(
-                            dmc.Button("Dossier →", size="xs", variant="subtle", color="teal"),
-                            href=profile_url,
-                            style={"textDecoration": "none"},
-                        ),
-                        style={"textAlign": "center"},
-                    ),
                 ])
             )
+        if total_matching == 0:
+            rows = [
+                dmc.TableTr([
+                    dmc.TableTd(
+                        dmc.Box([
+                            dmc.Text("No candidates matched your exact screening criteria.", size="xs", fw=600, c="var(--scout-text-primary)"),
+                            dmc.Text("Try lowering the minimum minutes threshold or adjusting score sliders.", size="11px", c="var(--scout-text-muted)", mt=2),
+                        ], style={"textAlign": "center", "padding": "28px 12px"}),
+                        colSpan=6,
+                    )
+                ])
+            ]
         tbody = dmc.TableTbody(rows)
         table = dmc.Table(
             [thead, tbody],
@@ -571,24 +667,23 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
         )
         return table, count_text, total_pages
 
-    # ANALYST VIEW: Full 15-column multi-attribute grid
+    # ANALYST VIEW: Full 14-column multi-attribute grid
     thead = dmc.TableThead(
         dmc.TableTr([
             dmc.TableTh("CANDIDATE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("SQUAD / LEAGUE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("ROLE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
             dmc.TableTh("NAT", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("AGE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("MINUTES", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("G+A", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px"}),
-            dmc.TableTh("FIN", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("CRE", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("PAS", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("PRG", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("DEF", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("SEC", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("AER", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "right"}),
-            dmc.TableTh("ACTION", style={"color": TEXT, "fontSize": "10px", "letterSpacing": "0.6px", "textAlign": "center"}),
+            col_header("AGE", "Age"),
+            col_header("MINUTES", "Min"),
+            col_header("G+A", sort_attr if sort_attr in ["Gls", "Ast", "G-xG"] else "G+A"),
+            col_header("FIN", "Finishing_Score", align="right"),
+            col_header("CRE", "Creativity_Score", align="right"),
+            col_header("PAS", "Passing_Score", align="right"),
+            col_header("PRG", "Progression_Score", align="right"),
+            col_header("DEF", "Defending_Score", align="right"),
+            col_header("SEC", "BallSecurity_Score", align="right"),
+            col_header("AER", "Aerial_Score", align="right"),
         ])
     )
 
@@ -620,13 +715,18 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
         rows.append(
             dmc.TableTr([
                 dmc.TableTd([
-                    dmc.Group([
-                        render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                    dcc.Link(
                         dmc.Group([
-                            dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)"),
-                            *([sample_pill] if sample_pill else []),
-                        ], gap=4, align="center"),
-                    ], gap="xs", align="center", wrap="nowrap"),
+                            render_player_portrait(r["Player_Unique"], size=32, radius=4),
+                            dmc.Group([
+                                dmc.Text(r["Player"], size="xs", fw=700, c="var(--scout-text-primary)", className="scout-candidate-name"),
+                                *([sample_pill] if sample_pill else []),
+                            ], gap=4, align="center"),
+                        ], gap="xs", align="center", wrap="nowrap"),
+                        href=profile_url,
+                        style={"textDecoration": "none", "color": "inherit"},
+                        className="scout-player-link",
+                    ),
                 ]),
                 dmc.TableTd([
                     dmc.Text(r["Squad"], size="xs", fw=500, c="var(--scout-text-primary)"),
@@ -641,24 +741,28 @@ def update_explorer_table(search, pos, subrole, comp, squad, nation, age_preset,
                 dmc.TableTd(dmc.Text(f"{r['Min']:,}", size="xs", c="var(--scout-text-muted)", style={"fontVariantNumeric": "tabular-nums"})),
                 dmc.TableTd(dmc.Text(str(ga), size="xs", fw=600, c="var(--scout-text-primary)", style={"fontVariantNumeric": "tabular-nums"})),
 
-                dmc.TableTd(render_score(r['Finishing_Score'])),
-                dmc.TableTd(render_score(r['Creativity_Score'])),
-                dmc.TableTd(render_score(r['Passing_Score'])),
-                dmc.TableTd(render_score(r['Progression_Score'])),
-                dmc.TableTd(render_score(r['Defending_Score'])),
-                dmc.TableTd(render_score(r['BallSecurity_Score'])),
-                dmc.TableTd(render_score(r['Aerial_Score'])),
-
-                dmc.TableTd(
-                    dcc.Link(
-                        dmc.Button("Dossier →", size="xs", variant="subtle", color="teal"),
-                        href=profile_url,
-                        style={"textDecoration": "none"},
-                    ),
-                    style={"textAlign": "center"},
-                ),
+                render_score(r['Finishing_Score']),
+                render_score(r['Creativity_Score']),
+                render_score(r['Passing_Score']),
+                render_score(r['Progression_Score']),
+                render_score(r['Defending_Score']),
+                render_score(r['BallSecurity_Score']),
+                render_score(r['Aerial_Score']),
             ])
         )
+
+    if total_matching == 0:
+        rows = [
+            dmc.TableTr([
+                dmc.TableTd(
+                    dmc.Box([
+                        dmc.Text("No candidates matched your exact screening criteria.", size="xs", fw=600, c="var(--scout-text-primary)"),
+                        dmc.Text("Try lowering the minimum minutes threshold or adjusting score sliders.", size="11px", c="var(--scout-text-muted)", mt=2),
+                    ], style={"textAlign": "center", "padding": "28px 12px"}),
+                    colSpan=14,
+                )
+            ])
+        ]
 
     tbody = dmc.TableTbody(rows)
 

@@ -23,6 +23,24 @@ PLAYER_COMPARE_COLORS = [
 ]
 
 
+def _get_chart_theme_tokens(theme="dark"):
+    """Centralized chart theme palette helper for dark and light themes."""
+    is_light = (theme == "light")
+    return {
+        "is_light": is_light,
+        "text_color": "#0F172A" if is_light else "#F8FAFC",
+        "muted_color": "#475569" if is_light else "#CBD5E1",
+        "grid_color": "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)",
+        "line_color": "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)",
+        "wedge_border": "rgba(15, 23, 42, 0.18)" if is_light else "rgba(128, 128, 128, 0.25)",
+        "zeroline_color": "rgba(15, 23, 42, 0.12)" if is_light else "rgba(128, 128, 128, 0.20)",
+        "halo_color": "rgba(16, 185, 129, 0.18)" if is_light else "rgba(16, 185, 129, 0.25)",
+        "pin_accent": "#059669" if is_light else "#10B981",
+        "pin_fill": "#FFFFFF" if is_light else "#0F172A",
+        "card_bg": "#FFFFFF" if is_light else "#1E293B",
+    }
+
+
 def build_radar_chart(players, include_position_avg=False, position_avg_scores=None, height=380, theme="dark"):
     """
     Builds a 7-dimensional radar chart for one or multiple players.
@@ -34,11 +52,12 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
         height (int): Figure height.
         theme (str): 'dark' or 'light'.
     """
-    is_light = (theme == "light")
-    text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#475569" if is_light else "#CBD5E1"
-    grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
-    line_color = "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)"
+    tokens = _get_chart_theme_tokens(theme)
+    is_light = tokens["is_light"]
+    text_color = tokens["text_color"]
+    muted_color = tokens["muted_color"]
+    grid_color = tokens["grid_color"]
+    line_color = tokens["line_color"]
 
     categories = list(ATTRIBUTE_COLUMNS.keys())
     # Closed loop for radar chart
@@ -124,12 +143,13 @@ def build_pizza_chart(player, height=400, theme="dark"):
       - Possession & Creation (Sky Blue #0EA5E9): xA/90, Key Passes/90, Prog Passes/90, Prog Carries/90
       - Defending & Physical (Pitch Lime #84CC16): pAdj Tackles/90, pAdj Interceptions/90, pAdj Clearances/90, Aerial Win %
     """
-    is_light = (theme == "light")
-    text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#475569" if is_light else "#CBD5E1"
-    grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
-    line_color = "rgba(15, 23, 42, 0.16)" if is_light else "rgba(128, 128, 128, 0.20)"
-    wedge_border = "rgba(15, 23, 42, 0.18)" if is_light else "rgba(128, 128, 128, 0.25)"
+    tokens = _get_chart_theme_tokens(theme)
+    is_light = tokens["is_light"]
+    text_color = tokens["text_color"]
+    muted_color = tokens["muted_color"]
+    grid_color = tokens["grid_color"]
+    line_color = tokens["line_color"]
+    wedge_border = tokens["wedge_border"]
 
     if player is None:
         fig = go.Figure()
@@ -260,10 +280,11 @@ def build_comparison_bars(players, height=380, theme="dark"):
     """
     Builds a grouped bar chart comparing multiple players across the 7 attributes.
     """
-    is_light = (theme == "light")
-    text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#475569" if is_light else "#CBD5E1"
-    grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.15)"
+    tokens = _get_chart_theme_tokens(theme)
+    is_light = tokens["is_light"]
+    text_color = tokens["text_color"]
+    muted_color = tokens["muted_color"]
+    grid_color = tokens["grid_color"]
 
     categories = list(ATTRIBUTE_COLUMNS.keys())
     fig = go.Figure()
@@ -317,15 +338,16 @@ def build_pca_cluster_scatter(df, pos="FW", selected_cluster="ALL", highlight_pl
     Builds an interactive 2D PCA scatter plot colored by Playing Style clusters.
     Optionally highlights coordinates for a specific targeted player.
     """
-    is_light = (theme == "light")
-    text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#475569" if is_light else "#CBD5E1"
-    grid_color = "rgba(15, 23, 42, 0.08)" if is_light else "rgba(128, 128, 128, 0.15)"
-    zeroline_color = "rgba(15, 23, 42, 0.12)" if is_light else "rgba(128, 128, 128, 0.20)"
-    halo_color = "rgba(16, 185, 129, 0.18)" if is_light else "rgba(132, 204, 22, 0.22)"
-    pin_accent = "#10B981" if is_light else "#84CC16"
-    pin_fill = "#0F172A" if is_light else "#FFFFFF"
-    card_bg = "#FFFFFF" if is_light else "#1E293B"
+    tokens = _get_chart_theme_tokens(theme)
+    is_light = tokens["is_light"]
+    text_color = tokens["text_color"]
+    muted_color = tokens["muted_color"]
+    grid_color = tokens["grid_color"]
+    zeroline_color = tokens["zeroline_color"]
+    halo_color = tokens["halo_color"]
+    pin_accent = tokens["pin_accent"]
+    pin_fill = tokens["pin_fill"]
+    card_bg = tokens["card_bg"]
 
     pos_df = df[df["Pos"] == pos].copy()
 
@@ -477,10 +499,11 @@ def build_cluster_dna_radar(cluster_summary_df, pos="FW", height=420, theme="dar
     """
     Builds an overlaid radar chart comparing the 4 tactical cluster profiles for a position.
     """
-    is_light = (theme == "light")
-    text_color = "#0F172A" if is_light else "#F8FAFC"
-    muted_color = "#475569" if is_light else "#CBD5E1"
-    grid_color = "rgba(15, 23, 42, 0.10)" if is_light else "rgba(128, 128, 128, 0.15)"
+    tokens = _get_chart_theme_tokens(theme)
+    is_light = tokens["is_light"]
+    text_color = tokens["text_color"]
+    muted_color = tokens["muted_color"]
+    grid_color = tokens["grid_color"]
 
     categories = list(ATTRIBUTE_COLUMNS.keys())
     categories_closed = categories + [categories[0]]

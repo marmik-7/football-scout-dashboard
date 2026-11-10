@@ -73,6 +73,13 @@ def layout(player=None, **kwargs):
                                 value=initial_player,
                                 searchable=True,
                                 allowDeselect=False,
+                                leftSection=html.Img(
+                                    src="/assets/search.svg",
+                                    alt="Search",
+                                    style={"width": "14px", "height": "14px", "display": "block", "opacity": 0.85},
+                                ),
+                                leftSectionPointerEvents="none",
+                                className="scout-search-input",
                             ),
                             span={"base": 12, "md": 5},
                         ),
@@ -97,6 +104,7 @@ def layout(player=None, **kwargs):
                                         ),
                                         id="profile-compare-btn",
                                         href="/player-comparison",
+                                        style={"textDecoration": "none"},
                                     ),
                                     dmc.Anchor(
                                         dmc.Button(
@@ -107,6 +115,7 @@ def layout(player=None, **kwargs):
                                         ),
                                         id="profile-similar-btn",
                                         href="/similar-players",
+                                        style={"textDecoration": "none"},
                                     ),
                                 ],
                                 gap="xs",
@@ -287,51 +296,6 @@ def layout(player=None, **kwargs):
                         ],
                         value="attributes",
                     ),
-
-                    # ACCORDION 3: DATA QUALITY & PROVENANCE VERIFICATION (LAYER 4)
-                    dmc.AccordionItem(
-                        [
-                            dmc.AccordionControl(
-                                dmc.Group([
-                                    dmc.Text("Data Quality & Provenance Verification", fw=700, size="sm", c="var(--scout-text-primary)"),
-                                    dmc.Badge("DATA AUDIT & PROVENANCE", color="teal", variant="light", size="xs"),
-                                    dmc.Text("Sample size validation, Opta event coverage, and analytical confidence", size="xs", c="dimmed"),
-                                ], gap="xs")
-                            ),
-                            dmc.AccordionPanel(
-                                dmc.Grid(
-                                    [
-                                        dmc.GridCol(
-                                            dmc.Box([
-                                                dmc.Text("SAMPLE SIZE INTEGRITY", size="10px", fw=700, c="var(--scout-text-muted)"),
-                                                dmc.Text("Standard Threshold Validation", size="xs", fw=600, c="var(--scout-text-primary)", mt=2),
-                                                dmc.Text("Rate metrics qualified against the 900-minute benchmark for statistical reliability.", size="10px", c="var(--scout-text-secondary)", mt=2),
-                                            ], style={"padding": "10px 12px", "backgroundColor": "var(--scout-surface-secondary)", "borderRadius": "4px", "border": "1px solid var(--scout-border)"}),
-                                            span={"base": 12, "sm": 4},
-                                        ),
-                                        dmc.GridCol(
-                                            dmc.Box([
-                                                dmc.Text("DATA PROVENANCE & LEAGUE COVERAGE", size="10px", fw=700, c="var(--scout-text-muted)"),
-                                                dmc.Text("Opta / FBref 2024–25 Event Stream", size="xs", fw=600, c="var(--scout-text-primary)", mt=2),
-                                                dmc.Text("European Big 5 league match events with possession adjustment (pAdj).", size="10px", c="var(--scout-text-secondary)", mt=2),
-                                            ], style={"padding": "10px 12px", "backgroundColor": "var(--scout-surface-secondary)", "borderRadius": "4px", "border": "1px solid var(--scout-border)"}),
-                                            span={"base": 12, "sm": 4},
-                                        ),
-                                        dmc.GridCol(
-                                            dmc.Box([
-                                                dmc.Text("ANALYTICAL CONFIDENCE", size="10px", fw=700, c="var(--scout-text-muted)"),
-                                                dmc.Text("Peer Cohort Benchmarking", size="xs", fw=600, c="#10B981", mt=2),
-                                                dmc.Text("Standardized percentile ranks computed strictly within positional peer groups.", size="10px", c="var(--scout-text-secondary)", mt=2),
-                                            ], style={"padding": "10px 12px", "backgroundColor": "var(--scout-surface-secondary)", "borderRadius": "4px", "border": "1px solid var(--scout-border)"}),
-                                            span={"base": 12, "sm": 4},
-                                        ),
-                                    ],
-                                    gap="sm",
-                                )
-                            ),
-                        ],
-                        value="data_quality",
-                    ),
                 ],
             ),
 
@@ -359,11 +323,10 @@ def layout(player=None, **kwargs):
     Input("profile-player-select", "value"),
     Input("profile-metric-mode", "value"),
     Input("profile-chart-type-toggle", "value"),
-    Input("scout-analyst-mode", "data"),
     Input("theme-store", "data"),
 )
-def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza", scout_analyst_mode="scout", theme="dark"):
-    scout_analyst_mode = scout_analyst_mode or "scout"
+def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza", theme="dark", **kwargs):
+    scout_analyst_mode = kwargs.get("scout_analyst_mode", "scout")
     theme = theme or "dark"
     player = get_player_by_name(selected_name)
     if player is None:
@@ -415,7 +378,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
                                 dmc.Group(
                                     [
                                         dmc.Title(name, order=2, c="var(--scout-text-primary)", style={"fontSize": "22px", "fontWeight": 700}),
-                                        dmc.Badge(pos_name, color=pos_badge_color, variant="filled", size="sm"),
+                                        dmc.Badge(pos_name, color=pos_badge_color, variant="light", size="sm"),
                                         dmc.Badge(subrole, color="cyan", variant="light", size="sm"),
                                         *([sample_badge] if sample_badge else []),
                                     ],
@@ -682,7 +645,7 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
             style={
                 "backgroundColor": "var(--scout-surface-secondary)",
                 "border": "1px solid var(--scout-accent-border)",
-                "borderRadius": "5px",
+                "borderRadius": "6px",
                 "padding": "10px 14px",
                 "marginTop": "6px",
             },
@@ -696,168 +659,206 @@ def update_player_profile(selected_name, metric_mode="per90", chart_type="pizza"
     g_xg = float(player.get("G-xG", 0.0))
     npxg_sh = float(player.get("npxG/Sh", 0.0))
 
-    if scout_analyst_mode == "scout":
-        # Role-tailored 6-metric focus
-        role_metric_keys = get_role_metrics(subrole, pos)
-        stat_items = []
-        for mk in role_metric_keys:
-            info = get_metric_info(mk)
-            label = info["scout_name"]
-            desc = info["description"]
+    # Primary Role-tailored 6-metric focus
+    role_metric_keys = get_role_metrics(subrole, pos)
+    stat_items = []
+    for mk in role_metric_keys:
+        info = get_metric_info(mk)
+        label = info["scout_name"]
+        desc = info["description"]
 
-            # Compute value based on per90 or total
-            if mk == "Gls_per90":
-                val = f"{player.get('Gls_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Gls', 0)))
-            elif mk == "xG_per90":
-                val = f"{player.get('xG_per90', 0.0):.2f}" if metric_mode == "per90" else f"{player.get('xG', 0.0):.2f}"
-            elif mk == "G-xG":
-                val = f"{g_xg:+.2f}"
-            elif mk == "npxG/Sh":
-                val = f"{npxg_sh:.2f}"
-            elif mk == "Ast_per90":
-                val = f"{player.get('Ast_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Ast', 0)))
-            elif mk == "xA_per90":
-                val = f"{player.get('xA_per90', 0.0):.2f}" if metric_mode == "per90" else f"{player.get('xA', 0.0):.2f}"
-            elif mk == "KP_per90":
-                val = f"{player.get('KP_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('KP', 0)))
-            elif mk == "SCA_per90":
-                val = f"{player.get('SCA_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('SCA', 0)))
-            elif mk == "PrgP_per90":
-                val = f"{player.get('PrgP_per90', 0.0):.1f}" if metric_mode == "per90" else str(int(player.get('PrgP', 0)))
-            elif mk == "PrgC_per90":
-                val = f"{player.get('PrgC_per90', 0.0):.1f}" if metric_mode == "per90" else str(int(player.get('PrgC', 0)))
-            elif mk == "Cmp%":
-                val = f"{cmp_pct:.1f}%"
-            elif mk == "Won%":
-                val = f"{won_pct:.1f}%"
-            elif mk == "Tkl_pAdj_per90":
-                val = f"{player.get('Tkl_pAdj_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Tkl_pAdj', 0)))
-            elif mk == "Int_pAdj_per90":
-                val = f"{player.get('Int_pAdj_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Int_pAdj', 0)))
-            elif mk == "Clr_pAdj_per90":
-                val = f"{player.get('Clr_pAdj_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Clr_pAdj', 0)))
-            else:
-                raw_val = player.get(mk, 0.0)
-                val = f"{float(raw_val):.2f}" if isinstance(raw_val, (int, float)) else str(raw_val)
-
-            stat_items.append((label, val, desc))
-
-        stat_cols = [
-            dmc.GridCol(
-                dmc.Box(
-                    [
-                        dmc.Text(label.upper(), size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
-                        dmc.Text(str(val), size="sm", fw=700, c="var(--scout-text-primary)", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
-                        dmc.Text(desc, size="10px", c="dimmed", mt=1, lineClamp=1),
-                    ],
-                    style={
-                        "backgroundColor": "var(--scout-surface-secondary)",
-                        "border": "1px solid var(--scout-border)",
-                        "borderRadius": "4px",
-                        "padding": "10px 12px",
-                    },
-                ),
-                span={"base": 6, "sm": 4},
-            )
-            for label, val, desc in stat_items
-        ]
-
-        stats_grid = dmc.Box([
-            dmc.Grid(stat_cols, gap="xs"),
-            dmc.Group([
-                dmc.Badge("ROLE-TAILORED METRICS", color="teal", variant="outline", size="xs"),
-                dmc.Text(
-                    f"Showing 6 primary production indicators prioritized for {subrole}. Switch to Analyst View in the header for all 15 advanced metrics and pAdj distributions.",
-                    size="10.5px",
-                    c="var(--scout-text-muted)",
-                ),
-            ], gap="xs", align="center", mt="md"),
-        ])
-
-    else:
-        # Analyst View: Comprehensive 15-item matrix with mathematical adjustments
-        if metric_mode == "per90":
-            stat_items = [
-                ("Goals / 90", f"{player.get('Gls_per90', 0.0):.2f}", "Scored per 90 min"),
-                ("Expected Goals (xG) / 90", f"{player.get('xG_per90', 0.0):.2f}", "Chance quality per 90"),
-                ("Finishing Diff (G - xG)", f"{g_xg:+.2f}", "Variance vs expected"),
-                ("Shot Quality (npxG/Sh)", f"{npxg_sh:.2f}", "Avg quality per attempt"),
-                ("Assists / 90", f"{player.get('Ast_per90', 0.0):.2f}", "Goal assists per 90"),
-                ("Expected Assists (xA) / 90", f"{player.get('xA_per90', 0.0):.2f}", "Assisting chance quality"),
-                ("Key Passes / 90", f"{player.get('KP_per90', 0.0):.2f}", "Shot-creating passes"),
-                ("SCA / 90", f"{player.get('SCA_per90', 0.0):.2f}", "Shot-creating actions"),
-                ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy"),
-                ("Prog. Passes / 90", f"{player.get('PrgP_per90', 0.0):.1f}", "Passes ≥10 yds closer"),
-                ("Prog. Carries / 90", f"{player.get('PrgC_per90', 0.0):.1f}", "Carries ≥10 yds closer"),
-                ("Shots (on Target) / 90", f"{player.get('Sh_per90', 0.0):.2f} ({player.get('SoT_per90', 0.0):.2f})", "Shot volume / 90"),
-                ("pAdj Defending / 90", f"{player.get('Tkl_pAdj_per90', 0.0) + player.get('Int_pAdj_per90', 0.0):.2f}", f"Adjusted ({padj_factor:.2f}x)"),
-                ("Raw Tackles + Int / 90", f"{player.get('Tkl_per90', 0.0) + player.get('Int_per90', 0.0):.2f}", "Unadjusted match rate"),
-                ("Aerials Won / 90", f"{player.get('Won_per90', 0.0):.2f}", f"Win rate: {won_pct:.1f}%"),
-            ]
+        # Compute value based on per90 or total
+        if mk == "Gls_per90":
+            val = f"{player.get('Gls_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Gls', 0)))
+        elif mk == "xG_per90":
+            val = f"{player.get('xG_per90', 0.0):.2f}" if metric_mode == "per90" else f"{player.get('xG', 0.0):.2f}"
+        elif mk == "G-xG":
+            val = f"{g_xg:+.2f}"
+        elif mk == "npxG/Sh":
+            val = f"{npxg_sh:.2f}"
+        elif mk == "Ast_per90":
+            val = f"{player.get('Ast_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Ast', 0)))
+        elif mk == "xA_per90":
+            val = f"{player.get('xA_per90', 0.0):.2f}" if metric_mode == "per90" else f"{player.get('xA', 0.0):.2f}"
+        elif mk == "KP_per90":
+            val = f"{player.get('KP_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('KP', 0)))
+        elif mk == "SCA_per90":
+            val = f"{player.get('SCA_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('SCA', 0)))
+        elif mk == "PrgP_per90":
+            val = f"{player.get('PrgP_per90', 0.0):.1f}" if metric_mode == "per90" else str(int(player.get('PrgP', 0)))
+        elif mk == "PrgC_per90":
+            val = f"{player.get('PrgC_per90', 0.0):.1f}" if metric_mode == "per90" else str(int(player.get('PrgC', 0)))
+        elif mk == "Cmp%":
+            val = f"{cmp_pct:.1f}%"
+        elif mk == "Won%":
+            val = f"{won_pct:.1f}%"
+        elif mk == "Tkl_pAdj_per90":
+            val = f"{player.get('Tkl_pAdj_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Tkl_pAdj', 0)))
+        elif mk == "Int_pAdj_per90":
+            val = f"{player.get('Int_pAdj_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Int_pAdj', 0)))
+        elif mk == "Clr_pAdj_per90":
+            val = f"{player.get('Clr_pAdj_per90', 0.0):.2f}" if metric_mode == "per90" else str(int(player.get('Clr_pAdj', 0)))
         else:
-            gls = int(player.get("Gls", 0))
-            ast = int(player.get("Ast", 0))
-            xg = float(player.get("xG", 0.0))
-            xa = float(player.get("xA", 0.0))
-            sh = int(player.get("Sh", 0))
-            sot = int(player.get("SoT", 0))
-            kp = int(player.get("KP", 0))
-            sca = int(player.get("SCA", 0))
-            prgp = int(player.get("PrgP", 0))
-            prgc = int(player.get("PrgC", 0))
-            tkl_int_padj = int(player.get("Tkl_pAdj", 0) + player.get("Int_pAdj", 0))
-            tkl_int = int(player.get("Tkl", 0) + player.get("Int", 0))
-            won = int(player.get("Won", 0))
+            raw_val = player.get(mk, 0.0)
+            val = f"{float(raw_val):.2f}" if isinstance(raw_val, (int, float)) else str(raw_val)
 
-            stat_items = [
-                ("Goals", str(gls), "Season total goals"),
-                ("Expected Goals (xG)", f"{xg:.2f}", "Season total xG"),
-                ("Finishing Diff (G - xG)", f"{g_xg:+.2f}", "Total variance vs xG"),
-                ("Shot Quality (npxG/Sh)", f"{npxg_sh:.2f}", "Avg quality per shot"),
-                ("Assists", str(ast), "Season total assists"),
-                ("Expected Assists (xA)", f"{xa:.2f}", "Season total xA"),
-                ("Key Passes", str(kp), "Season total key passes"),
-                ("Shot-Creating Actions", str(sca), "Season total creation actions"),
-                ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy"),
-                ("Progressive Passes", str(prgp), "Season total prog passes"),
-                ("Progressive Carries", str(prgc), "Season total prog carries"),
-                ("Shots (on Target)", f"{sh} ({sot})", "Season total attempts"),
-                ("pAdj Defending Actions", str(tkl_int_padj), f"Adjusted ({padj_factor:.2f}x)"),
-                ("Raw Tackles + Int", str(tkl_int), "Unadjusted defensive actions"),
-                ("Aerial Duels Won", str(won), f"Won ({won_pct:.1f}% win rate)"),
-            ]
+        stat_items.append((label, val, desc))
 
-        stat_cols = [
-            dmc.GridCol(
-                dmc.Box(
-                    [
-                        dmc.Text(label.upper(), size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
-                        dmc.Text(str(val), size="sm", fw=700, c="var(--scout-text-primary)", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
-                        dmc.Text(desc, size="10px", c="dimmed", mt=1),
-                    ],
-                    style={
-                        "backgroundColor": "var(--scout-surface-secondary)",
-                        "border": "1px solid var(--scout-border)",
-                        "borderRadius": "4px",
-                        "padding": "8px 10px",
-                    },
-                ),
-                span={"base": 6, "sm": 4},
-            )
-            for label, val, desc in stat_items
+    stat_cols = [
+        dmc.GridCol(
+            dmc.Box(
+                [
+                    dmc.Text(label.upper(), size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
+                    dmc.Text(str(val), size="sm", fw=700, c="var(--scout-text-primary)", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
+                    dmc.Text(desc, size="10px", c="dimmed", mt=1, lineClamp=1),
+                ],
+                style={
+                    "backgroundColor": "var(--scout-surface-secondary)",
+                    "border": "1px solid var(--scout-border)",
+                    "borderRadius": "4px",
+                    "padding": "10px 12px",
+                },
+            ),
+            span={"base": 6, "sm": 4},
+        )
+        for label, val, desc in stat_items
+    ]
+
+    # Comprehensive 15-item matrix with mathematical adjustments
+    if metric_mode == "per90":
+        analyst_items = [
+            ("Goals / 90", f"{player.get('Gls_per90', 0.0):.2f}", "Scored per 90 min"),
+            ("Expected Goals (xG) / 90", f"{player.get('xG_per90', 0.0):.2f}", "Chance quality per 90"),
+            ("Finishing Diff (G - xG)", f"{g_xg:+.2f}", "Variance vs expected"),
+            ("Shot Quality (npxG/Sh)", f"{npxg_sh:.2f}", "Avg quality per attempt"),
+            ("Assists / 90", f"{player.get('Ast_per90', 0.0):.2f}", "Goal assists per 90"),
+            ("Expected Assists (xA) / 90", f"{player.get('xA_per90', 0.0):.2f}", "Assisting chance quality"),
+            ("Key Passes / 90", f"{player.get('KP_per90', 0.0):.2f}", "Shot-creating passes"),
+            ("SCA / 90", f"{player.get('SCA_per90', 0.0):.2f}", "Shot-creating actions"),
+            ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy"),
+            ("Prog. Passes / 90", f"{player.get('PrgP_per90', 0.0):.1f}", "Passes ≥10 yds closer"),
+            ("Prog. Carries / 90", f"{player.get('PrgC_per90', 0.0):.1f}", "Carries ≥10 yds closer"),
+            ("Shots (on Target) / 90", f"{player.get('Sh_per90', 0.0):.2f} ({player.get('SoT_per90', 0.0):.2f})", "Shot volume / 90"),
+            ("pAdj Defending / 90", f"{player.get('Tkl_pAdj_per90', 0.0) + player.get('Int_pAdj_per90', 0.0):.2f}", f"Adjusted ({padj_factor:.2f}x)"),
+            ("Raw Tackles + Int / 90", f"{player.get('Tkl_per90', 0.0) + player.get('Int_per90', 0.0):.2f}", "Unadjusted match rate"),
+            ("Aerials Won / 90", f"{player.get('Won_per90', 0.0):.2f}", f"Win rate: {won_pct:.1f}%"),
+        ]
+    else:
+        gls = int(player.get("Gls", 0))
+        ast = int(player.get("Ast", 0))
+        xg = float(player.get("xG", 0.0))
+        xa = float(player.get("xA", 0.0))
+        sh = int(player.get("Sh", 0))
+        sot = int(player.get("SoT", 0))
+        kp = int(player.get("KP", 0))
+        sca = int(player.get("SCA", 0))
+        prgp = int(player.get("PrgP", 0))
+        prgc = int(player.get("PrgC", 0))
+        tkl_int_padj = int(player.get("Tkl_pAdj", 0) + player.get("Int_pAdj", 0))
+        tkl_int = int(player.get("Tkl", 0) + player.get("Int", 0))
+        won = int(player.get("Won", 0))
+
+        analyst_items = [
+            ("Goals", str(gls), "Season total goals"),
+            ("Expected Goals (xG)", f"{xg:.2f}", "Season total xG"),
+            ("Finishing Diff (G - xG)", f"{g_xg:+.2f}", "Total variance vs xG"),
+            ("Shot Quality (npxG/Sh)", f"{npxg_sh:.2f}", "Avg quality per shot"),
+            ("Assists", str(ast), "Season total assists"),
+            ("Expected Assists (xA)", f"{xa:.2f}", "Season total xA"),
+            ("Key Passes", str(kp), "Season total key passes"),
+            ("Shot-Creating Actions", str(sca), "Season total creation actions"),
+            ("Pass Completion %", f"{cmp_pct:.1f}%", "Passing accuracy"),
+            ("Progressive Passes", str(prgp), "Season total prog passes"),
+            ("Progressive Carries", str(prgc), "Season total prog carries"),
+            ("Shots (on Target)", f"{sh} ({sot})", "Season total attempts"),
+            ("pAdj Defending Actions", str(tkl_int_padj), f"Adjusted ({padj_factor:.2f}x)"),
+            ("Raw Tackles + Int", str(tkl_int), "Unadjusted defensive actions"),
+            ("Aerial Duels Won", str(won), f"Won ({won_pct:.1f}% win rate)"),
         ]
 
-        stats_grid = dmc.Box([
-            dmc.Grid(stat_cols, gap="xs"),
-            dmc.Group([
-                dmc.Badge("ANALYST VIEW ACTIVE", color="indigo", variant="outline", size="xs"),
-                dmc.Text(
-                    f"Showing complete 15-attribute analytical matrix with possession-adjusted (pAdj) defending factors ({padj_factor:.2f}x), shot quality, and finishing differentials.",
-                    size="10.5px",
-                    c="#818CF8",
-                ),
-            ], gap="xs", align="center", mt="md"),
-        ])
+    analyst_cols = [
+        dmc.GridCol(
+            dmc.Box(
+                [
+                    dmc.Text(label.upper(), size="10px", fw=700, c="dimmed", style={"letterSpacing": "0.5px"}),
+                    dmc.Text(str(val), size="sm", fw=700, c="var(--scout-text-primary)", mt=2, style={"fontVariantNumeric": "tabular-nums"}),
+                    dmc.Text(desc, size="10px", c="dimmed", mt=1),
+                ],
+                style={
+                    "backgroundColor": "var(--scout-surface-secondary)",
+                    "border": "1px solid var(--scout-border)",
+                    "borderRadius": "4px",
+                    "padding": "8px 10px",
+                },
+            ),
+            span={"base": 6, "sm": 4},
+        )
+        for label, val, desc in analyst_items
+    ]
+
+    advanced_accordion = dmc.Accordion(
+        value="advanced" if scout_analyst_mode == "analyst" else None,
+        styles={
+            "item": {
+                "backgroundColor": "var(--scout-surface-secondary)",
+                "border": "1px solid var(--scout-border)",
+                "borderRadius": "4px",
+                "marginTop": "10px",
+            },
+            "control": {
+                "color": "var(--scout-text-primary)",
+                "padding": "8px 12px",
+            },
+            "panel": {
+                "padding": "0 12px 12px 12px",
+            },
+        },
+        children=[
+            dmc.AccordionItem(
+                [
+                    dmc.AccordionControl(
+                        dmc.Group([
+                            dmc.Text("Comprehensive Advanced Statistical Matrix (15 Metrics)", fw=700, size="xs", c="var(--scout-text-primary)"),
+                            dmc.Badge(
+                                "ANALYST MATRIX (OPEN)" if scout_analyst_mode == "analyst" else "EXPAND ADVANCED METRICS",
+                                color="indigo" if scout_analyst_mode == "analyst" else "teal",
+                                variant="light",
+                                size="xs",
+                            ),
+                            dmc.Text("Click to view complete volume, shot selection & pAdj defending metrics", size="10px", c="dimmed"),
+                        ], gap="xs")
+                    ),
+                    dmc.AccordionPanel(
+                        dmc.Box([
+                            dmc.Grid(analyst_cols, gap="xs"),
+                            dmc.Group([
+                                dmc.Badge("ANALYST VIEW ACTIVE" if scout_analyst_mode == "analyst" else "ADVANCED DETAIL", color="indigo", variant="outline", size="xs"),
+                                dmc.Text(
+                                    f"Showing complete 15-attribute analytical matrix with possession-adjusted (pAdj) defending factors ({padj_factor:.2f}x), shot quality, and finishing differentials.",
+                                    size="10.5px",
+                                    c="var(--scout-text-secondary)",
+                                ),
+                            ], gap="xs", align="center", mt="md"),
+                        ])
+                    ),
+                ],
+                value="advanced",
+            )
+        ],
+    )
+
+    stats_grid = dmc.Box([
+        dmc.Grid(stat_cols, gap="xs"),
+        dmc.Group([
+            dmc.Badge("ROLE-TAILORED METRICS", color="teal", variant="outline", size="xs"),
+            dmc.Text(
+                f"Showing 6 primary production indicators prioritized for {subrole}. Expand below for all 15 advanced metrics and pAdj distributions.",
+                size="10.5px",
+                c="var(--scout-text-muted)",
+            ),
+        ], gap="xs", align="center", mt="xs", mb="xs"),
+        advanced_accordion,
+    ])
 
     compare_href = f"/player-comparison?player1={player['Player_Unique']}"
     similar_href = f"/similar-players?player={player['Player_Unique']}"

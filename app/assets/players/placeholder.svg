@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
-  <rect width="100" height="100" rx="8" fill="#1E293B"/>
-  <circle cx="50" cy="38" r="18" fill="#475569"/>
-  <path d="M22 84 C22 66, 34 58, 50 58 C66 58, 78 66, 78 84 Z" fill="#475569"/>
+  <defs>
+    <linearGradient id="scoutSilhouette" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#94A3B8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#64748B" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="44" fill="#94A3B8" fill-opacity="0.08"/>
+  <circle cx="50" cy="35" r="16" fill="url(#scoutSilhouette)"/>
+  <path d="M20 86 C20 70 32 58 43 56 C45 61 50 64 50 64 C50 64 55 61 57 56 C68 58 80 70 80 86 Z" fill="url(#scoutSilhouette)"/>
+  <path d="M43 56 C46 62 54 62 57 56" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-opacity="0.4"/>
 </svg>
-
