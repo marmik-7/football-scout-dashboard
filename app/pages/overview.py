@@ -33,6 +33,171 @@ clinical_finishers = int(len(df[df.get("G-xG", 0.0) >= 2.0]))
 elite_defenders = int(len(df[df.get("Defending_Score", 0.0) >= 80.0]))
 
 
+def _build_overview_kpi_card(
+    title,
+    value,
+    description,
+    criteria,
+    kind_label,
+    badge_color="gray",
+    value_color="var(--scout-text-primary)",
+):
+    """Build an Overview KPI card distinguishing cohort counts from performance filters."""
+    return dmc.Box(
+        [
+            dmc.Box(
+                [
+                    dmc.Group(
+                        [
+                            dmc.Text(
+                                title.upper(),
+                                size="10.5px",
+                                fw=700,
+                                style={
+                                    "letterSpacing": "0.6px",
+                                    "color": "var(--scout-text-secondary)",
+                                    "lineHeight": 1.3,
+                                    "flex": "1 1 110px",
+                                    "minWidth": 0,
+                                },
+                            ),
+                            dmc.Badge(
+                                kind_label,
+                                color=badge_color,
+                                variant="light",
+                                size="xs",
+                                style={"flexShrink": 0},
+                            ),
+                        ],
+                        justify="space-between",
+                        align="center",
+                        gap="6px",
+                        wrap="wrap",
+                    ),
+                    dmc.Text(
+                        str(value),
+                        fw=700,
+                        mt=8,
+                        style={
+                            "fontVariantNumeric": "tabular-nums",
+                            "fontWeight": 700,
+                            "letterSpacing": "-0.025em",
+                            "fontSize": "25px",
+                            "lineHeight": 1.15,
+                            "color": value_color,
+                        },
+                    ),
+                    dmc.Text(
+                        description,
+                        size="12px",
+                        mt=6,
+                        style={
+                            "lineHeight": 1.4,
+                            "color": "var(--scout-text-secondary)",
+                        },
+                    ),
+                ]
+            ),
+            dmc.Text(
+                criteria,
+                className="scout-overview-kpi__criteria",
+            ),
+        ],
+        className="scout-overview-kpi",
+    )
+
+
+def _build_spotlight_card(
+    player_name,
+    category_label,
+    role_label,
+    meta_line,
+    summary,
+    accent_color,
+):
+    """Build a consistent Spotlight candidate card with player name as primary anchor."""
+    return dmc.Box(
+        [
+            dmc.Box(
+                [
+                    dmc.Group(
+                        [
+                            dmc.Badge(
+                                category_label,
+                                color=accent_color,
+                                variant="light",
+                                size="xs",
+                            ),
+                            dmc.Text(
+                                role_label,
+                                size="11px",
+                                fw=600,
+                                c="var(--scout-text-muted)",
+                            ),
+                        ],
+                        justify="space-between",
+                        align="center",
+                        gap="xs",
+                    ),
+                    dmc.Group(
+                        [
+                            render_player_portrait(player_name, size=36, radius=6),
+                            dmc.Box(
+                                [
+                                    dmc.Text(
+                                        player_name,
+                                        fw=700,
+                                        c="var(--scout-text-primary)",
+                                        style={
+                                            "fontSize": "15.5px",
+                                            "lineHeight": 1.25,
+                                            "letterSpacing": "-0.015em",
+                                        },
+                                    ),
+                                    dmc.Text(
+                                        meta_line,
+                                        size="xs",
+                                        c="var(--scout-text-secondary)",
+                                        mt=2,
+                                        style={"lineHeight": 1.35},
+                                    ),
+                                ],
+                                style={"minWidth": 0, "flex": 1},
+                            ),
+                        ],
+                        gap="sm",
+                        align="center",
+                        mt=10,
+                        wrap="nowrap",
+                    ),
+                    dmc.Text(
+                        summary,
+                        c="var(--scout-text-secondary)",
+                        mt=10,
+                        style={"fontSize": "12.5px", "lineHeight": 1.48},
+                    ),
+                ]
+            ),
+            dmc.Box(
+                dcc.Link(
+                    dmc.Button(
+                        "Open Dossier →",
+                        size="xs",
+                        variant="subtle",
+                        color=accent_color,
+                        fw=600,
+                        p=0,
+                    ),
+                    href=f"/player-profile?player={player_name}",
+                    style={"textDecoration": "none"},
+                ),
+                mt=12,
+            ),
+        ],
+        className="scout-spotlight-card",
+    )
+
+
 # --------------------------------------------------
 # PAGE LAYOUT
 # --------------------------------------------------
@@ -49,43 +214,56 @@ layout = dmc.Container(
         dmc.Grid(
             [
                 dmc.GridCol(
-                    create_metric_card(
-                        "Qualified Talent Pool",
-                        f"{total_players:,}",
-                        "European Big 5 leagues (≥600 mins)",
-                        color=TEXT,
+                    _build_overview_kpi_card(
+                        title="Qualified Talent Pool",
+                        value=f"{total_players:,}",
+                        description="Eligible outfielders across Europe's Big 5 leagues",
+                        criteria="Pool: ≥600 mins played (2024–25)",
+                        kind_label="Population",
+                        badge_color="gray",
+                        value_color="var(--scout-text-primary)",
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
                 ),
                 dmc.GridCol(
-                    create_metric_card(
-                        "U-21 Elite Prospects",
-                        u21_prospects,
-                        "Emerging players age ≤21 in database",
-                        color="cyan",
+                    _build_overview_kpi_card(
+                        title="U-21 Elite Prospects",
+                        value=u21_prospects,
+                        description="Emerging young players aged 21 or under in the pool",
+                        criteria="Pool filter: Age ≤ 21 • ≥600 mins",
+                        kind_label="Age Cohort",
+                        badge_color="cyan",
+                        value_color="var(--scout-semantic-blue)",
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
                 ),
                 dmc.GridCol(
-                    create_metric_card(
-                        "Clinical Outperformers",
-                        clinical_finishers,
-                        "Finishing variance G - xG ≥ +2.0",
-                        color="emerald",
+                    _build_overview_kpi_card(
+                        title="Clinical Outperformers",
+                        value=clinical_finishers,
+                        description="Finishers significantly outscoring expected goals",
+                        criteria="Performance: G − xG ≥ +2.0 • ≥600 mins",
+                        kind_label="Perf. Filter",
+                        badge_color="teal",
+                        value_color="var(--scout-semantic-emerald)",
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
                 ),
                 dmc.GridCol(
-                    create_metric_card(
-                        "Elite Ball Winners",
-                        elite_defenders,
-                        "Top 20th percentile defensive actions",
-                        color="blue",
+                    _build_overview_kpi_card(
+                        title="Elite Ball Winners",
+                        value=elite_defenders,
+                        description="Top 20th-percentile performers in positional defending",
+                        criteria="Performance: Defending ≥ 80th pct • ≥600 mins",
+                        kind_label="Perf. Filter",
+                        badge_color="blue",
+                        value_color="var(--scout-semantic-blue)",
                     ),
                     span={"base": 12, "sm": 6, "lg": 3},
                 ),
             ],
             gap="md",
+            align="stretch",
         ),
 
         dmc.Space(h=16),
@@ -95,97 +273,41 @@ layout = dmc.Container(
             dmc.Grid(
                 [
                     dmc.GridCol(
-                        dmc.Box(
-                            [
-                                dmc.Group([
-                                    dmc.Badge("Breakthrough", color="cyan", variant="light", size="xs"),
-                                    dmc.Text("U-21 Winger", size="10px", c="var(--scout-text-muted)"),
-                                ], justify="space-between"),
-                                dmc.Group([
-                                    render_player_portrait("Lamine Yamal", size=36, radius=6),
-                                    dmc.Box([
-                                        dmc.Text("Lamine Yamal", size="sm", fw=700, c="var(--scout-text-primary)"),
-                                        dmc.Text("Barcelona • La Liga • Age 17", size="xs", c="var(--scout-text-secondary)"),
-                                    ]),
-                                ], gap="xs", align="center", mt=6),
-                                dmc.Text("96.1th pct Creativity, elite 1v1 take-on volume and box entries.", size="xs", c="var(--scout-text-secondary)", mt=4),
-                                dcc.Link(
-                                    dmc.Button("Open Dossier →", size="xs", variant="subtle", color="cyan", p=0, mt=8),
-                                    href="/player-profile?player=Lamine Yamal",
-                                    style={"textDecoration": "none"},
-                                ),
-                            ],
-                            style={
-                                "backgroundColor": "var(--scout-surface-secondary)",
-                                "border": "1px solid var(--scout-border)",
-                                "borderRadius": "6px",
-                                "padding": "14px 16px",
-                            },
+                        _build_spotlight_card(
+                            player_name="Lamine Yamal",
+                            category_label="Breakthrough",
+                            role_label="U-21 Winger",
+                            meta_line="Barcelona • La Liga • Age 17",
+                            summary="96.1th pct Creativity, elite 1v1 take-on volume and box entries.",
+                            accent_color="cyan",
                         ),
                         span={"base": 12, "md": 4},
                     ),
                     dmc.GridCol(
-                        dmc.Box(
-                            [
-                                dmc.Group([
-                                    dmc.Badge("Clinical Target", color="emerald", variant="light", size="xs"),
-                                    dmc.Text("Center Forward", size="10px", c="var(--scout-text-muted)"),
-                                ], justify="space-between"),
-                                dmc.Group([
-                                    render_player_portrait("Erling Haaland", size=36, radius=6),
-                                    dmc.Box([
-                                        dmc.Text("Erling Haaland", size="sm", fw=700, c="var(--scout-text-primary)"),
-                                        dmc.Text("Manchester City • Premier League • Age 24", size="xs", c="var(--scout-text-secondary)"),
-                                    ]),
-                                ], gap="xs", align="center", mt=6),
-                                dmc.Text("0.85 Gls/90, 98.4th pct Finishing, unmatched box gravity.", size="xs", c="var(--scout-text-secondary)", mt=4),
-                                dcc.Link(
-                                    dmc.Button("Open Dossier →", size="xs", variant="subtle", color="emerald", p=0, mt=8),
-                                    href="/player-profile?player=Erling Haaland",
-                                    style={"textDecoration": "none"},
-                                ),
-                            ],
-                            style={
-                                "backgroundColor": "var(--scout-surface-secondary)",
-                                "border": "1px solid var(--scout-border)",
-                                "borderRadius": "6px",
-                                "padding": "14px 16px",
-                            },
+                        _build_spotlight_card(
+                            player_name="Erling Haaland",
+                            category_label="Clinical Target",
+                            role_label="Center Forward",
+                            meta_line="Manchester City • Premier League • Age 24",
+                            summary="0.85 Gls/90, 98.4th pct Finishing, unmatched box gravity.",
+                            accent_color="teal",
                         ),
                         span={"base": 12, "md": 4},
                     ),
                     dmc.GridCol(
-                        dmc.Box(
-                            [
-                                dmc.Group([
-                                    dmc.Badge("Defensive Anchor", color="blue", variant="light", size="xs"),
-                                    dmc.Text("Center-Back", size="10px", c="var(--scout-text-muted)"),
-                                ], justify="space-between"),
-                                dmc.Group([
-                                    render_player_portrait("William Saliba", size=36, radius=6),
-                                    dmc.Box([
-                                        dmc.Text("William Saliba", size="sm", fw=700, c="var(--scout-text-primary)"),
-                                        dmc.Text("Arsenal • Premier League • Age 23", size="xs", c="var(--scout-text-secondary)"),
-                                    ]),
-                                ], gap="xs", align="center", mt=6),
-                                dmc.Text("97.2th pct Ball Retention, 93.8% pass accuracy, recovery speed.", size="xs", c="var(--scout-text-secondary)", mt=4),
-                                dcc.Link(
-                                    dmc.Button("Open Dossier →", size="xs", variant="subtle", color="blue", p=0, mt=8),
-                                    href="/player-profile?player=William Saliba",
-                                    style={"textDecoration": "none"},
-                                ),
-                            ],
-                            style={
-                                "backgroundColor": "var(--scout-surface-secondary)",
-                                "border": "1px solid var(--scout-border)",
-                                "borderRadius": "6px",
-                                "padding": "14px 16px",
-                            },
+                        _build_spotlight_card(
+                            player_name="William Saliba",
+                            category_label="Defensive Anchor",
+                            role_label="Center-Back",
+                            meta_line="Arsenal • Premier League • Age 23",
+                            summary="97.2th pct Ball Retention, 93.8% pass accuracy, recovery speed.",
+                            accent_color="blue",
                         ),
                         span={"base": 12, "md": 4},
                     ),
                 ],
                 gap="md",
+                align="stretch",
             ),
             title="Recruitment Market Spotlights",
             subtitle="Curated standout targets across primary scouting profiles in Europe's top 5 leagues",
@@ -198,15 +320,18 @@ layout = dmc.Container(
             [
                 html.Div(id="overview-limitation-notice", style={"marginTop": "2px"}),
                 dmc.Space(h=10),
-                dcc.Graph(
-                    id="overview-top-players-chart",
-                    config={"displayModeBar": False},
-                    responsive=True,
+                html.Div(
+                    dcc.Graph(
+                        id="overview-top-players-chart",
+                        config={"displayModeBar": False, "responsive": True},
+                        responsive=True,
+                    ),
+                    className="scout-chart-container",
                 ),
             ],
             title="Top Benchmark Performers",
             subtitle="Leading candidates ranked by position-relative percentile scores",
-            extra_header=dmc.Group(
+            extra_header=dmc.Box(
                 [
                     dmc.Select(
                         id="overview-position-select",
@@ -217,7 +342,6 @@ layout = dmc.Container(
                             {"label": "All Positions", "value": "ALL"},
                         ],
                         value="FW",
-                        w=165,
                         size="xs",
                         allowDeselect=False,
                     ),
@@ -228,12 +352,11 @@ layout = dmc.Container(
                             for name in ATTRIBUTE_COLUMNS
                         ],
                         value="Finishing",
-                        w=165,
                         size="xs",
                         allowDeselect=False,
                     ),
                 ],
-                gap="xs",
+                className="scout-overview-selectors",
             ),
         ),
     ],
@@ -278,29 +401,61 @@ def update_overview_top_players(position, attribute, theme="dark", *args, **kwar
         filtered_df = df
         pos_display = "Players (All Positions)"
         title_text = f"Top 10 Candidates (All Positions) — {attribute}"
-        notice = dmc.Alert(
-            "Analytical Note: Percentile scores are benchmarked within each player's position peer group. Direct comparisons across different positions reflect within-position rank rather than absolute skill parity.",
-            title="Cross-Position Percentile Comparison",
-            color="yellow",
-            variant="light",
-            radius="sm",
-            p="xs",
-            style={
-                "backgroundColor": "rgba(245, 158, 11, 0.05)",
-                "borderColor": "rgba(245, 158, 11, 0.20)",
-                "color": "var(--scout-text-primary, #F8FAFC)",
-                "fontSize": "12px",
-            },
-        )
+        cohort_label = f"All Positions (n={len(filtered_df):,})"
+        scale_note = "0–100 percentile within each player's own position group"
     else:
         filtered_df = df[df["Pos"] == position]
         pos_display = POSITION_NAMES.get(position, position)
         title_text = f"Top 10 {pos_display} — {attribute}"
-        notice = dmc.Text(
-            f"Rankings benchmarked strictly against other {pos_display.lower()} with ≥600 minutes played. Scores span 0 to 100 percentile.",
-            size="xs",
-            c="var(--scout-text-secondary)",
+        cohort_label = f"{pos_display} only (n={len(filtered_df):,})"
+        scale_note = f"0–100 rank strictly within qualified {pos_display.lower()}"
+
+    context_bar = dmc.Box(
+        [
+            dmc.Group(
+                [
+                    dmc.Badge("2024–25 Big 5", color="teal", variant="light", size="xs"),
+                    dmc.Text(
+                        f"Cohort: {cohort_label}",
+                        size="xs",
+                        fw=600,
+                        c="var(--scout-text-primary)",
+                    ),
+                ],
+                gap="xs",
+                align="center",
+            ),
+            dmc.Text(
+                f"Eligibility: ≥600 mins played  •  Percentile Scale: {scale_note}",
+                size="xs",
+                c="var(--scout-text-secondary)",
+                style={"lineHeight": 1.4},
+            ),
+        ],
+        className="scout-benchmark-context",
+    )
+
+    if position == "ALL":
+        notice = dmc.Stack(
+            [
+                context_bar,
+                dmc.Alert(
+                    "Analytical Note: Percentile scores are benchmarked within each player's position peer group. Direct comparisons across different positions reflect within-position rank rather than absolute skill parity.",
+                    title="Cross-Position Percentile Comparison",
+                    color="yellow",
+                    variant="light",
+                    radius="sm",
+                    p="xs",
+                    style={
+                        "fontSize": "12px",
+                        "color": "var(--scout-text-primary)",
+                    },
+                ),
+            ],
+            gap="xs",
         )
+    else:
+        notice = context_bar
 
     if filtered_df.empty:
         fig = go.Figure()
@@ -313,7 +468,7 @@ def update_overview_top_players(position, attribute, theme="dark", *args, **kwar
             xref="paper",
             yref="paper",
         )
-        fig = style_figure(fig, 380, theme=theme)
+        fig = style_figure(fig, 390, theme=theme)
         return fig, notice
 
     top_players = (
@@ -323,6 +478,8 @@ def update_overview_top_players(position, attribute, theme="dark", *args, **kwar
     )
 
     nat_col = "Nation_Display" if "Nation_Display" in top_players.columns else "Nation_Clean"
+    bar_color = "#059669" if is_light else "#10B981"
+    bar_border = "rgba(4, 120, 87, 0.35)" if is_light else "rgba(52, 211, 153, 0.35)"
 
     fig = go.Figure(
         go.Bar(
@@ -330,11 +487,16 @@ def update_overview_top_players(position, attribute, theme="dark", *args, **kwar
             y=top_players["Player_Unique"],
             orientation="h",
             marker=dict(
-                color="#10B981",
-                line=dict(color="rgba(16, 185, 129, 0.3)", width=1),
+                color=bar_color,
+                line=dict(color=bar_border, width=1),
             ),
             text=top_players[column].apply(lambda v: f"{v:.1f}"),
             textposition="outside",
+            textfont=dict(
+                color=text_color,
+                size=11,
+                family="'Twemoji Country Flags', Inter, sans-serif",
+            ),
             cliponaxis=False,
             customdata=top_players[["Player", "Squad", "Pos", nat_col]].values,
             hovertemplate=(
@@ -348,12 +510,19 @@ def update_overview_top_players(position, attribute, theme="dark", *args, **kwar
         )
     )
 
-    fig = style_figure(fig, 380, theme=theme)
+    fig = style_figure(fig, 390, theme=theme)
     fig.update_layout(
-        title=dict(text=title_text, font=dict(color=text_color, size=14)),
+        autosize=True,
+        title=dict(
+            text=title_text,
+            x=0,
+            xref="container",
+            font=dict(color=text_color, size=13),
+        ),
         xaxis=dict(
-            title=dict(text="Percentile Score", font=dict(color=muted_color, size=11)),
-            range=[0, 110],
+            title=dict(text="Percentile Score (0–100)", font=dict(color=muted_color, size=11)),
+            range=[0, 109],
+            tickvals=[0, 20, 40, 60, 80, 100],
             gridcolor=grid_color,
             tickfont=dict(color=muted_color, size=10),
         ),
@@ -361,11 +530,12 @@ def update_overview_top_players(position, attribute, theme="dark", *args, **kwar
             title="",
             gridcolor=grid_color,
             tickfont=dict(color=text_color, size=11),
+            ticklabelstandoff=8,
             categoryorder="array",
             categoryarray=top_players["Player_Unique"].tolist(),
             automargin=True,
         ),
-        margin=dict(l=155, r=35, t=45, b=35),
+        margin=dict(l=12, r=28, t=42, b=38),
     )
 
     return fig, notice

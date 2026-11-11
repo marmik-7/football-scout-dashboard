@@ -103,13 +103,14 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
 
     fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
+        autosize=True,
         polar=dict(
             bgcolor="rgba(0, 0, 0, 0)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
                 dtick=25,
-                tickfont=dict(color=muted_color, size=9),
+                tickfont=dict(color=muted_color, size=9.5),
                 gridcolor=grid_color,
                 linecolor=line_color,
             ),
@@ -121,13 +122,13 @@ def build_radar_chart(players, include_position_avg=False, position_avg_scores=N
         ),
         legend=dict(
             orientation="h",
-            yanchor="bottom",
-            y=-0.22,
+            yanchor="top",
+            y=-0.15,
             xanchor="center",
             x=0.5,
-            font=dict(color=text_color, size=11),
+            font=dict(color=text_color, size=10.5),
         ),
-        margin=dict(l=40, r=40, t=30, b=45),
+        margin=dict(l=64, r=64, t=36, b=66),
     )
     return fig
 
@@ -169,30 +170,30 @@ def build_pizza_chart(player, height=400, theme="dark"):
             "domain": "Attacking",
             "color": "#EF4444",
             "metrics": [
-                ("Goals / 90", "Gls_per90_pct", "Gls_per90", "{:.2f}/90"),
-                ("NP xG / 90", "npxG_per90_pct", "npxG_per90", "{:.2f}/90"),
-                ("Shot Quality", "npxG/Sh_pct", "npxG/Sh", "{:.2f} npxG/Sh"),
-                ("Finishing (G-xG)", "G-xG_pct", "G-xG", "{:+.2f} vs xG"),
+                ("Goals / 90", "Goals / 90", "Gls_per90_pct", "Gls_per90", "{:.2f}/90"),
+                ("NP xG / 90", "NP xG / 90", "npxG_per90_pct", "npxG_per90", "{:.2f}/90"),
+                ("Shot Quality", "Shot Quality", "npxG/Sh_pct", "npxG/Sh", "{:.2f} npxG/Sh"),
+                ("Finishing (G-xG)", "Finishing<br>(G-xG)", "G-xG_pct", "G-xG", "{:+.2f} vs xG"),
             ],
         },
         {
             "domain": "Possession & Creation",
             "color": "#0EA5E9",
             "metrics": [
-                ("xAssists / 90", "xA_per90_pct", "xA_per90", "{:.2f}/90"),
-                ("Key Passes / 90", "KP_per90_pct", "KP_per90", "{:.2f}/90"),
-                ("Prog Passes / 90", "PrgP_per90_pct", "PrgP_per90", "{:.1f}/90"),
-                ("Prog Carries / 90", "PrgC_per90_pct", "PrgC_per90", "{:.1f}/90"),
+                ("xAssists / 90", "xAssists / 90", "xA_per90_pct", "xA_per90", "{:.2f}/90"),
+                ("Key Passes / 90", "Key Passes<br>/ 90", "KP_per90_pct", "KP_per90", "{:.2f}/90"),
+                ("Prog Passes / 90", "Prog Passes<br>/ 90", "PrgP_per90_pct", "PrgP_per90", "{:.1f}/90"),
+                ("Prog Carries / 90", "Prog Carries<br>/ 90", "PrgC_per90_pct", "PrgC_per90", "{:.1f}/90"),
             ],
         },
         {
             "domain": "Defending (pAdj)",
             "color": "#84CC16",
             "metrics": [
-                ("pAdj Tackles / 90", "Tkl_pAdj_per90_pct", "Tkl_pAdj_per90", "{:.2f}/90"),
-                ("pAdj Interceptions / 90", "Int_pAdj_per90_pct", "Int_pAdj_per90", "{:.2f}/90"),
-                ("pAdj Clearances / 90", "Clr_pAdj_per90_pct", "Clr_pAdj_per90", "{:.2f}/90"),
-                ("Aerial Win %", "Won%_pct", "Won%", "{:.1f}%"),
+                ("pAdj Tackles / 90", "pAdj Tackles<br>/ 90", "Tkl_pAdj_per90_pct", "Tkl_pAdj_per90", "{:.2f}/90"),
+                ("pAdj Interceptions / 90", "pAdj<br>Interceptions/90", "Int_pAdj_per90_pct", "Int_pAdj_per90", "{:.2f}/90"),
+                ("pAdj Clearances / 90", "pAdj<br>Clearances/90", "Clr_pAdj_per90_pct", "Clr_pAdj_per90", "{:.2f}/90"),
+                ("Aerial Win %", "Aerial Win %", "Won%_pct", "Won%", "{:.1f}%"),
             ],
         },
     ]
@@ -207,10 +208,10 @@ def build_pizza_chart(player, height=400, theme="dark"):
         g_radii = []
         g_hover = []
         dom_name = group["domain"]
-        for m_label, pct_col, raw_col, fmt in group["metrics"]:
+        for m_label, tick_label, pct_col, raw_col, fmt in group["metrics"]:
             angle = current_idx * 30
             angles.append(angle)
-            labels.append(m_label)
+            labels.append(tick_label)
             g_angles.append(angle)
 
             pct_val = max(1.0, min(100.0, float(player.get(pct_col, 50.0) or 50.0)))
@@ -242,13 +243,16 @@ def build_pizza_chart(player, height=400, theme="dark"):
 
     fig = style_figure(fig, height=height, theme=theme)
     fig.update_layout(
+        autosize=True,
         polar=dict(
             bgcolor="rgba(0, 0, 0, 0)",
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
                 dtick=25,
-                tickfont=dict(color=muted_color, size=9),
+                angle=75,
+                tickangle=0,
+                tickfont=dict(color=muted_color, size=9.5),
                 gridcolor=grid_color,
                 linecolor=line_color,
             ),
@@ -256,7 +260,7 @@ def build_pizza_chart(player, height=400, theme="dark"):
                 tickmode="array",
                 tickvals=angles,
                 ticktext=labels,
-                tickfont=dict(color=text_color, size=9, weight=600),
+                tickfont=dict(color=text_color, size=10, weight=600),
                 rotation=90,
                 direction="clockwise",
                 gridcolor=grid_color,
@@ -265,13 +269,13 @@ def build_pizza_chart(player, height=400, theme="dark"):
         ),
         legend=dict(
             orientation="h",
-            yanchor="bottom",
+            yanchor="top",
             y=-0.16,
             xanchor="center",
             x=0.5,
-            font=dict(color=text_color, size=10),
+            font=dict(color=text_color, size=10.5),
         ),
-        margin=dict(l=40, r=40, t=30, b=35),
+        margin=dict(l=68, r=68, t=36, b=72),
     )
     return fig
 

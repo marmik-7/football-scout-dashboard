@@ -140,6 +140,7 @@ app.layout = dmc.MantineProvider(
                                         color="teal",
                                         variant="light",
                                         size="xs",
+                                        visibleFrom="xs",
                                         style={"fontSize": "8.5px", "height": "15px", "padding": "0 4px", "borderRadius": "3px"}
                                     ),
                                     dmc.Text("|", c="var(--scout-border-hover)", visibleFrom="sm"),
@@ -159,7 +160,7 @@ app.layout = dmc.MantineProvider(
                             # GLOBAL COMMAND SEARCH (PROMINENT RECRUITMENT SEARCH)
                             dmc.Select(
                                 id="header-global-search",
-                                placeholder="Search 1,692 player dossiers (e.g. Saliba, Haaland, Wirtz)...",
+                                placeholder="Search 1,692 player dossiers...",
                                 data=[{"label": name, "value": name} for name in all_players],
                                 searchable=True,
                                 clearable=True,
@@ -173,7 +174,7 @@ app.layout = dmc.MantineProvider(
                                 rightSection=dmc.Kbd("/", size="xs"),
                                 rightSectionPointerEvents="none",
                                 className="scout-header-search",
-                                w={"base": 140, "xs": 190, "sm": 320, "md": 460, "lg": 560},
+                                style={"minWidth": 0},
                             ),
 
                             dmc.Group(
@@ -215,7 +216,9 @@ app.layout = dmc.MantineProvider(
                             ),
                         ],
                         justify="space-between",
-                        px="md",
+                        wrap="nowrap",
+                        gap={"base": "xs", "sm": "md"},
+                        px={"base": "xs", "sm": "md"},
                         h="100%",
                     )
                 ),
@@ -278,7 +281,7 @@ app.layout = dmc.MantineProvider(
                     dmc.Container(
                         dash.page_container,
                         fluid=True,
-                        p="lg",
+                        p={"base": "sm", "sm": "md", "lg": "lg"},
                     )
                 ),
             ],

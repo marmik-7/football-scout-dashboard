@@ -40,6 +40,11 @@
     --scout-accent-dim: rgba(16, 185, 129, 0.14);
     --scout-accent-border: rgba(16, 185, 129, 0.28);
 
+    --scout-semantic-emerald: #34D399;
+    --scout-semantic-amber: #FBBF24;
+    --scout-semantic-blue: #38BDF8;
+    --scout-semantic-red: #FB7185;
+
     --scout-table-header-bg: rgba(17, 24, 39, 0.96);
     --scout-table-row-hover: rgba(255, 255, 255, 0.035);
     --scout-input-bg: #090D14;
@@ -70,6 +75,11 @@
     --scout-accent-dim: rgba(5, 150, 105, 0.10);
     --scout-accent-border: rgba(5, 150, 105, 0.24);
 
+    --scout-semantic-emerald: #047857;
+    --scout-semantic-amber: #B45309;
+    --scout-semantic-blue: #0369A1;
+    --scout-semantic-red: #BE123C;
+
     --scout-table-header-bg: #F1F5F9;
     --scout-table-row-hover: rgba(15, 23, 42, 0.025);
     --scout-input-bg: #F8FAFC;
@@ -85,6 +95,8 @@
 html, body {
     margin: 0;
     padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
     background-color: var(--scout-bg);
     color: var(--scout-text-primary);
     font-family: "Twemoji Country Flags", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -365,8 +377,37 @@ p, span, div {
 
 /* Prominent Global Command Search Bar */
 .scout-header-search {
-    flex: 1 1 360px;
+    flex: 1 1 0%;
+    min-width: 0 !important;
+    width: 0;
     max-width: 560px;
+}
+
+.scout-header-search .mantine-Select-wrapper,
+.scout-header-search .mantine-Select-input {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+@media (min-width: 768px) {
+    .scout-header-search {
+        flex: 0 1 320px;
+        width: 320px;
+    }
+}
+
+@media (min-width: 992px) {
+    .scout-header-search {
+        flex: 0 1 460px;
+        width: 460px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .scout-header-search {
+        flex: 0 1 560px;
+        width: 560px;
+    }
 }
 
 .scout-header-search .mantine-Select-input {
@@ -822,5 +863,179 @@ tr:hover td {
 [data-mantine-color-scheme="light"] .scout-portrait-hero {
     border: 2px solid rgba(15, 23, 42, 0.1) !important;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* =========================================================================
+   Player Dossier Refinement & Responsive Guardrails
+   ========================================================================= */
+.mantine-AppShell-root,
+.mantine-AppShell-header {
+    max-width: 100vw !important;
+}
+
+.mantine-AppShell-main {
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+.mantine-Grid-col {
+    min-width: 0;
+}
+
+.mantine-Card-root,
+.scout-card {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.scout-chart-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.scout-chart-container .dash-graph,
+.scout-chart-container .js-plotly-plot,
+.scout-chart-container .plot-container,
+.scout-chart-container .svg-container {
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+.scout-hero-style-dna {
+    text-align: right;
+}
+
+.scout-kpi-card {
+    background-color: var(--scout-surface-secondary);
+    border: 1px solid var(--scout-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: border-color 0.15s ease;
+}
+
+.scout-kpi-card:hover {
+    border-color: var(--scout-border-hover);
+}
+
+.scout-kpi-card--compact {
+    padding: 12px 14px;
+}
+
+.scout-benchmark-row {
+    padding: 10px 12px;
+    border-radius: 6px;
+    background-color: var(--scout-surface-secondary);
+    border: 1px solid var(--scout-border);
+    margin-bottom: 10px;
+}
+
+/* =========================================================================
+   Overview Dashboard Refinement
+   ========================================================================= */
+.scout-overview-kpi {
+    background-color: var(--scout-surface-primary);
+    border: 1px solid var(--scout-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.15s ease;
+}
+
+.scout-overview-kpi:hover {
+    border-color: var(--scout-border-hover);
+}
+
+.scout-overview-kpi__criteria {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--scout-border-subtle);
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--scout-text-muted);
+}
+
+.scout-spotlight-card {
+    background-color: var(--scout-surface-secondary);
+    border: 1px solid var(--scout-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.15s ease;
+}
+
+.scout-spotlight-card:hover {
+    border-color: var(--scout-border-hover);
+}
+
+.scout-benchmark-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: var(--scout-surface-secondary);
+    border: 1px solid var(--scout-border);
+}
+
+.scout-overview-selectors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.scout-overview-selectors .mantine-Select-root {
+    min-width: 150px;
+    flex: 1 1 160px;
+}
+
+@media (max-width: 575px) {
+    .scout-header-search .mantine-Kbd-root,
+    .scout-header-search .mantine-Select-section[data-position="right"] {
+        display: none !important;
+    }
+
+    .scout-header-search .mantine-Select-input {
+        padding-right: 10px !important;
+        font-size: 12px !important;
+    }
+
+    .scout-hero-style-dna {
+        text-align: left;
+        width: 100%;
+        padding-top: 4px;
+    }
+
+    .mantine-SegmentedControl-root {
+        max-width: 100%;
+    }
+
+    .mantine-SegmentedControl-label {
+        font-size: 10.5px !important;
+        padding: 4px 7px !important;
+    }
+
+    .scout-overview-selectors {
+        width: 100%;
+    }
+
+    .scout-overview-selectors .mantine-Select-root {
+        min-width: 130px;
+        flex: 1 1 140px;
+    }
 }
 
